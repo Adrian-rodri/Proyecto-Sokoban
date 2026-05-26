@@ -15,6 +15,7 @@ public class Main extends ApplicationAdapter {
     ShapeRenderer shape;
     private Player player;
     OrthographicCamera camera;
+    char[][] level;
     
 
     @Override
@@ -29,6 +30,24 @@ public class Main extends ApplicationAdapter {
         player.cargarSprites(playerSheet, playerSheet, playerSheet);
         player.setCabeza(0, 0);
         
+        //level de prueba
+        /*
+        a= aire
+        w=pared
+        b=box
+        x=objetivo
+        p=player
+        */
+        level= new char[][]{
+            {'a','a','w','w','w','a','a','a'},
+            {'a','a','w','x','w','a','a','a'},
+            {'a','a','w','a','w','w','w','w'},
+            {'w','w','w','b','a','b','x','w'},
+            {'w','x','a','b','p','w','w','w'},
+            {'w','w','w','w','b','w','a','a'},
+            {'a','a','a','w','x','w','a','a'},
+            {'a','a','a','w','w','w','a','a'}
+        };
         
     }
 
@@ -60,6 +79,8 @@ public class Main extends ApplicationAdapter {
     public void dibujarTexturas(SpriteBatch batch){ //dibujar todas las texturas aqui
         batch.draw(image, 0, 0,832,640);
         player.dibujarPlayer(batch);
+        for(int i=0;i<level.length;i++){
+        }
     }
     public void logic(){//aqui se configura toda la logicaa del juego
         player.tecladoInput();

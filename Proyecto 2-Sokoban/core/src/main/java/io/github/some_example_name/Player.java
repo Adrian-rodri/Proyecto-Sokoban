@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
  */
 public class Player extends Entity{
     private Texture sheetCabeza,sheetTorso,sheetAccesorio;
+    int contador=4;
     
     protected TextureRegion playerSprite;
     public Player(int x, int y) {
@@ -22,11 +23,17 @@ public class Player extends Entity{
     public void tecladoInput(){
         if(Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP)){
             y+=Constantes.TILE_SIZE;
+            
             this.setCabeza(1, 3);
+//            if(contador>0){
+//                Constantes.TILE_SIZE-=6;
+//                contador--;
+//            }
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)){
             y-=Constantes.TILE_SIZE;
             this.setCabeza(2, 0);
+//              Constantes.TILE_SIZE+=6;
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.A) || Gdx.input.isKeyJustPressed(Input.Keys.LEFT)){
             x-=Constantes.TILE_SIZE;
