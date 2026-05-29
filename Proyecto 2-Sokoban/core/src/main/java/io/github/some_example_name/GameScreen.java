@@ -19,30 +19,31 @@ public class GameScreen implements Screen {
     private Player player;
     private OrthographicCamera camera;
     private char[][] level;
-    private boolean initPlayer = false;
+    private boolean initPlayer= false;
+    TileType tiposTiles;
 
-    public GameScreen(Main game) {
-        this.game = game;
+    public GameScreen(Main game){
+        this.game= game;
     }
 
     @Override
-    public void show() {
-        camera = new OrthographicCamera();
+    public void show(){
+        camera= new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch       = new SpriteBatch();
-        image       = new Texture("fondo.png");
-        playerSheet = new Texture("playerSheet.png");
-        sheetTiles  = new Texture("sheetTiles.png");
-        wall     = new TextureRegion(sheetTiles, 0,      2*80, 80, 80);
-        box      = new TextureRegion(sheetTiles, 1*80,   1*80, 80, 80);
-        piso     = new TextureRegion(sheetTiles, 2*80,   0,    80, 80);
-        objetivo = new TextureRegion(sheetTiles, 3*80,   1*80, 80, 80);
-        shape  = new ShapeRenderer();
-        player = new Player(0, 0);
+        batch= new SpriteBatch();
+        image= new Texture("fondo.png");
+        playerSheet= new Texture("playerSheet.png");
+        sheetTiles= new Texture("sheetTiles.png");
+        wall= new TextureRegion(sheetTiles, 0,      2*80, 80, 80);
+        box= new TextureRegion(sheetTiles, 1*80,   1*80, 80, 80);
+        piso= new TextureRegion(sheetTiles, 2*80,   0,    80, 80);
+        objetivo= new TextureRegion(sheetTiles, 3*80,   1*80, 80, 80);
+        shape= new ShapeRenderer();
+        player= new Player(0, 0);
         player.cargarSprites(playerSheet, playerSheet, playerSheet);
         player.setCabeza(0, 0);
-
-        level = new char[][]{
+        tiposTiles= TileType.WALL;
+        level= new char[][]{
             {'a','a','w','w','w','a','a','a'},
             {'a','a','w','x','w','a','a','a'},
             {'a','a','w','a','w','w','w','w'},
@@ -55,7 +56,7 @@ public class GameScreen implements Screen {
     }
 
     @Override
-    public void render(float delta) {
+    public void render(float delta){
         ScreenUtils.clear(0f, 0f, 0f, 1f);
         camera.update();
         batch.setProjectionMatrix(camera.combined);
@@ -68,32 +69,43 @@ public class GameScreen implements Screen {
         logic();
     }
 
-    private void dibujarTexturas(SpriteBatch batch) {
+    private void dibujarTexturas(SpriteBatch batch){
+        
         batch.draw(image, 0, 0, 832, 640);
-        for (int i = 0; i < level.length; i++) {
+        for (int i=0; i<level.length;i++) {
             for (int j = 0; j < level[i].length; j++) {
-                int yPos = (level.length - 1 - i) * Constantes.TILE_SIZE;
-                switch (level[i][j]) {
-                    case 'a': batch.draw(piso,    j*Constantes.TILE_SIZE, yPos, Constantes.TILE_SIZE, Constantes.TILE_SIZE); break;
-                    case 'w': batch.draw(wall,    j*Constantes.TILE_SIZE, yPos, Constantes.TILE_SIZE, Constantes.TILE_SIZE); break;
-                    case 'b': batch.draw(box,     j*Constantes.TILE_SIZE, yPos, Constantes.TILE_SIZE, Constantes.TILE_SIZE); break;
-                    case 'x': batch.draw(objetivo,j*Constantes.TILE_SIZE, yPos, Constantes.TILE_SIZE, Constantes.TILE_SIZE); break;
+                int yPos=(level.length-1-i)*Constantes.TILE_SIZE;
+                switch(level[i][j]){
+                    case 'a': 
+                        tiposTiles=TileType.PISO;
+                        break;
+                    case 'w':
+                        tiposTiles=TileType.WALL;
+                        break;
+                    case 'b': 
+                        tiposTiles=TileType.BOX;
+                        break;
+                    case 'x': 
+                        tiposTiles=TileType.META;
+                        break;
                     case 'p':
-                        batch.draw(piso, j*Constantes.TILE_SIZE, yPos, Constantes.TILE_SIZE, Constantes.TILE_SIZE);
-                        if (!initPlayer) {
-                            player.x = j * Constantes.TILE_SIZE;
-                            player.y = yPos;
-                            initPlayer = true;
+                        tiposTiles=TileType.PISO;
+                        if(!initPlayer){
+                            player.x= j * Constantes.TILE_SIZE;
+                            player.y= yPos;
+                            initPlayer= true;
                         }
                         break;
                 }
+                TextureRegion texutra= tiposTiles.getTexture();
+                batch.draw(texutra, j*Constantes.TILE_SIZE, yPos,Constantes.TILE_SIZE,Constantes.TILE_SIZE);
             }
         }
         player.dibujarPlayer(batch);
     }
 
     private void logic() {
-        player.tecladoInput();
+        player.tecladoInput(level);
     }
 
     @Override
