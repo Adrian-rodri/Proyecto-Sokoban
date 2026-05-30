@@ -26,6 +26,15 @@ public enum TileType {
         }
         return textura;
     }
+    public static void dispose(){
+        if (sheetTiles!= null){
+            sheetTiles.dispose();
+            sheetTiles= null;
+        }
+        for (TileType t :values())
+            t.textura= null;
+        
+}
     
 }
 

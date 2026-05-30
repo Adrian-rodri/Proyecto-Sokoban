@@ -46,10 +46,10 @@ public class GameScreen implements Screen {
         level= new char[][]{
             {'a','a','w','w','w','a','a','a'},
             {'a','a','w','x','w','a','a','a'},
-            {'a','a','w','a','w','w','w','w'},
-            {'w','w','w','b','a','b','x','w'},
-            {'w','x','a','b','p','w','w','w'},
-            {'w','w','w','w','b','w','a','a'},
+            {'a','a','a','a','a','w','w','w'},
+            {'a','a','x','b','a','b','x','w'},
+            {'a','x','x','b','p','w','w','w'},
+            {'a','w','w','w','b','w','a','a'},
             {'a','a','a','w','x','w','a','a'},
             {'a','a','a','w','w','w','a','a'}
         };
@@ -73,7 +73,7 @@ public class GameScreen implements Screen {
         
         batch.draw(image, 0, 0, 832, 640);
         for (int i=0; i<level.length;i++) {
-            for (int j = 0; j < level[i].length; j++) {
+            for (int j= 0; j<level[i].length; j++) {
                 int yPos=(level.length-1-i)*Constantes.TILE_SIZE;
                 switch(level[i][j]){
                     case 'a': 
@@ -82,7 +82,8 @@ public class GameScreen implements Screen {
                     case 'w':
                         tiposTiles=TileType.WALL;
                         break;
-                    case 'b': 
+                    case 'B':
+                    case'b': 
                         tiposTiles=TileType.BOX;
                         break;
                     case 'x': 
@@ -106,6 +107,8 @@ public class GameScreen implements Screen {
 
     private void logic() {
         player.tecladoInput(level);
+        if(nivelCompleto(level))
+            System.out.println("Ganastes");
     }
 
     @Override
@@ -114,6 +117,12 @@ public class GameScreen implements Screen {
         camera.viewportHeight = h;
         camera.update();
     }
+    public boolean nivelCompleto(char[][] level) {
+        for (char[] fila : level)
+            for (char c : fila)
+                if (c == 'b') return false; // queda una caja sin posición
+        return true;
+}
 
     @Override public void pause()  {}
     @Override public void resume() {}
@@ -121,6 +130,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+        tiposTiles.dispose();
         batch.dispose();
         image.dispose();
         shape.dispose();
