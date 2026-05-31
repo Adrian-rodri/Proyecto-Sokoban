@@ -2,13 +2,15 @@ package io.github.some_example_name;
 
 public final class Nivel {
     private char[][] level;
-     private final char[][] copiaLevel;
+    private final char[][] copiaLevel;
     private final int numNivel;
     private int cantidadCajas;
-    Nivel(char[][] level, int numNivel){
+    private final String name;
+    
+    public Nivel(char[][] level, String name,int numNivel){
         this.level=level;
         this.numNivel=numNivel;
-        
+        this.name=name;        
         copiaLevel=new char[level.length][];
         for(int fila=0;fila<level.length;fila++){
             copiaLevel[fila]= new char[level[fila].length];
@@ -18,7 +20,7 @@ public final class Nivel {
         calcularCajas();
     }
     
-    public boolean nivelCompletado(){
+    public final boolean nivelCompletado(){
         for(char[] fila :level){
             for(char col:fila){
                 if(col=='b') 
@@ -27,7 +29,7 @@ public final class Nivel {
         }
         return true;
     }
-    public void calcularCajas(){
+    public final void calcularCajas(){
         for(char[] fila:copiaLevel){
             for(char col: fila){
                 if(col=='b' || col=='B')
@@ -35,7 +37,7 @@ public final class Nivel {
             }
         }
     }
-    public void reiniciar(){
+    public final void reiniciar(){
        for(int fila=0;fila<copiaLevel.length;fila++){
             for(int col=0;col<copiaLevel[fila].length;col++)
                 level[fila][col]=copiaLevel[fila][col];
@@ -52,6 +54,9 @@ public final class Nivel {
 
     public int getCantidadCajas() {
         return cantidadCajas;
+    }
+    public String getName(){
+        return name;
     }
     
     

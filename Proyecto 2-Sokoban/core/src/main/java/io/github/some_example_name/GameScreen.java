@@ -24,6 +24,7 @@ public class GameScreen implements Screen {
 
     public GameScreen(Main game){
         this.game= game;
+        
     }
 
     @Override
