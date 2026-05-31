@@ -2,9 +2,6 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.Gdx;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -13,7 +10,7 @@ public class NivelManager implements Gestionable<Nivel>{
     public final ArrayList<String> arrayLevelsNames= new ArrayList<>();
     
     
-    public void cargarLevels(){
+    private void cargarLevels(){
         String ruta= Gdx.files.internal("levels").file().getAbsolutePath();
         File folderNiveles= new File(ruta);
         File[] niveles= folderNiveles.listFiles();
@@ -48,7 +45,7 @@ public class NivelManager implements Gestionable<Nivel>{
 
     @Override
     public void cargar() {
-        
+        cargarLevels();
     }
 
     @Override
@@ -58,7 +55,7 @@ public class NivelManager implements Gestionable<Nivel>{
 
     @Override
     public int getCantidad() {
-        return 1;
+        return arrayLevels.size();
     }
     
 }

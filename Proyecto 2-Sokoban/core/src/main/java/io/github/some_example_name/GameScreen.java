@@ -19,8 +19,10 @@ public class GameScreen implements Screen {
     private Player player;
     private OrthographicCamera camera;
     private char[][] level;
-    private boolean initPlayer= false;
+    public static boolean initPlayer= false;
     TileType tiposTiles;
+    NivelManager nivelMng;
+    Nivel nivelActual;
 
     public GameScreen(Main game){
         this.game= game;
@@ -44,16 +46,21 @@ public class GameScreen implements Screen {
         player.cargarSprites(playerSheet, playerSheet, playerSheet);
         player.setCabeza(0, 0);
         tiposTiles= TileType.WALL;
-        level= new char[][]{
-            {'a','a','w','w','w','a','a','a'},
-            {'a','a','w','x','w','a','a','a'},
-            {'a','a','a','a','a','w','w','w'},
-            {'a','a','x','b','a','b','x','w'},
-            {'a','x','x','b','p','w','w','w'},
-            {'a','w','w','w','b','w','a','a'},
-            {'a','a','a','w','x','w','a','a'},
-            {'a','a','a','w','w','w','a','a'}
-        };
+        nivelMng= new NivelManager();
+        nivelMng.cargar();
+        nivelActual= nivelMng.getNivel(0);
+        level= nivelActual.getLevel();
+        
+//        level= new char[][]{
+//            {'a','a','w','w','w','a','a','a'},
+//            {'a','a','w','x','w','a','a','a'},
+//            {'a','a','a','a','a','w','w','w'},
+//            {'a','a','x','b','a','b','x','w'},
+//            {'a','x','x','b','p','w','w','w'},
+//            {'a','w','w','w','b','w','a','a'},
+//            {'a','a','a','w','x','w','a','a'},
+//            {'a','a','a','w','w','w','a','a'}
+//        };
     }
 
     @Override
@@ -93,6 +100,7 @@ public class GameScreen implements Screen {
                     case 'p':
                         tiposTiles=TileType.PISO;
                         if(!initPlayer){
+                            player.setCabeza(2, 0);
                             player.x= j * Constantes.TILE_SIZE;
                             player.y= yPos;
                             initPlayer= true;
@@ -107,7 +115,7 @@ public class GameScreen implements Screen {
     }
 
     private void logic() {
-        player.tecladoInput(level);
+        player.tecladoInput(nivelActual);
         if(nivelCompleto(level))
             System.out.println("Ganastes");
     }

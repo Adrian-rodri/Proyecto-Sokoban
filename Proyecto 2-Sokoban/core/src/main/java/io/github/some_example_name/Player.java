@@ -34,8 +34,14 @@ public class Player extends Entity{
        (-1,0)x+--------------------------------------- (+1,0)x
             (0,-1)y
     */
-    public void tecladoInput(char[][] level){
+    public void tecladoInput(Nivel nivelActual){
+        char [][] level= nivelActual.getLevel();
         int dirX=0,dirY=0;
+        if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
+            nivelActual.reiniciar();
+            //level=nivelActual.getLevel();
+            GameScreen.initPlayer=false;
+        }
         if(Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP)){
             dirY+=1;
             //y+=Constantes.TILE_SIZE;
