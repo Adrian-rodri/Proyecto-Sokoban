@@ -77,7 +77,10 @@ public class MenuScreen implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN))
             opcionSeleccionada = (opcionSeleccionada + 1) % opciones.length;
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            if (opcionSeleccionada == 0) { game.setScreen(new GameScreen(game)); dispose(); }
+            if (opcionSeleccionada == 0) { 
+                game.setScreen(new GameScreen(game,1));
+                dispose(); 
+            }
             else Gdx.app.exit();
         }
     }

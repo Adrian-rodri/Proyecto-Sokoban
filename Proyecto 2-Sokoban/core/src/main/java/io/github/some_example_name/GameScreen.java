@@ -20,12 +20,14 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private char[][] level;
     public static boolean initPlayer= false;
-    TileType tiposTiles;
-    NivelManager nivelMng;
-    Nivel nivelActual;
-
-    public GameScreen(Main game){
+    private TileType tiposTiles;
+    private NivelManager nivelMng;
+    private Nivel nivelActual;
+    private boolean isGanado=false;
+    private int numLevel;
+    public GameScreen(Main game, int numLevel){
         this.game= game;
+        this.numLevel=numLevel;
         
     }
 
@@ -48,7 +50,7 @@ public class GameScreen implements Screen {
         tiposTiles= TileType.WALL;
         nivelMng= new NivelManager();
         nivelMng.cargar();
-        nivelActual= nivelMng.getNivel(0);
+        nivelActual= nivelMng.getNivel(numLevel);
         level= nivelActual.getLevel();
         
 //        level= new char[][]{
@@ -84,6 +86,9 @@ public class GameScreen implements Screen {
             for (int j= 0; j<level[i].length; j++) {
                 int yPos=(level.length-1-i)*Constantes.TILE_SIZE;
                 switch(level[i][j]){
+                    case '~':
+                        tiposTiles=TileType.AIRE;
+                        break;
                     case 'a': 
                         tiposTiles=TileType.PISO;
                         break;
@@ -91,6 +96,8 @@ public class GameScreen implements Screen {
                         tiposTiles=TileType.WALL;
                         break;
                     case 'B':
+                        tiposTiles=TileType.BOX_EN_SU_LUGAR;
+                        break;
                     case'b': 
                         tiposTiles=TileType.BOX;
                         break;
@@ -116,8 +123,12 @@ public class GameScreen implements Screen {
 
     private void logic() {
         player.tecladoInput(nivelActual);
-        if(nivelCompleto(level))
-            System.out.println("Ganastes");
+        if(nivelActual.nivelCompletado() && !isGanado){
+            System.out.println("Ganaste");
+            isGanado=true;
+            game.setScreen(new MenuScreen(game));
+            dispose();
+        }
     }
 
     @Override
@@ -126,12 +137,6 @@ public class GameScreen implements Screen {
         camera.viewportHeight = h;
         camera.update();
     }
-    public boolean nivelCompleto(char[][] level) {
-        for (char[] fila : level)
-            for (char c : fila)
-                if (c == 'b') return false; // queda una caja sin posición
-        return true;
-}
 
     @Override public void pause()  {}
     @Override public void resume() {}
@@ -145,5 +150,6 @@ public class GameScreen implements Screen {
         shape.dispose();
         sheetTiles.dispose();
         playerSheet.dispose();
+        initPlayer=false;
     }
 }
