@@ -7,33 +7,92 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import java.util.ArrayList;
 
 /**
  *
  * @author adria
  */
-public class Player extends Entity{
+public class Player{
     private Texture sheetCabeza,sheetTorso,sheetAccesorio;
+    protected int x,y;
+    //atributos que se van a guardar en users.skb
+    private String userName, password;
+    private int puntos;
     
+    //atributos guardados en carpetas aparte
+    //perfil.skb
+    private String nombreCompleto,rutaAvatar;
+    private long fechaRegistro,ultimaSesion;
+    private double volumen;
+    private String idioma;
+    //amigos.skb
+    private ArrayList<String> amigos; //se escribe uno por uno en el archivo
+    
+    //stats.skb
+    private int partidasJugadas,nivelelesCompletados;
+    private int mejorPuntaje,puntajeGeneral ;
+    private double tiempoJugadoHoras;
+    private double tiempoPromedioPorNivel;
+    
+    //progreso.skb
+    private int nivelesDesbloqueados;
+    
+    //avatar.skb
+    private int colCabeza,filaCabeza;
+    private int colTorso,filaTorso;
+    private int colAccesorio,filaAccesorio;
     
     protected TextureRegion playerSprite;
     public Player(int x, int y) {
-        super(x, y);
+        this.x=x;
+        this.y=y;
     }
-    /*
-            (0,+1y)
-            |
-            |
-            |
-            |
-            |
-            |
-            |
-            |
-            |
-       (-1,0)x+--------------------------------------- (+1,0)x
-            (0,-1)y
-    */
+    public Player(String userName, String password, String nombreCompleto) {
+        this.x=0;
+        this.y=0;
+        this.userName=userName;
+        this.password=password;
+        this.nombreCompleto=nombreCompleto;
+    }
+    public Player(String userName, String password, String nombreCompleto,String idioma) {
+        this.x=0;
+        this.y=0;
+        this.userName=userName;
+        this.password=password;
+        this.nombreCompleto=nombreCompleto;
+        this.idioma=idioma;
+    }
+
+    public Player(String userName, String password, int puntos, String nombreCompleto, String rutaAvatar, long fechaRegistro, long ultimaSesion, double volumen, String idioma, ArrayList<String> amigos, int partidasJugadas, int nivelelesCompletados, int mejorPuntaje, int puntajeGeneral, double tiempoJugadoHoras, double tiempoPromedioPorNivel, int nivelesDesbloqueados, int colCabeza, int filaCabeza, int colTorso, int filaTorso, int colAccesorio, int filaAccesorio) {
+        this.x=0;
+        this.y=0;
+        this.userName= userName;
+        this.password= password;
+        this.puntos= puntos;
+        this.nombreCompleto= nombreCompleto;
+        this.rutaAvatar= rutaAvatar;
+        this.fechaRegistro= fechaRegistro;
+        this.ultimaSesion= ultimaSesion;
+        this.volumen= volumen;
+        this.idioma= idioma;
+        this.amigos= amigos;
+        this.partidasJugadas= partidasJugadas;
+        this.nivelelesCompletados= nivelelesCompletados;
+        this.mejorPuntaje= mejorPuntaje;
+        this.puntajeGeneral= puntajeGeneral;
+        this.tiempoJugadoHoras= tiempoJugadoHoras;
+        this.tiempoPromedioPorNivel= tiempoPromedioPorNivel;
+        this.nivelesDesbloqueados= nivelesDesbloqueados;
+        this.colCabeza= colCabeza;
+        this.filaCabeza= filaCabeza;
+        this.colTorso= colTorso;
+        this.filaTorso= filaTorso;
+        this.colAccesorio= colAccesorio;
+        this.filaAccesorio= filaAccesorio;
+    }
+    
+    
     public void tecladoInput(Nivel nivelActual){
         char [][] level= nivelActual.getLevel();
         int dirX=0,dirY=0;
@@ -72,7 +131,7 @@ public class Player extends Entity{
             
             if(predictFila>=0 &&predictFila<level.length && predictCol>=0 && predictCol<level[predictFila].length){
                 char destino= level[predictFila][predictCol];
-                if(destino=='a'|| destino=='x' || destino =='p'){
+                if(destino=='a'|| destino=='0' || destino =='p'){
                     x+= dirX *Constantes.TILE_SIZE;
                     y+= dirY *Constantes.TILE_SIZE;
                 }else if(destino=='b' || destino=='B'){
@@ -81,13 +140,13 @@ public class Player extends Entity{
                     
                     if(cajaFila >=0 && cajaFila<level.length&& cajaCol>=0 && cajaCol<level[cajaFila].length){
                         char cajaDestino=level[cajaFila][cajaCol];
-                        if(cajaDestino=='a' || cajaDestino=='p'|| cajaDestino=='x'){
+                        if(cajaDestino=='a' || cajaDestino=='p'|| cajaDestino=='0'){
                             if(destino =='B')
-                                level[predictFila][predictCol]='x';
+                                level[predictFila][predictCol]='0';
                             else
                                 level[predictFila][predictCol]='a';
                             
-                            if(cajaDestino =='x'){
+                            if(cajaDestino =='0'){
                                 level[cajaFila][cajaCol]='B';
                                 System.out.println("Una caja en su lugar");
                             }else

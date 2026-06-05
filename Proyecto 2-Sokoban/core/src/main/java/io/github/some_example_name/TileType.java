@@ -4,7 +4,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public enum TileType {
-    WALL(0,5),PISO(2,0),META(1,5),BOX(1,1),AIRE(2,3),BOX_EN_SU_LUGAR(2,2);
+    WALL(0,5),PISO(2,0),META(1,5),AIRE(2,3),BOX_EN_SU_LUGAR(2,2)
+    ,BOX(1,1),BOX_1(0,3),BOX_2(0,4),Meta_1(1,4),Meta_2(1,3);
     
     private static int PIXELS_TILE=80;
     

@@ -25,6 +25,7 @@ public class GameScreen implements Screen {
     private Nivel nivelActual;
     private boolean isGanado=false;
     private int numLevel;
+    
     public GameScreen(Main game, int numLevel){
         this.game= game;
         this.numLevel=numLevel;
@@ -52,17 +53,7 @@ public class GameScreen implements Screen {
         nivelMng.cargar();
         nivelActual= nivelMng.getNivel(numLevel);
         level= nivelActual.getLevel();
-        
-//        level= new char[][]{
-//            {'a','a','w','w','w','a','a','a'},
-//            {'a','a','w','x','w','a','a','a'},
-//            {'a','a','a','a','a','w','w','w'},
-//            {'a','a','x','b','a','b','x','w'},
-//            {'a','x','x','b','p','w','w','w'},
-//            {'a','w','w','w','b','w','a','a'},
-//            {'a','a','a','w','x','w','a','a'},
-//            {'a','a','a','w','w','w','a','a'}
-//        };
+       
     }
 
     @Override
@@ -101,7 +92,7 @@ public class GameScreen implements Screen {
                     case'b': 
                         tiposTiles=TileType.BOX;
                         break;
-                    case 'x': 
+                    case '0': 
                         tiposTiles=TileType.META;
                         break;
                     case 'p':
