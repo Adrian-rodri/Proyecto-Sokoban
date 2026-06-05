@@ -46,7 +46,7 @@ public class PlayerManager implements Gestionable<Player>{
                         if(!password.equals(passCorrecta))
                             return false;
                         int puntos= rPlayer.readInt();
-                        cargarUsuario(userName, password, puntos);
+                        cargarUser(userName, password, puntos);
                         return true;
                     }else {
                         rPlayer.readUTF();
@@ -60,7 +60,7 @@ public class PlayerManager implements Gestionable<Player>{
         }
         return false;    
     }
-    private void cargarUsuario(String userName, String password, int puntos){
+    private void cargarUser(String userName, String password, int puntos){
         try{
             RandomAccessFile rUser= new RandomAccessFile("users/"+userName+"/perfil.skb","r");
             //leer perfil.skb 
@@ -124,7 +124,7 @@ public class PlayerManager implements Gestionable<Player>{
                                         ultimaSesion,volumen,idioma,amigos,partidasJugadas,nivelesCompletados,
                                         mejorPuntaje,puntajeGeneral,tiempoJugadoHoras,tiempoPromedioPorNivel,
                                         nivelesDesbloqueados,colCabeza,filaCabeza,colTorso,filaTorso,
-                                                colAccesorio,filaAccesorio,historial);
+                                        colAccesorio,filaAccesorio,historial);
         }catch(IOException e){
             System.out.println("Error: "+e.getMessage());
         }
@@ -172,7 +172,7 @@ public class PlayerManager implements Gestionable<Player>{
             rPlayer.close();
             
             
-        } catch (IOException e) {
+        } catch (IOException e){
             System.err.println("Error: "+e.getMessage());
         }
     }
@@ -184,7 +184,7 @@ public class PlayerManager implements Gestionable<Player>{
 
     @Override
     public void cargar() {
-        try(RandomAccessFile rUsers= new RandomAccessFile(usersFile,"rw")){
+        try(RandomAccessFile rUsers= new RandomAccessFile(usersFile,"r")){
             while(rUsers.getFilePointer()<rUsers.length()){
                 arrayUsernames.add(rUsers.readUTF());
                 rUsers.readUTF();
@@ -196,9 +196,56 @@ public class PlayerManager implements Gestionable<Player>{
     }
 
     @Override
-    public void guardar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public synchronized  void guardar() {
+        if(playerLogeado==null)
+            return;
+        try{
+            //guardar los puntos
+            RandomAccessFile rUser= new RandomAccessFile(usersFile,"rw");
+            while(rUser.getFilePointer()<rUser.length()){
+                String user= rUser.readUTF();
+                if(user.equals(playerLogeado.getUserName())){
+                    rUser.readUTF();
+                    rUser.writeInt(playerLogeado.getPuntos());
+                    break;
+                }else{
+                    rUser.readUTF();
+                    rUser.readInt();
+                }
+                    
+            }
+            rUser.close();
+            //guardar perfil.skb;
+            rUser= new RandomAccessFile("users/"+playerLogeado.getUserName()+"/perfil.skb","rw");
+            rUser.setLength(0);
+            rUser.writeUTF(playerLogeado.getNombreCompleto());
+            rUser.writeLong(playerLogeado.getFechaRegistro());
+            rUser.writeLong(playerLogeado.getUltimaSesion());
+            rUser.writeDouble(playerLogeado.getVolumen());
+            rUser.writeUTF(playerLogeado.getIdioma());
+            rUser.writeUTF(playerLogeado.getRutaAvatar());
+            rUser.close();
+            
+            //guardar stats.skb
+            rUser= new RandomAccessFile("users/"+playerLogeado.getUserName()+"/stats.skb","rw");
+            rUser.setLength(0);
+            rUser.writeInt(playerLogeado.getPartidasJugadas());//partidasJugadas
+            rUser.writeInt(playerLogeado.getNivelesCompletados());//nivelesCompletados
+            rUser.writeInt(playerLogeado.getMejorPuntaje());//mejorPuntaje
+            rUser.writeInt(playerLogeado.getPuntajeGeneral());//puntajeGeneral
+            rUser.writeDouble(playerLogeado.getTiempoJugadoHoras());//tiempoJugadoHoras
+            rUser.writeDouble(playerLogeado.getTiempoPromedioPorNivel());//tiempoPromedioPorNivel
+            rUser.close();
+            
+            //guardar progreso.skb
+            rUser= new RandomAccessFile("users/"+playerLogeado.getUserName()+"/progreso.skb","rw");
+            rUser.writeInt(playerLogeado.getNivelesDesbloqueados());
+            rUser.close();
+        }catch(IOException e){
+            System.out.println("Error: "+e.getMessage());
+        }
     }
+    
 
     @Override
     public int getCantidad() {
