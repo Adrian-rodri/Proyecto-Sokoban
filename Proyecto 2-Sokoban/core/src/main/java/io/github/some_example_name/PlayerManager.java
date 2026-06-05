@@ -15,6 +15,7 @@ import java.util.Calendar;
 public class PlayerManager implements Gestionable<Player>{
     private ArrayList<String> arrayUsernames= new ArrayList<>();
     private File usersFile= new File("users.skb");
+    private Player playerLogeado=null;
     PlayerManager(){
         cargar();
     }
@@ -35,6 +36,99 @@ public class PlayerManager implements Gestionable<Player>{
         }
         return false;
     }
+    public boolean logIn(String userName, String password){
+        if(arrayUsernames.contains(userName)){
+            try(RandomAccessFile rPlayer= new RandomAccessFile(usersFile,"r")){
+                while(rPlayer.getFilePointer()<rPlayer.length()){
+                    String user=rPlayer.readUTF();
+                    if(user.equals(userName)){
+                        String passCorrecta= rPlayer.readUTF();
+                        if(!password.equals(passCorrecta))
+                            return false;
+                        int puntos= rPlayer.readInt();
+                        cargarUsuario(userName, password, puntos);
+                        return true;
+                    }else {
+                        rPlayer.readUTF();
+                        rPlayer.readInt();
+                    }
+                    
+                }
+            }catch (IOException e){
+                System.out.println("Error: "+e.getMessage());
+            }
+        }
+        return false;    
+    }
+    private void cargarUsuario(String userName, String password, int puntos){
+        try{
+            RandomAccessFile rUser= new RandomAccessFile("users/"+userName+"/perfil.skb","r");
+            //leer perfil.skb 
+            String nombreCompleto= rUser.readUTF();
+            long fechaRegistro= rUser.readLong();
+            long ultimaSesion= rUser.readLong();
+            double volumen= rUser.readDouble();
+            String idioma= rUser.readUTF();
+            String rutaAvatar= rUser.readUTF();
+            rUser.close();
+            
+            //leer stats.skb
+            rUser= new RandomAccessFile("users/"+userName+"/stats.skb","r");
+            int partidasJugadas= rUser.readInt();
+            int nivelesCompletados= rUser.readInt();
+            int mejorPuntaje= rUser.readInt();
+            int puntajeGeneral= rUser.readInt();
+            double tiempoJugadoHoras= rUser.readDouble();
+            double tiempoPromedioPorNivel= rUser.readDouble();
+            rUser.close();
+            
+            //leer progreso.skb
+            rUser= new RandomAccessFile("users/"+userName+"/progreso.skb","r");
+            int nivelesDesbloqueados= rUser.readInt();
+            rUser.close();
+            
+            //leer avatar.skb
+            rUser= new RandomAccessFile("users/"+userName+"/avatar.skb","r");
+            int colCabeza= rUser.readInt();
+            int filaCabeza= rUser.readInt();
+            int colTorso= rUser.readInt();
+            int filaTorso= rUser.readInt();
+            int colAccesorio= rUser.readInt();
+            int filaAccesorio= rUser.readInt();
+            rUser.close();
+            
+            //leer amigos.skb
+            rUser= new RandomAccessFile("users/"+userName+"/amigos.skb","r");
+            ArrayList<String> amigos= new ArrayList<>();
+            while(rUser.getFilePointer()<rUser.length()){
+                amigos.add(rUser.readUTF());
+            }
+            rUser.close();
+            
+            //leer historial.skb
+            rUser= new RandomAccessFile("users/"+userName+"/historial.skb","r");
+            ArrayList<EntradaHistorial> historial= new ArrayList<>();
+            while(rUser.getFilePointer()<rUser.length()){
+                int numIntento= rUser.readInt();
+                int nivel= rUser.readInt();
+                int puntaje= rUser.readInt();
+                int movimientos= rUser.readInt();
+                double tiempo= rUser.readDouble();
+                long fecha= rUser.readLong();
+                EntradaHistorial entrada= new EntradaHistorial(numIntento,nivel,puntaje,movimientos,tiempo,fecha);
+                historial.add(entrada);
+            }
+            rUser.close();
+            
+            playerLogeado= new Player(userName,password,puntos,nombreCompleto,rutaAvatar,fechaRegistro,
+                                        ultimaSesion,volumen,idioma,amigos,partidasJugadas,nivelesCompletados,
+                                        mejorPuntaje,puntajeGeneral,tiempoJugadoHoras,tiempoPromedioPorNivel,
+                                        nivelesDesbloqueados,colCabeza,filaCabeza,colTorso,filaTorso,
+                                                colAccesorio,filaAccesorio,historial);
+        }catch(IOException e){
+            System.out.println("Error: "+e.getMessage());
+        }
+    }
     private void crearArchivosNuevos(String userName,String nombreCompleto){
         try{
             File playerFiles= new File("users/"+userName);
@@ -43,6 +137,8 @@ public class PlayerManager implements Gestionable<Player>{
             playerFiles= new File("users/"+userName+"/amigos.skb");
             playerFiles.createNewFile();
             
+            playerFiles= new File("users/"+userName+"/historial.skb");
+            playerFiles.createNewFile();
             
             RandomAccessFile rPlayer= new RandomAccessFile("users/"+userName+"/perfil.skb","rw");//perfil.skb
             rPlayer.writeUTF(nombreCompleto);
@@ -50,7 +146,7 @@ public class PlayerManager implements Gestionable<Player>{
             rPlayer.writeLong(Calendar.getInstance().getTimeInMillis());//Ultima fecha de sesion
             rPlayer.writeDouble(0);//volumen
             rPlayer.writeUTF("espanol");//idioma
-            rPlayer.writeUTF("defaul/avatar.png");//avatar
+            rPlayer.writeUTF("default/avatar.png");//avatar
             rPlayer.close();
             
             rPlayer= new RandomAccessFile("users/"+userName+"/stats.skb","rw");//stats.skb

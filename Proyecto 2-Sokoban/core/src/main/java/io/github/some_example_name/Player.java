@@ -28,9 +28,11 @@ public class Player{
     private String idioma;
     //amigos.skb
     private ArrayList<String> amigos; //se escribe uno por uno en el archivo
+    // historial.skb
+    private ArrayList<EntradaHistorial> historial;
     
     //stats.skb
-    private int partidasJugadas,nivelelesCompletados;
+    private int partidasJugadas,nivelesCompletados;
     private int mejorPuntaje,puntajeGeneral ;
     private double tiempoJugadoHoras;
     private double tiempoPromedioPorNivel;
@@ -55,16 +57,13 @@ public class Player{
         this.password=password;
         this.nombreCompleto=nombreCompleto;
     }
-    public Player(String userName, String password, String nombreCompleto,String idioma) {
-        this.x=0;
-        this.y=0;
-        this.userName=userName;
-        this.password=password;
-        this.nombreCompleto=nombreCompleto;
-        this.idioma=idioma;
-    }
 
-    public Player(String userName, String password, int puntos, String nombreCompleto, String rutaAvatar, long fechaRegistro, long ultimaSesion, double volumen, String idioma, ArrayList<String> amigos, int partidasJugadas, int nivelelesCompletados, int mejorPuntaje, int puntajeGeneral, double tiempoJugadoHoras, double tiempoPromedioPorNivel, int nivelesDesbloqueados, int colCabeza, int filaCabeza, int colTorso, int filaTorso, int colAccesorio, int filaAccesorio) {
+    public Player(String userName, String password, int puntos, String nombreCompleto, 
+            String rutaAvatar, long fechaRegistro, long ultimaSesion, double volumen, 
+            String idioma, ArrayList<String> amigos, int partidasJugadas, int nivelesCompletados, 
+            int mejorPuntaje, int puntajeGeneral, double tiempoJugadoHoras, double tiempoPromedioPorNivel, 
+            int nivelesDesbloqueados, int colCabeza, int filaCabeza, int colTorso, int filaTorso, 
+            int colAccesorio, int filaAccesorio, ArrayList<EntradaHistorial> historial) {
         this.x=0;
         this.y=0;
         this.userName= userName;
@@ -78,7 +77,7 @@ public class Player{
         this.idioma= idioma;
         this.amigos= amigos;
         this.partidasJugadas= partidasJugadas;
-        this.nivelelesCompletados= nivelelesCompletados;
+        this.nivelesCompletados= nivelesCompletados;
         this.mejorPuntaje= mejorPuntaje;
         this.puntajeGeneral= puntajeGeneral;
         this.tiempoJugadoHoras= tiempoJugadoHoras;
@@ -90,6 +89,7 @@ public class Player{
         this.filaTorso= filaTorso;
         this.colAccesorio= colAccesorio;
         this.filaAccesorio= filaAccesorio;
+        this.historial=historial;
     }
     
     
@@ -187,4 +187,125 @@ public class Player{
         this.sheetTorso=torso;
         this.sheetAccesorio=accesorio;
     }
+
+    public Texture getSheetCabeza() {
+        return sheetCabeza;
+    }
+
+    public Texture getSheetTorso() {
+        return sheetTorso;
+    }
+
+    public Texture getSheetAccesorio() {
+        return sheetAccesorio;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public int getPuntos() {
+        return puntos;
+    }
+
+    public String getNombreCompleto() {
+        return nombreCompleto;
+    }
+
+    public String getRutaAvatar() {
+        return rutaAvatar;
+    }
+
+    public long getFechaRegistro() {
+        return fechaRegistro;
+    }
+
+    public long getUltimaSesion() {
+        return ultimaSesion;
+    }
+
+    public double getVolumen() {
+        return volumen;
+    }
+
+    public String getIdioma() {
+        return idioma;
+    }
+
+    public ArrayList<String> getAmigos() {
+        return amigos;
+    }
+
+    public ArrayList<EntradaHistorial> getHistorial() {
+        return historial;
+    }
+
+    public int getPartidasJugadas() {
+        return partidasJugadas;
+    }
+
+    public int getNivelesCompletados() {
+        return nivelesCompletados;
+    }
+
+    public int getMejorPuntaje() {
+        return mejorPuntaje;
+    }
+
+    public int getPuntajeGeneral() {
+        return puntajeGeneral;
+    }
+
+    public double getTiempoJugadoHoras() {
+        return tiempoJugadoHoras;
+    }
+
+    public double getTiempoPromedioPorNivel() {
+        return tiempoPromedioPorNivel;
+    }
+
+    public int getNivelesDesbloqueados() {
+        return nivelesDesbloqueados;
+    }
+
+    public int getColCabeza() {
+        return colCabeza;
+    }
+
+    public int getFilaCabeza() {
+        return filaCabeza;
+    }
+
+    public int getColTorso() {
+        return colTorso;
+    }
+
+    public int getFilaTorso() {
+        return filaTorso;
+    }
+
+    public int getColAccesorio() {
+        return colAccesorio;
+    }
+
+    public int getFilaAccesorio() {
+        return filaAccesorio;
+    }
+
+    public TextureRegion getPlayerSprite() {
+        return playerSprite;
+    }
+    
 }
