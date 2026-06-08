@@ -37,6 +37,19 @@ public final class Nivel {
             }
         }
     }
+    public char[][] copiarLevel(char[][] nivel){
+        char[][] copia=new char[nivel.length][];
+        for(int i=0; i<nivel.length;i++){
+            copia[i] = new char[nivel[i].length];
+            for(int j=0;j<nivel[i].length;j++)
+                copia[i][j]=nivel[i][j];
+        }
+        return copia;
+    }
+    public void setLevel(char[][] nuevoLevel) {
+        this.level = nuevoLevel;
+    }
+    
     public final void reiniciar(){
        for(int fila=0;fila<copiaLevel.length;fila++){
             for(int col=0;col<copiaLevel[fila].length;col++)

@@ -14,6 +14,7 @@ import java.util.ArrayList;
  * @author adria
  */
 public class Player{
+    private ArrayList<EstadoTurno> copias= new ArrayList<>();
     private Texture sheetCabeza,sheetTorso,sheetAccesorio;
     protected int x,y;
     //atributos que se van a guardar en users.skb
@@ -44,6 +45,9 @@ public class Player{
     private int colCabeza,filaCabeza;
     private int colTorso,filaTorso;
     private int colAccesorio,filaAccesorio;
+    
+    private int spriteCol;
+    private int spriteFila;
     
     protected TextureRegion playerSprite;
     public Player(int x, int y) {
@@ -90,37 +94,59 @@ public class Player{
         this.colAccesorio= colAccesorio;
         this.filaAccesorio= filaAccesorio;
         this.historial=historial;
+        this.spriteCol=2;
+        this.spriteFila=0;
     }
     
     
     public void tecladoInput(Nivel nivelActual){
         char [][] level= nivelActual.getLevel();
         int dirX=0,dirY=0;
+        
         if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
             nivelActual.reiniciar();
             //level=nivelActual.getLevel();
             GameScreen.initPlayer=false;
         }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.U)){
+            if(!copias.isEmpty()){
+                int indexAnterior=copias.size()-1;
+                EstadoTurno estado= copias.get(indexAnterior);
+                copias.remove(indexAnterior);
+                nivelActual.setLevel(estado.matriz);
+                x=estado.playerX;
+                y=estado.playerY;
+                spriteCol=estado.spriteCol;
+                spriteFila=estado.spriteFila;
+                level=estado.matriz;
+            }
+        }
         if(Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP)){
             dirY+=1;
             //y+=Constantes.TILE_SIZE;
-            this.setCabeza(1, 3);
+            spriteCol=1;
+            spriteFila=3;
+            
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)){
             dirY-=1;            
             //y-=Constantes.TILE_SIZE;
-            this.setCabeza(2, 0);
+            spriteCol=2;
+            spriteFila=0;
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.A) || Gdx.input.isKeyJustPressed(Input.Keys.LEFT)){
             dirX-=1;            
             //x-=Constantes.TILE_SIZE;
-            this.setCabeza(1, 1);
+            spriteCol=1;
+            spriteFila=1;
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.D) || Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)){
             dirX+=1;
             //x+=Constantes.TILE_SIZE;
-            this.setCabeza(1, 2);
+            spriteCol=1;
+            spriteFila=2;
         }
+        this.setCabeza(spriteCol, spriteFila);
         if(dirX!=0||dirY!=0){
             int posX= x/Constantes.TILE_SIZE;
             int posY= (level.length-1)-(y/Constantes.TILE_SIZE);
@@ -131,9 +157,12 @@ public class Player{
             
             if(predictFila>=0 &&predictFila<level.length && predictCol>=0 && predictCol<level[predictFila].length){
                 char destino= level[predictFila][predictCol];
+                //caminar a casilla vacio o una meta
                 if(destino=='a'|| destino=='0' || destino =='p'){
+                    copias.add(new EstadoTurno(nivelActual.copiarLevel(level),x,y,spriteCol,spriteFila));
                     x+= dirX *Constantes.TILE_SIZE;
                     y+= dirY *Constantes.TILE_SIZE;
+                    //empujar una caja
                 }else if(destino=='b' || destino=='B'){
                     int cajaFila= predictFila-dirY;
                     int cajaCol= predictCol+dirX;
@@ -141,6 +170,7 @@ public class Player{
                     if(cajaFila >=0 && cajaFila<level.length&& cajaCol>=0 && cajaCol<level[cajaFila].length){
                         char cajaDestino=level[cajaFila][cajaCol];
                         if(cajaDestino=='a' || cajaDestino=='p'|| cajaDestino=='0'){
+                            copias.add(new EstadoTurno(nivelActual.copiarLevel(level),x,y,spriteCol,spriteFila));
                             if(destino =='B')
                                 level[predictFila][predictCol]='0';
                             else
@@ -151,6 +181,7 @@ public class Player{
                                 System.out.println("Una caja en su lugar");
                             }else
                                 level[cajaFila][cajaCol]='b';
+                            
                             
                             
                             this.x += dirX * Constantes.TILE_SIZE;

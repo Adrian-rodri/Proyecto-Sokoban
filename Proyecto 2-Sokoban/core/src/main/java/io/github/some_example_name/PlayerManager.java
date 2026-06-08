@@ -179,7 +179,7 @@ public class PlayerManager implements Gestionable<Player>{
 
     @Override
     public Player getActual() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return playerLogeado;
     }
 
     @Override

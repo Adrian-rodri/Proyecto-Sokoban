@@ -18,7 +18,6 @@ public class GameScreen implements Screen {
     private ShapeRenderer shape;
     private Player player;
     private OrthographicCamera camera;
-    private char[][] level;
     public static boolean initPlayer= false;
     private TileType tiposTiles;
     private NivelManager nivelMng;
@@ -52,7 +51,7 @@ public class GameScreen implements Screen {
         nivelMng= new NivelManager();
         nivelMng.cargar();
         nivelActual= nivelMng.getNivel(numLevel);
-        level= nivelActual.getLevel();
+        initPlayer=false;
        
     }
 
@@ -73,6 +72,7 @@ public class GameScreen implements Screen {
     private void dibujarTexturas(SpriteBatch batch){
         
         batch.draw(image, 0, 0, 832, 640);
+        char[][] level= nivelActual.getLevel();
         for (int i=0; i<level.length;i++) {
             for (int j= 0; j<level[i].length; j++) {
                 int yPos=(level.length-1-i)*Constantes.TILE_SIZE;
@@ -129,9 +129,12 @@ public class GameScreen implements Screen {
         camera.update();
     }
 
-    @Override public void pause()  {}
-    @Override public void resume() {}
-    @Override public void hide()   {}
+    @Override public void pause(){
+    }
+    @Override public void resume(){
+    }
+    @Override public void hide(){
+    }
 
     @Override
     public void dispose() {
