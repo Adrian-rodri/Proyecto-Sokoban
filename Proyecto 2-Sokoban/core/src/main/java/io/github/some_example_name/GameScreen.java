@@ -1,16 +1,20 @@
 package io.github.some_example_name;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
+
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+
+
+
 
 public class GameScreen implements Screen {
     private final Main game;
@@ -19,7 +23,6 @@ public class GameScreen implements Screen {
     private Texture image, playerSheet, sheetTiles;
     private TextureRegion wall, box, objetivo, piso;
     private ShapeRenderer shape;
-    private BitmapFont font;
     private Player player;
     private OrthographicCamera camera;
     public static boolean initPlayer= false;
@@ -28,23 +31,11 @@ public class GameScreen implements Screen {
     private Nivel nivelActual;
     private boolean isGanado=false;
     private int numLevel;
-
-    // ── HUD botones ───────────────────────────────────────────────────────────
-    private static final int HUD_H  = 36;   // altura del HUD en pixels
-    private static final int BTN_W  = 85;
-    private static final int BTN_H  = 24;
-
-    private Boton btnReiniciar, btnSalir;
-
-    // ── Temporizador (hilo de concurrencia) ───────────────────────────────────
-    private int movimientos = 0;
-    private volatile double  tiempoSegundos = 0;
-    private volatile boolean timerActivo    = false;
-    private Thread hiloTimer;
-
+    private BitmapFont font; //añadido
     public GameScreen(Main game, int numLevel){
         this.game= game;
         this.numLevel=numLevel;
+        
     }
 
     @Override
@@ -52,7 +43,6 @@ public class GameScreen implements Screen {
         camera= new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch= new SpriteBatch();
-        font = new BitmapFont();
         image= new Texture("fondo.png");
         playerSheet= new Texture("playerSheet.png");
         sheetTiles= new Texture("sheetTiles.png");
@@ -61,66 +51,20 @@ public class GameScreen implements Screen {
         piso= new TextureRegion(sheetTiles, 2*80,   0,    80, 80);
         objetivo= new TextureRegion(sheetTiles, 3*80,   1*80, 80, 80);
         shape= new ShapeRenderer();
-        
         player= new Player(0, 0);
         player.cargarSprites(playerSheet, playerSheet, playerSheet);
         player.setCabeza(0, 0);
-        
         tiposTiles= TileType.WALL;
         nivelMng= new NivelManager();
         nivelMng.cargar();
         nivelActual= nivelMng.getNivel(numLevel);
         initPlayer=false;
-
+        
+        //Añadido
+        font = new BitmapFont();
         crearBotonesHUD();
         iniciarTimer();
-    }
-
-    /** Crea/reposiciona los botones del HUD segun el tamano actual de pantalla. */
-    private void crearBotonesHUD() {
-        int sw = Gdx.graphics.getWidth();
-        int sh = Gdx.graphics.getHeight();
-        int by = sh - HUD_H + (HUD_H - BTN_H) / 2;
-
-        btnReiniciar = new Boton(Textos.GAME_BTN_REINICIAR, sw - BTN_W * 2 - 10, by, BTN_W, BTN_H);
-        btnSalir     = new Boton(Textos.GAME_BTN_SALIR,     sw - BTN_W - 2,      by, BTN_W, BTN_H);
-
-        // Colores sutiles para el HUD
-        btnReiniciar.setColorFondo(0.15f, 0.15f, 0.25f, 1f);
-        btnReiniciar.setColorHover(0.25f, 0.25f, 0.45f, 1f);
-        btnReiniciar.setColorBorde(0.40f, 0.40f, 0.65f, 1f);
-        btnSalir.setColorFondo(0.20f, 0.12f, 0.12f, 1f);
-        btnSalir.setColorHover(0.38f, 0.18f, 0.18f, 1f);
-        btnSalir.setColorBorde(0.55f, 0.30f, 0.30f, 1f);
-    }
-
-    // ── Timer ─────────────────────────────────────────────────────────────────
-    private void iniciarTimer() {
-        timerActivo = true;
-        hiloTimer   = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                long ultimo = System.currentTimeMillis();
-                while (timerActivo) {
-                    try {
-                        Thread.sleep(100);
-                        long ahora = System.currentTimeMillis();
-                        tiempoSegundos += (ahora - ultimo) / 1000.0;
-                        ultimo = ahora;
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        break;
-                    }
-                }
-            }
-        });
-        hiloTimer.setDaemon(true);
-        hiloTimer.start();
-    }
-
-    private void detenerTimer() {
-        timerActivo = false;
-        if (hiloTimer != null) hiloTimer.interrupt();
+       //END
     }
 
     @Override
@@ -133,8 +77,9 @@ public class GameScreen implements Screen {
         batch.begin();
         dibujarTexturas(batch);
         batch.end();
+        
+        dibujarHUD();//añadido
 
-        dibujarHUD();
         logic();
     }
 
@@ -181,8 +126,146 @@ public class GameScreen implements Screen {
         player.dibujarPlayer(batch);
     }
 
-    // ── HUD con botones clickeables ───────────────────────────────────────────
-    private void dibujarHUD() {
+    private void logic() {
+        
+        //añadido
+        // Clic en boton Salir
+        if (btnSalir.clicado()) {
+            detenerTimer();
+            game.setScreen(new MenuScreen(game));
+            dispose();
+            return;
+        }
+
+        // Clic en boton Reiniciar
+        if (btnReiniciar.clicado()) {
+            nivelActual.reiniciar();
+            GameScreen.initPlayer = false;
+        }
+        
+        //END
+        
+        
+        
+        player.tecladoInput(nivelActual);
+        if(nivelActual.nivelCompletado() && !isGanado){
+            System.out.println("Ganaste");
+            isGanado=true;
+            detenerTimer();//añadido
+            game.setScreen(new MenuScreen(game));
+            dispose();
+        }
+    }
+
+    @Override
+    public void resize(int w, int h) {
+        camera.viewportWidth  = w;
+        camera.viewportHeight = h;
+        camera.update();
+        
+        crearBotonesHUD();//añadido
+    }
+
+     @Override public void pause()  { detenerTimer(); }//añadido
+    @Override public void resume() { if (!isGanado) iniciarTimer(); }//añadido
+    
+    
+/*
+    @Override public void pause(){
+    }
+    @Override public void resume(){
+    }*///ORIGINALES
+    
+    
+    @Override public void hide(){
+    }
+
+    @Override
+    public void dispose() {
+        tiposTiles.dispose();
+        batch.dispose();
+        image.dispose();
+        shape.dispose();
+        sheetTiles.dispose();
+        playerSheet.dispose();
+        initPlayer=false;
+        
+        detenerTimer();//añadido
+        font.dispose();//añadido
+        
+    }
+    
+    
+    
+    
+    
+    //-----------------------JJ
+    
+    
+    
+    
+    private static final int HUD_H  = 36;   // altura del HUD en pixels
+    private static final int BTN_W  = 85;
+    private static final int BTN_H  = 24;
+
+    private Boton btnReiniciar, btnSalir;
+
+    // ── Temporizador (hilo de concurrencia) ───────────────────────────────────
+    private int movimientos = 0;
+    private volatile double  tiempoSegundos = 0;
+    private volatile boolean timerActivo    = false;
+    private Thread hiloTimer;
+    
+    
+     private void crearBotonesHUD() {
+        int sw = Gdx.graphics.getWidth();
+        int sh = Gdx.graphics.getHeight();
+        int by = sh - HUD_H + (HUD_H - BTN_H) / 2;
+
+        btnReiniciar = new Boton(Textos.GAME_BTN_REINICIAR, sw - BTN_W * 2 - 10, by, BTN_W, BTN_H);
+        btnSalir     = new Boton(Textos.GAME_BTN_SALIR,     sw - BTN_W - 2,      by, BTN_W, BTN_H);
+
+        // Colores sutiles para el HUD
+        btnReiniciar.setColorFondo(0.15f, 0.15f, 0.25f, 1f);
+        btnReiniciar.setColorHover(0.25f, 0.25f, 0.45f, 1f);
+        btnReiniciar.setColorBorde(0.40f, 0.40f, 0.65f, 1f);
+        btnSalir.setColorFondo(0.20f, 0.12f, 0.12f, 1f);
+        btnSalir.setColorHover(0.38f, 0.18f, 0.18f, 1f);
+        btnSalir.setColorBorde(0.55f, 0.30f, 0.30f, 1f);
+    }
+
+    // ── Timer ─────────────────────────────────────────────────────────────────
+    private void iniciarTimer() {
+        timerActivo = true;
+        hiloTimer   = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long ultimo = System.currentTimeMillis();
+                while (timerActivo) {
+                    try {
+                        Thread.sleep(100);
+                        long ahora = System.currentTimeMillis();
+                        tiempoSegundos += (ahora - ultimo) / 1000.0;
+                        ultimo = ahora;
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+        });
+        hiloTimer.setDaemon(true);
+        hiloTimer.start();
+        
+        
+    }
+    
+    private void detenerTimer() {
+        timerActivo = false;
+        if (hiloTimer != null) hiloTimer.interrupt();
+    }
+    
+     private void dibujarHUD() {
         int sw = Gdx.graphics.getWidth();
         int sh = Gdx.graphics.getHeight();
 
@@ -218,58 +301,6 @@ public class GameScreen implements Screen {
         batch.end();
     }
 
-    private void logic() {
-        // Clic en boton Salir
-        if (btnSalir.clicado()) {
-            detenerTimer();
-            game.setScreen(new MenuScreen(game));
-            dispose();
-            return;
-        }
-
-        // Clic en boton Reiniciar
-        if (btnReiniciar.clicado()) {
-            nivelActual.reiniciar();
-            GameScreen.initPlayer = false;
-        }
-
-        // Movimiento del jugador
-        int prevX = player.x, prevY = player.y;
-        player.tecladoInput(nivelActual);
-        if (player.x != prevX || player.y != prevY) movimientos++;
-
-        // Verificar victoria (Mantiene tu lógica original hacia MenuScreen)
-        if(nivelActual.nivelCompletado() && !isGanado){
-            System.out.println("Ganaste");
-            isGanado=true;
-            detenerTimer();
-            game.setScreen(new MenuScreen(game));
-            dispose();
-        }
-    }
-
-    @Override
-    public void resize(int w, int h) {
-        camera.viewportWidth  = w;
-        camera.viewportHeight = h;
-        camera.update();
-        crearBotonesHUD();
-    }
-
-    @Override public void pause()  { detenerTimer(); }
-    @Override public void resume() { if (!isGanado) iniciarTimer(); }
-    @Override public void hide()   {}
-
-    @Override
-    public void dispose() {
-        detenerTimer();
-        tiposTiles.dispose();
-        batch.dispose();
-        image.dispose();
-        shape.dispose();
-        sheetTiles.dispose();
-        playerSheet.dispose();
-        font.dispose();
-        initPlayer=false;
-    }
+ 
+   
 }

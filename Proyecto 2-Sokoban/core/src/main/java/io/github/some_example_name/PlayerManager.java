@@ -1,189 +1,261 @@
 package io.github.some_example_name;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class PlayerManager implements Gestionable<Player> {
-    private ArrayList<String> arrayUsernames = new ArrayList<>();
-    private File usersFile = new File("users.skb");
-    private Player playerLogeado = null;
-
-    PlayerManager() {
+/**
+ *
+ * @author adria
+ */
+public class PlayerManager implements Gestionable<Player>{
+    private ArrayList<String> arrayUsernames= new ArrayList<>();
+    private File usersFile= new File("users.skb");
+    private Player playerLogeado=null;
+    
+    
+    PlayerManager(){
         cargar();
     }
-
-    // ── Utilidad SHA-256 ──────────────────────────────────────────────────────
-    private String hash(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] bytes = md.digest(input.getBytes("UTF-8"));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : bytes) sb.append(String.format("%02x", b));
-            return sb.toString();
-        } catch (Exception e) {
-            return input;
-        }
-    }
-
-    // ── Registro e inicio de sesion ───────────────────────────────────────────
-    public boolean registrarUser(String userName, String password, String nombreCompleto) {
-        if (arrayUsernames.contains(userName)) return false;
-        try (RandomAccessFile rUsers = new RandomAccessFile(usersFile, "rw")) {
+    
+    public boolean registrarUser(String userName, String password, String nombreCompleto){
+        if(arrayUsernames.contains(userName))
+            return false;
+        try(RandomAccessFile rUsers= new RandomAccessFile(usersFile,"rw")){
             rUsers.seek(rUsers.length());
             rUsers.writeUTF(userName);
-            rUsers.writeUTF(hash(password));
-            rUsers.writeInt(0);
-            crearArchivosNuevos(userName, nombreCompleto);
+            rUsers.writeUTF(password);
+            rUsers.writeInt(0); //puntos
+            crearArchivosNuevos(userName,nombreCompleto);
             arrayUsernames.add(userName);
             return true;
-        } catch (IOException e) {
-            System.err.println("Error registro: " + e.getMessage());
+        }catch (IOException e){
+            System.err.println("Error: "+ e.getMessage());
         }
         return false;
     }
-
-    public boolean logIn(String userName, String password) {
-        if (!arrayUsernames.contains(userName)) return false;
-        try (RandomAccessFile rPlayer = new RandomAccessFile(usersFile, "r")) {
-            while (rPlayer.getFilePointer() < rPlayer.length()) {
-                String user = rPlayer.readUTF();
-                if (user.equals(userName)) {
-                    String passGuardada = rPlayer.readUTF();
-                    if (!hash(password).equals(passGuardada)) return false;
-                    int puntos = rPlayer.readInt();
-                    cargarUser(userName, password, puntos);
-                    return true;
-                } else {
-                    rPlayer.readUTF();
-                    rPlayer.readInt();
+    public boolean logIn(String userName, String password){
+        if(arrayUsernames.contains(userName)){
+            try(RandomAccessFile rPlayer= new RandomAccessFile(usersFile,"r")){
+                while(rPlayer.getFilePointer()<rPlayer.length()){
+                    String user=rPlayer.readUTF();
+                    if(user.equals(userName)){
+                        String passCorrecta= rPlayer.readUTF();
+                        if(!password.equals(passCorrecta))
+                            return false;
+                        int puntos= rPlayer.readInt();
+                        cargarUser(userName, password, puntos);
+                        return true;
+                    }else {
+                        rPlayer.readUTF();
+                        rPlayer.readInt();
+                    }
+                    
                 }
+            }catch (IOException e){
+                System.out.println("Error: "+e.getMessage());
             }
-        } catch (IOException e) {
-            System.err.println("Error login: " + e.getMessage());
         }
-        return false;
+        return false;    
     }
-
-    public void cerrarSesion() {
-        playerLogeado = null;
-    }
-
-    // ── Cambio de idioma ──────────────────────────────────────────────────────
-    /**
-     * Cambia el idioma del jugador logueado y lo persiste en perfil.skb.
-     * Si no hay sesion activa solo actualiza Textos (ya hecho por el caller).
-     */
-    public void cambiarIdioma(String nuevoIdioma) {
-        if (playerLogeado == null) return;
-        playerLogeado.setIdioma(nuevoIdioma);
-        guardar();
-    }
-
-    // ── Carga completa del usuario desde sus archivos ─────────────────────────
-    private void cargarUser(String userName, String password, int puntos) {
-        try {
-            RandomAccessFile rf = new RandomAccessFile("users/" + userName + "/perfil.skb", "r");
-            String nombreCompleto = rf.readUTF();
-            long   fechaRegistro  = rf.readLong();
-            long   ultimaSesion   = rf.readLong();
-            double volumen        = rf.readDouble();
-            String idioma         = rf.readUTF();
-            String rutaAvatar     = rf.readUTF();
-            rf.close();
-
-            rf = new RandomAccessFile("users/" + userName + "/stats.skb", "r");
-            int    partidasJugadas        = rf.readInt();
-            int    nivelesCompletados     = rf.readInt();
-            int    mejorPuntaje           = rf.readInt();
-            int    puntajeGeneral         = rf.readInt();
-            double tiempoJugadoHoras      = rf.readDouble();
-            double tiempoPromedioPorNivel = rf.readDouble();
-            rf.close();
-
-            rf = new RandomAccessFile("users/" + userName + "/progreso.skb", "r");
-            int nivelesDesbloqueados = rf.readInt();
-            rf.close();
-
-            rf = new RandomAccessFile("users/" + userName + "/avatar.skb", "r");
-            int colCabeza    = rf.readInt();
-            int filaCabeza   = rf.readInt();
-            int colTorso     = rf.readInt();
-            int filaTorso    = rf.readInt();
-            int colAccesorio = rf.readInt();
-            int filaAccesorio= rf.readInt();
-            rf.close();
-
-            rf = new RandomAccessFile("users/" + userName + "/amigos.skb", "r");
-            ArrayList<String> amigos = new ArrayList<>();
-            while (rf.getFilePointer() < rf.length()) amigos.add(rf.readUTF());
-            rf.close();
-
-            rf = new RandomAccessFile("users/" + userName + "/historial.skb", "r");
-            ArrayList<EntradaHistorial> historial = new ArrayList<>();
-            while (rf.getFilePointer() < rf.length()) {
-                int    numIntento = rf.readInt();
-                int    nivel      = rf.readInt();
-                int    puntajeh   = rf.readInt();
-                int    movimientos= rf.readInt();
-                double tiempo     = rf.readDouble();
-                long   fecha      = rf.readLong();
-                historial.add(new EntradaHistorial(numIntento, nivel, puntajeh, movimientos, tiempo, fecha));
+    
+    
+    
+    private void cargarUser(String userName, String password, int puntos){
+        try{
+            RandomAccessFile rUser= new RandomAccessFile("users/"+userName+"/perfil.skb","r");
+            //leer perfil.skb 
+            String nombreCompleto= rUser.readUTF();
+            long fechaRegistro= rUser.readLong();
+            long ultimaSesion= rUser.readLong();
+            double volumen= rUser.readDouble();
+            String idioma= rUser.readUTF();
+            String rutaAvatar= rUser.readUTF();
+            rUser.close();
+            
+            //leer stats.skb
+            rUser= new RandomAccessFile("users/"+userName+"/stats.skb","r");
+            int partidasJugadas= rUser.readInt();
+            int nivelesCompletados= rUser.readInt();
+            int mejorPuntaje= rUser.readInt();
+            int puntajeGeneral= rUser.readInt();
+            double tiempoJugadoHoras= rUser.readDouble();
+            double tiempoPromedioPorNivel= rUser.readDouble();
+            rUser.close();
+            
+            //leer progreso.skb
+            rUser= new RandomAccessFile("users/"+userName+"/progreso.skb","r");
+            int nivelesDesbloqueados= rUser.readInt();
+            rUser.close();
+            
+            //leer avatar.skb
+            rUser= new RandomAccessFile("users/"+userName+"/avatar.skb","r");
+            int colCabeza= rUser.readInt();
+            int filaCabeza= rUser.readInt();
+            int colTorso= rUser.readInt();
+            int filaTorso= rUser.readInt();
+            int colAccesorio= rUser.readInt();
+            int filaAccesorio= rUser.readInt();
+            rUser.close();
+            
+            //leer amigos.skb
+            rUser= new RandomAccessFile("users/"+userName+"/amigos.skb","r");
+            ArrayList<String> amigos= new ArrayList<>();
+            while(rUser.getFilePointer()<rUser.length()){
+                amigos.add(rUser.readUTF());
             }
-            rf.close();
-
-            playerLogeado = new Player(userName, password, puntos, nombreCompleto, rutaAvatar,
-                    fechaRegistro, ultimaSesion, volumen, idioma, amigos,
-                    partidasJugadas, nivelesCompletados, mejorPuntaje, puntajeGeneral,
-                    tiempoJugadoHoras, tiempoPromedioPorNivel, nivelesDesbloqueados,
-                    colCabeza, filaCabeza, colTorso, filaTorso, colAccesorio, filaAccesorio, historial);
-
-            // Aplicar el idioma guardado del jugador
-            if (idioma != null && !idioma.isEmpty()) {
-                Textos.aplicar(idioma);
+            rUser.close();
+            
+            //leer historial.skb
+            rUser= new RandomAccessFile("users/"+userName+"/historial.skb","r");
+            ArrayList<EntradaHistorial> historial= new ArrayList<>();
+            while(rUser.getFilePointer()<rUser.length()){
+                int numIntento= rUser.readInt();
+                int nivel= rUser.readInt();
+                int puntaje= rUser.readInt();
+                int movimientos= rUser.readInt();
+                double tiempo= rUser.readDouble();
+                long fecha= rUser.readLong();
+                EntradaHistorial entrada= new EntradaHistorial(numIntento,nivel,puntaje,movimientos,tiempo,fecha);
+                historial.add(entrada);
             }
-
-        } catch (IOException e) {
-            System.err.println("Error cargar usuario: " + e.getMessage());
+            rUser.close();
+            
+            playerLogeado= new Player(userName,password,puntos,nombreCompleto,rutaAvatar,fechaRegistro,
+                                        ultimaSesion,volumen,idioma,amigos,partidasJugadas,nivelesCompletados,
+                                        mejorPuntaje,puntajeGeneral,tiempoJugadoHoras,tiempoPromedioPorNivel,
+                                        nivelesDesbloqueados,colCabeza,filaCabeza,colTorso,filaTorso,
+                                        colAccesorio,filaAccesorio,historial);
+        }catch(IOException e){
+            System.out.println("Error: "+e.getMessage());
         }
     }
-
-    private void crearArchivosNuevos(String userName, String nombreCompleto) {
-        try {
-            new File("users/" + userName).mkdirs();
-            new File("users/" + userName + "/amigos.skb").createNewFile();
-            new File("users/" + userName + "/historial.skb").createNewFile();
-
-            RandomAccessFile rf = new RandomAccessFile("users/" + userName + "/perfil.skb", "rw");
-            rf.writeUTF(nombreCompleto);
-            rf.writeLong(Calendar.getInstance().getTimeInMillis());
-            rf.writeLong(Calendar.getInstance().getTimeInMillis());
-            rf.writeDouble(0.8);
-            rf.writeUTF(Textos.idioma);   // guarda el idioma actual al registrarse
-            rf.writeUTF("default/avatar.png");
-            rf.close();
-
-            rf = new RandomAccessFile("users/" + userName + "/stats.skb", "rw");
-            rf.writeInt(0); rf.writeInt(0); rf.writeInt(0); rf.writeInt(0);
-            rf.writeDouble(0); rf.writeDouble(0);
-            rf.close();
-
-            rf = new RandomAccessFile("users/" + userName + "/progreso.skb", "rw");
-            rf.writeInt(0);
-            rf.close();
-
-            rf = new RandomAccessFile("users/" + userName + "/avatar.skb", "rw");
-            for (int i = 0; i < 6; i++) rf.writeInt(0);
-            rf.close();
-        } catch (IOException e) {
-            System.err.println("Error crear archivos: " + e.getMessage());
+    private void crearArchivosNuevos(String userName,String nombreCompleto){
+        try{
+            File playerFiles= new File("users/"+userName);
+            playerFiles.mkdirs();
+            
+            playerFiles= new File("users/"+userName+"/amigos.skb");
+            playerFiles.createNewFile();
+            
+            playerFiles= new File("users/"+userName+"/historial.skb");
+            playerFiles.createNewFile();
+            
+            RandomAccessFile rPlayer= new RandomAccessFile("users/"+userName+"/perfil.skb","rw");//perfil.skb
+            rPlayer.writeUTF(nombreCompleto);
+            rPlayer.writeLong(Calendar.getInstance().getTimeInMillis());//Fecha de inicio de sesion
+            rPlayer.writeLong(Calendar.getInstance().getTimeInMillis());//Ultima fecha de sesion
+            rPlayer.writeDouble(0);//volumen
+            rPlayer.writeUTF(Textos.idioma);// rPlayer.writeUTF("espanol");//idioma
+            rPlayer.writeUTF("default/avatar.png");//avatar
+            rPlayer.close();
+            
+            rPlayer= new RandomAccessFile("users/"+userName+"/stats.skb","rw");//stats.skb
+            rPlayer.writeInt(0);//partidasJugadas
+            rPlayer.writeInt(0);//nivelesCompletados
+            rPlayer.writeInt(0);//mejorPuntaje
+            rPlayer.writeInt(0);//puntajeGeneral
+            rPlayer.writeDouble(0);//tiempoJugadoHoras
+            rPlayer.writeDouble(0);//tiempoPromedioPorNivel
+            rPlayer.close();
+            
+            rPlayer= new RandomAccessFile("users/"+userName+"/progreso.skb","rw");//progreso.skb
+            rPlayer.writeInt(0);//nivelesDesbloqueados
+            rPlayer.close();
+            
+            rPlayer= new RandomAccessFile("users/"+userName+"/avatar.skb","rw");//avatar.skb
+            rPlayer.writeInt(0);//colCabeza
+            rPlayer.writeInt(0);//filaCabeza
+            rPlayer.writeInt(0);//colTorso
+            rPlayer.writeInt(0);//filaTorso
+            rPlayer.writeInt(0);//colAccesorio
+            rPlayer.writeInt(0);//filaAccesorio
+            rPlayer.close();
+            
+            
+        } catch (IOException e){
+            System.err.println("Error: "+e.getMessage());
         }
     }
 
-    // ── Actualizacion de estadisticas tras completar un nivel ─────────────────
+    @Override
+    public Player getActual() {
+        return playerLogeado;
+    }
+
+    @Override
+    public void cargar() {
+        try(RandomAccessFile rUsers= new RandomAccessFile(usersFile,"r")){
+            while(rUsers.getFilePointer()<rUsers.length()){
+                arrayUsernames.add(rUsers.readUTF());
+                rUsers.readUTF();
+                rUsers.readInt();
+            }
+        }catch(IOException e){
+            System.err.println("Error: "+ e.getMessage());
+        }
+    }
+
+    @Override
+    public synchronized  void guardar() {
+        if(playerLogeado==null)
+            return;
+        try{
+            //guardar los puntos
+            RandomAccessFile rUser= new RandomAccessFile(usersFile,"rw");
+            while(rUser.getFilePointer()<rUser.length()){
+                String user= rUser.readUTF();
+                if(user.equals(playerLogeado.getUserName())){
+                    rUser.readUTF();
+                    rUser.writeInt(playerLogeado.getPuntos());
+                    break;
+                }else{
+                    rUser.readUTF();
+                    rUser.readInt();
+                }
+                    
+            }
+            rUser.close();
+            //guardar perfil.skb;
+            rUser= new RandomAccessFile("users/"+playerLogeado.getUserName()+"/perfil.skb","rw");
+            rUser.setLength(0);
+            rUser.writeUTF(playerLogeado.getNombreCompleto());
+            rUser.writeLong(playerLogeado.getFechaRegistro());
+            rUser.writeLong(playerLogeado.getUltimaSesion());
+            rUser.writeDouble(playerLogeado.getVolumen());
+            rUser.writeUTF(playerLogeado.getIdioma());
+            rUser.writeUTF(playerLogeado.getRutaAvatar());
+            rUser.close();
+            
+            //guardar stats.skb
+            rUser= new RandomAccessFile("users/"+playerLogeado.getUserName()+"/stats.skb","rw");
+            rUser.setLength(0);
+            rUser.writeInt(playerLogeado.getPartidasJugadas());//partidasJugadas
+            rUser.writeInt(playerLogeado.getNivelesCompletados());//nivelesCompletados
+            rUser.writeInt(playerLogeado.getMejorPuntaje());//mejorPuntaje
+            rUser.writeInt(playerLogeado.getPuntajeGeneral());//puntajeGeneral
+            rUser.writeDouble(playerLogeado.getTiempoJugadoHoras());//tiempoJugadoHoras
+            rUser.writeDouble(playerLogeado.getTiempoPromedioPorNivel());//tiempoPromedioPorNivel
+            rUser.close();
+            
+            //guardar progreso.skb
+            rUser= new RandomAccessFile("users/"+playerLogeado.getUserName()+"/progreso.skb","rw");
+            rUser.writeInt(playerLogeado.getNivelesDesbloqueados());
+            rUser.close();
+        }catch(IOException e){
+            System.out.println("Error: "+e.getMessage());
+        }
+    }
+   
+    //-----------JJ
+    
+ 
+    
+    
     public void actualizarTrasPartida(int nivel, int movimientos, double tiempoSeg, int puntaje) {
         if (playerLogeado == null) return;
 
@@ -210,8 +282,14 @@ public class PlayerManager implements Gestionable<Player> {
 
         guardar();
     }
-
-    private void appendHistorial(EntradaHistorial e) {
+    
+         public void cambiarIdioma(String nuevoIdioma) {
+        if (playerLogeado == null) return;
+        playerLogeado.setIdioma(nuevoIdioma);
+        guardar();
+    }
+    
+        private void appendHistorial(EntradaHistorial e) {
         if (playerLogeado == null) return;
         try (RandomAccessFile rf = new RandomAccessFile("users/" + playerLogeado.getUserName() + "/historial.skb", "rw")) {
             rf.seek(rf.length());
@@ -225,8 +303,7 @@ public class PlayerManager implements Gestionable<Player> {
             System.err.println("Error historial: " + ex.getMessage());
         }
     }
-
-    // ── Ranking ───────────────────────────────────────────────────────────────
+    
     public ArrayList<String[]> getRanking() {
         ArrayList<String[]> lista = new ArrayList<>();
         for (String user : arrayUsernames) {
@@ -248,8 +325,7 @@ public class PlayerManager implements Gestionable<Player> {
         }
         return lista;
     }
-
-    // ── Getters ───────────────────────────────────────────────────────────────
+    
     public Player getPlayerLogeado() { return playerLogeado; }
 
     public String getNombreJugador() {
@@ -257,70 +333,20 @@ public class PlayerManager implements Gestionable<Player> {
         String n = playerLogeado.getNombreCompleto();
         return (n != null && !n.isEmpty()) ? n : playerLogeado.getUserName();
     }
+   
 
-    // ── Interfaz Gestionable ──────────────────────────────────────────────────
-    @Override
-    public void cargar() {
-        try (RandomAccessFile rUsers = new RandomAccessFile(usersFile, "r")) {
-            while (rUsers.getFilePointer() < rUsers.length()) {
-                arrayUsernames.add(rUsers.readUTF());
-                rUsers.readUTF();
-                rUsers.readInt();
-            }
-        } catch (IOException e) {
-            System.err.println("Sin archivo de usuarios: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public synchronized void guardar() {
-        if (playerLogeado == null) return;
-        try {
-            // Actualizar puntos en users.skb
-            RandomAccessFile rf = new RandomAccessFile(usersFile, "rw");
-            while (rf.getFilePointer() < rf.length()) {
-                String user = rf.readUTF();
-                if (user.equals(playerLogeado.getUserName())) {
-                    rf.readUTF();
-                    rf.writeInt(playerLogeado.getPuntos());
-                    break;
-                } else { rf.readUTF(); rf.readInt(); }
-            }
-            rf.close();
-
-            // perfil.skb (incluye idioma)
-            rf = new RandomAccessFile("users/" + playerLogeado.getUserName() + "/perfil.skb", "rw");
-            rf.setLength(0);
-            rf.writeUTF(playerLogeado.getNombreCompleto());
-            rf.writeLong(playerLogeado.getFechaRegistro());
-            rf.writeLong(System.currentTimeMillis());
-            rf.writeDouble(playerLogeado.getVolumen());
-            rf.writeUTF(playerLogeado.getIdioma());
-            rf.writeUTF(playerLogeado.getRutaAvatar());
-            rf.close();
-
-            // stats.skb
-            rf = new RandomAccessFile("users/" + playerLogeado.getUserName() + "/stats.skb", "rw");
-            rf.setLength(0);
-            rf.writeInt(playerLogeado.getPartidasJugadas());
-            rf.writeInt(playerLogeado.getNivelesCompletados());
-            rf.writeInt(playerLogeado.getMejorPuntaje());
-            rf.writeInt(playerLogeado.getPuntajeGeneral());
-            rf.writeDouble(playerLogeado.getTiempoJugadoHoras());
-            rf.writeDouble(playerLogeado.getTiempoPromedioPorNivel());
-            rf.close();
-
-            // progreso.skb
-            rf = new RandomAccessFile("users/" + playerLogeado.getUserName() + "/progreso.skb", "rw");
-            rf.setLength(0);
-            rf.writeInt(playerLogeado.getNivelesDesbloqueados());
-            rf.close();
-
-        } catch (IOException e) {
-            System.err.println("Error guardar: " + e.getMessage());
-        }
-    }
-
-    @Override public Player getActual()  { return playerLogeado; }
     @Override public int getCantidad()   { return arrayUsernames.size(); }
+    
+    
+    public void cerrarSesion() {
+        playerLogeado = null;
+    }
+    
+    
+    /*
+    @Override
+    public int getCantidad() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    } //ORIGINAL  */
+    
 }

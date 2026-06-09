@@ -43,7 +43,7 @@ public class VictoryScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        game.playerManager.actualizarTrasPartida(numLevel, movimientos, tiempoSegundos, puntaje);
+       // game.playerManager.actualizarTrasPartida(numLevel, movimientos, tiempoSegundos, puntaje);
 
         crearBotones();
     }
