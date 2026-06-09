@@ -16,6 +16,8 @@ public class PlayerManager implements Gestionable<Player>{
     private ArrayList<String> arrayUsernames= new ArrayList<>();
     private File usersFile= new File("users.skb");
     private Player playerLogeado=null;
+    
+    
     PlayerManager(){
         cargar();
     }
@@ -60,6 +62,9 @@ public class PlayerManager implements Gestionable<Player>{
         }
         return false;    
     }
+    
+    
+    
     private void cargarUser(String userName, String password, int puntos){
         try{
             RandomAccessFile rUser= new RandomAccessFile("users/"+userName+"/perfil.skb","r");
@@ -145,7 +150,7 @@ public class PlayerManager implements Gestionable<Player>{
             rPlayer.writeLong(Calendar.getInstance().getTimeInMillis());//Fecha de inicio de sesion
             rPlayer.writeLong(Calendar.getInstance().getTimeInMillis());//Ultima fecha de sesion
             rPlayer.writeDouble(0);//volumen
-            rPlayer.writeUTF("espanol");//idioma
+            rPlayer.writeUTF(Textos.idioma);// rPlayer.writeUTF("espanol");//idioma
             rPlayer.writeUTF("default/avatar.png");//avatar
             rPlayer.close();
             
@@ -245,11 +250,103 @@ public class PlayerManager implements Gestionable<Player>{
             System.out.println("Error: "+e.getMessage());
         }
     }
+   
+    //-----------JJ
     
+ 
+    
+    
+    public void actualizarTrasPartida(int nivel, int movimientos, double tiempoSeg, int puntaje) {
+        if (playerLogeado == null) return;
 
+        int  numIntento = playerLogeado.getHistorial() != null ? playerLogeado.getHistorial().size() + 1 : 1;
+        long fecha      = System.currentTimeMillis();
+        EntradaHistorial entrada = new EntradaHistorial(numIntento, nivel, puntaje, movimientos, tiempoSeg, fecha);
+
+        if (playerLogeado.getHistorial() != null) playerLogeado.getHistorial().add(entrada);
+        appendHistorial(entrada);
+
+        playerLogeado.setPartidasJugadas(playerLogeado.getPartidasJugadas() + 1);
+        playerLogeado.setNivelesCompletados(playerLogeado.getNivelesCompletados() + 1);
+        playerLogeado.setPuntajeGeneral(playerLogeado.getPuntajeGeneral() + puntaje);
+        if (puntaje > playerLogeado.getMejorPuntaje()) playerLogeado.setMejorPuntaje(puntaje);
+
+        double nuevasHoras = playerLogeado.getTiempoJugadoHoras() + tiempoSeg / 3600.0;
+        playerLogeado.setTiempoJugadoHoras(nuevasHoras);
+        int nc = playerLogeado.getNivelesCompletados();
+        if (nc > 0) playerLogeado.setTiempoPromedioPorNivel(nuevasHoras * 3600.0 / nc);
+
+        int siguiente = nivel + 1;
+        if (siguiente > playerLogeado.getNivelesDesbloqueados())
+            playerLogeado.setNivelesDesbloqueados(siguiente);
+
+        guardar();
+    }
+    
+         public void cambiarIdioma(String nuevoIdioma) {
+        if (playerLogeado == null) return;
+        playerLogeado.setIdioma(nuevoIdioma);
+        guardar();
+    }
+    
+        private void appendHistorial(EntradaHistorial e) {
+        if (playerLogeado == null) return;
+        try (RandomAccessFile rf = new RandomAccessFile("users/" + playerLogeado.getUserName() + "/historial.skb", "rw")) {
+            rf.seek(rf.length());
+            rf.writeInt(e.getNumIntento());
+            rf.writeInt(e.getNivel());
+            rf.writeInt(e.getPuntaje());
+            rf.writeInt(e.getMovimientos());
+            rf.writeDouble(e.getTiempo());
+            rf.writeLong(e.getFecha());
+        } catch (IOException ex) {
+            System.err.println("Error historial: " + ex.getMessage());
+        }
+    }
+    
+    public ArrayList<String[]> getRanking() {
+        ArrayList<String[]> lista = new ArrayList<>();
+        for (String user : arrayUsernames) {
+            try (RandomAccessFile rf = new RandomAccessFile("users/" + user + "/stats.skb", "r")) {
+                rf.readInt(); rf.readInt(); rf.readInt();
+                int puntaje = rf.readInt();
+                lista.add(new String[]{ user, String.valueOf(puntaje) });
+            } catch (IOException ignored) {}
+        }
+        // Ordenamiento burbuja descendente
+        for (int i = 0; i < lista.size() - 1; i++) {
+            for (int j = 0; j < lista.size() - 1 - i; j++) {
+                if (Integer.parseInt(lista.get(j)[1]) < Integer.parseInt(lista.get(j + 1)[1])) {
+                    String[] tmp = lista.get(j);
+                    lista.set(j, lista.get(j + 1));
+                    lista.set(j + 1, tmp);
+                }
+            }
+        }
+        return lista;
+    }
+    
+    public Player getPlayerLogeado() { return playerLogeado; }
+
+    public String getNombreJugador() {
+        if (playerLogeado == null) return "Invitado";
+        String n = playerLogeado.getNombreCompleto();
+        return (n != null && !n.isEmpty()) ? n : playerLogeado.getUserName();
+    }
+   
+
+    @Override public int getCantidad()   { return arrayUsernames.size(); }
+    
+    
+    public void cerrarSesion() {
+        playerLogeado = null;
+    }
+    
+    
+    /*
     @Override
     public int getCantidad() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    } //ORIGINAL  */
     
 }

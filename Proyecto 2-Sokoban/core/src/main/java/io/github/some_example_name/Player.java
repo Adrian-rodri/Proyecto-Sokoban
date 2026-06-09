@@ -14,6 +14,7 @@ import java.util.ArrayList;
  * @author adria
  */
 public class Player{
+    
     private ArrayList<EstadoTurno> copias= new ArrayList<>();
     private Texture sheetCabeza,sheetTorso,sheetAccesorio;
     protected int x,y;
@@ -50,6 +51,7 @@ public class Player{
     private int spriteFila;
     
     protected TextureRegion playerSprite;
+    
     public Player(int x, int y) {
         this.x=x;
         this.y=y;
@@ -108,6 +110,7 @@ public class Player{
             //level=nivelActual.getLevel();
             GameScreen.initPlayer=false;
         }
+        //undo
         if(Gdx.input.isKeyJustPressed(Input.Keys.U)){
             if(!copias.isEmpty()){
                 int indexAnterior=copias.size()-1;
@@ -338,5 +341,22 @@ public class Player{
     public TextureRegion getPlayerSprite() {
         return playerSprite;
     }
+    
+    
+    //-------------------JJ
+    public void setPuntos(int puntos)                         { this.puntos = puntos; }
+    public void setIdioma(String idioma)                      { this.idioma = idioma; }
+    public void setPartidasJugadas(int n)                     { this.partidasJugadas = n; }
+    public void setNivelesCompletados(int n)                  { this.nivelesCompletados = n; }
+    public void setMejorPuntaje(int n)                        { this.mejorPuntaje = n; }
+    public void setPuntajeGeneral(int n)                      { this.puntajeGeneral = n; }
+    public void setTiempoJugadoHoras(double t)                { this.tiempoJugadoHoras = t; }
+    public void setTiempoPromedioPorNivel(double t)           { this.tiempoPromedioPorNivel = t; }
+    public void setNivelesDesbloqueados(int n)                { this.nivelesDesbloqueados = n; }
+    public void setUltimaSesion(long t)                       { this.ultimaSesion = t; }
+    
+    
+    
+    
     
 }
