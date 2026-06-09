@@ -87,9 +87,11 @@ public class GameScreen implements Screen {
                         tiposTiles=TileType.WALL;
                         break;
                     case 'B':
+                        batch.draw(TileType.META.getTexture(), j*Constantes.TILE_SIZE, yPos,Constantes.TILE_SIZE,Constantes.TILE_SIZE);
                         tiposTiles=TileType.BOX_EN_SU_LUGAR;
                         break;
                     case'b': 
+                        batch.draw(TileType.PISO.getTexture(), j*Constantes.TILE_SIZE, yPos,Constantes.TILE_SIZE,Constantes.TILE_SIZE);
                         tiposTiles=TileType.BOX;
                         break;
                     case '0': 
