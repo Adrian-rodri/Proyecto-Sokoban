@@ -1,4 +1,4 @@
-package io.github.some_example_name;
+package io.github.some_example_name.game;
 
 public interface Gestionable<COMODIN> {
     public COMODIN getActual();

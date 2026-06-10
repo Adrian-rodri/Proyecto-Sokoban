@@ -1,5 +1,8 @@
-package io.github.some_example_name;
+package io.github.some_example_name.model;
 
+import io.github.some_example_name.game.EstadoTurno;
+import io.github.some_example_name.game.Nivel;
+import io.github.some_example_name.screens.GameScreen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -7,7 +10,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import io.github.some_example_name.util.Constantes;
 import java.util.ArrayList;
+import io.github.some_example_name.game.EstadoTurno;
+import io.github.some_example_name.game.Nivel;
+import io.github.some_example_name.util.Constantes;
 
 /**
  *
@@ -15,9 +22,9 @@ import java.util.ArrayList;
  */
 public class Player{
     
-    private ArrayList<EstadoTurno> copias= new ArrayList<>();
+    public ArrayList<EstadoTurno> copias= new ArrayList<>();
     private Texture sheetCabeza,sheetTorso,sheetAccesorio;
-    protected int x,y;
+    public int x,y;
     //atributos que se van a guardar en users.skb
     private String userName, password;
     private int puntos;
@@ -340,6 +347,17 @@ public class Player{
 
     public TextureRegion getPlayerSprite() {
         return playerSprite;
+    }
+    @Override
+    public String toString() {
+        return "Player{" +
+            "userName='" + userName+'\''+
+            ", nombreCompleto='"+ nombreCompleto+'\'' +
+            ", fechaRegistro="+fechaRegistro +
+            ", nivelesDesbloqueados=" + nivelesDesbloqueados +
+            ", partidasJugadas="+ partidasJugadas+
+            ", puntajeGeneral=" +puntajeGeneral +
+            '}';
     }
     
     

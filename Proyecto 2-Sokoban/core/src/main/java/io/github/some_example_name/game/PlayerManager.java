@@ -1,5 +1,8 @@
-package io.github.some_example_name;
+package io.github.some_example_name.game;
 
+import io.github.some_example_name.model.EntradaHistorial;
+import io.github.some_example_name.model.Player;
+import io.github.some_example_name.game.Gestionable;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -18,7 +21,7 @@ public class PlayerManager implements Gestionable<Player>{
     private Player playerLogeado=null;
     
     
-    PlayerManager(){
+    public PlayerManager(){
         cargar();
     }
     
@@ -150,7 +153,7 @@ public class PlayerManager implements Gestionable<Player>{
             rPlayer.writeLong(Calendar.getInstance().getTimeInMillis());//Fecha de inicio de sesion
             rPlayer.writeLong(Calendar.getInstance().getTimeInMillis());//Ultima fecha de sesion
             rPlayer.writeDouble(0);//volumen
-            rPlayer.writeUTF(Textos.idioma);// rPlayer.writeUTF("espanol");//idioma
+            rPlayer.writeUTF("espanol");// rPlayer.writeUTF("espanol");//idioma
             rPlayer.writeUTF("default/avatar.png");//avatar
             rPlayer.close();
             
@@ -189,6 +192,8 @@ public class PlayerManager implements Gestionable<Player>{
 
     @Override
     public void cargar() {
+        if (!usersFile.exists()) 
+            return;
         try(RandomAccessFile rUsers= new RandomAccessFile(usersFile,"r")){
             while(rUsers.getFilePointer()<rUsers.length()){
                 arrayUsernames.add(rUsers.readUTF());
@@ -253,9 +258,6 @@ public class PlayerManager implements Gestionable<Player>{
    
     //-----------JJ
     
- 
-    
-    
     public void actualizarTrasPartida(int nivel, int movimientos, double tiempoSeg, int puntaje) {
         if (playerLogeado == null) return;
 
@@ -313,7 +315,6 @@ public class PlayerManager implements Gestionable<Player>{
                 lista.add(new String[]{ user, String.valueOf(puntaje) });
             } catch (IOException ignored) {}
         }
-        // Ordenamiento burbuja descendente
         for (int i = 0; i < lista.size() - 1; i++) {
             for (int j = 0; j < lista.size() - 1 - i; j++) {
                 if (Integer.parseInt(lista.get(j)[1]) < Integer.parseInt(lista.get(j + 1)[1])) {
@@ -326,27 +327,25 @@ public class PlayerManager implements Gestionable<Player>{
         return lista;
     }
     
-    public Player getPlayerLogeado() { return playerLogeado; }
+    public Player getPlayerLogeado() { 
+        return playerLogeado; 
+    }
 
     public String getNombreJugador() {
-        if (playerLogeado == null) return "Invitado";
+        if (playerLogeado == null) 
+            return "Invitado";
         String n = playerLogeado.getNombreCompleto();
         return (n != null && !n.isEmpty()) ? n : playerLogeado.getUserName();
     }
    
 
-    @Override public int getCantidad()   { return arrayUsernames.size(); }
-    
-    
-    public void cerrarSesion() {
-        playerLogeado = null;
+    @Override public int getCantidad(){ 
+        return arrayUsernames.size(); 
     }
     
-    
-    /*
-    @Override
-    public int getCantidad() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    } //ORIGINAL  */
+    public void cerrarSesion(){
+        playerLogeado = null;
+    }
+
     
 }

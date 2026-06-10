@@ -1,5 +1,6 @@
-package io.github.some_example_name;
+package io.github.some_example_name.game;
 
+import io.github.some_example_name.game.Nivel;
 import com.badlogic.gdx.Gdx;
 import java.io.File;
 import java.util.ArrayList;

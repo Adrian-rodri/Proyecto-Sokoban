@@ -1,4 +1,4 @@
-package io.github.some_example_name;
+package io.github.some_example_name.model;
 
 public class EntradaHistorial {
     private final int numIntento,nivel,puntaje,movimientos;
