@@ -41,14 +41,12 @@ public class RegisterScreen implements Screen {
     private Label lblReqLen, lblReqMay, lblReqNum, lblReqSim;
     private Table tablaRequisitos;
 
-    // Texturas generadas para el skin
     private Texture texField, texFieldFocus, texBtn, texBtnHov, texPixel;
 
     public RegisterScreen(Main game) {
         this.game = game;
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     private Texture bordeTex(int w, int h, Color fondo, Color borde, int g) {
         Pixmap p = new Pixmap(w, h, Pixmap.Format.RGBA8888);
         p.setColor(fondo);
@@ -62,7 +60,6 @@ public class RegisterScreen implements Screen {
         return t;
     }
 
-    // ── show ──────────────────────────────────────────────────────────────────
     @Override
     public void show() {
         batch = new SpriteBatch();
@@ -74,7 +71,6 @@ public class RegisterScreen implements Screen {
         stage = new Stage(new ScreenViewport());
         skin = crearSkin();
 
-        // Campos de texto
         campoNombre = new TextField("", skin);
         campoUser = new TextField("", skin);
         campoClave = new TextField("", skin);
@@ -89,10 +85,8 @@ public class RegisterScreen implements Screen {
         campoConfirm.setPasswordMode(true);
         campoConfirm.setPasswordCharacter('*');
 
-        // Etiqueta de error
         lblError = new Label("", skin, "error");
 
-        // Labels de requisitos de contraseña
         lblReqLen = new Label(". Min 8 caracteres", skin, "req-nok");
         lblReqMay = new Label(". Una mayuscula", skin, "req-nok");
         lblReqNum = new Label(". Un numero", skin, "req-nok");
@@ -104,7 +98,6 @@ public class RegisterScreen implements Screen {
         tablaRequisitos.add(lblReqNum).left().padRight(16);
         tablaRequisitos.add(lblReqSim).left();
 
-        // Actualizar requisitos al escribir en el campo de contraseña
         campoClave.setTextFieldListener(new TextField.TextFieldListener() {
             @Override
             public void keyTyped(TextField field, char c) {
@@ -112,7 +105,6 @@ public class RegisterScreen implements Screen {
             }
         });
 
-        // Botones
         TextButton btnRegistrar = new TextButton("Registrarse", skin, "azul");
         TextButton btnVolver = new TextButton("Volver", skin, "gris");
         TextButton btnIdioma = new TextButton("ES/EN", skin, "gris");
@@ -138,7 +130,6 @@ public class RegisterScreen implements Screen {
             }
         });
 
-        // Layout
         float fw = 290, fh = 30, bw = 130, bh = 32;
 
         Table table = new Table();
@@ -178,7 +169,6 @@ public class RegisterScreen implements Screen {
         NinePatchDrawable npBtnHov = new NinePatchDrawable(new NinePatch(texBtnHov, 4, 4, 4, 4));
         NinePatchDrawable npClear = new NinePatchDrawable(new NinePatch(texPixel, 0, 0, 0, 0));
 
-        // TextField style
         TextField.TextFieldStyle tfStyle = new TextField.TextFieldStyle();
         tfStyle.font = f;
         tfStyle.fontColor = Color.WHITE;
@@ -188,7 +178,6 @@ public class RegisterScreen implements Screen {
         tfStyle.cursor = npFieldFocus;
         s.add("default", tfStyle, TextField.TextFieldStyle.class);
 
-        // TextButton azul
         TextButton.TextButtonStyle tbAzul = new TextButton.TextButtonStyle();
         tbAzul.font = f;
         tbAzul.fontColor = Color.WHITE;
@@ -197,7 +186,6 @@ public class RegisterScreen implements Screen {
         tbAzul.down = npBtnHov;
         s.add("azul", tbAzul, TextButton.TextButtonStyle.class);
 
-        // TextButton gris
         TextButton.TextButtonStyle tbGris = new TextButton.TextButtonStyle();
         tbGris.font = f;
         tbGris.fontColor = new Color(0.75f, 0.75f, 0.9f, 1f);
@@ -206,11 +194,9 @@ public class RegisterScreen implements Screen {
         tbGris.down = npClear;
         s.add("gris", tbGris, TextButton.TextButtonStyle.class);
 
-        // Label de error
         Label.LabelStyle lsError = new Label.LabelStyle(f, new Color(1f, 0.3f, 0.3f, 1f));
         s.add("error", lsError, Label.LabelStyle.class);
 
-        // Requisito cumplido (verde) y pendiente (gris)
         Label.LabelStyle lsOk = new Label.LabelStyle(f, new Color(0.3f, 0.9f, 0.3f, 1f));
         Label.LabelStyle lsNok = new Label.LabelStyle(f, new Color(0.45f, 0.45f, 0.55f, 1f));
         s.add("req-ok", lsOk, Label.LabelStyle.class);
@@ -219,7 +205,6 @@ public class RegisterScreen implements Screen {
         return s;
     }
 
-    // ── Render ────────────────────────────────────────────────────────────────
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0.08f, 0.08f, 0.12f, 1f);
@@ -240,7 +225,6 @@ public class RegisterScreen implements Screen {
         shape.rect(cx - 215, cy - 260, 430, 512);
         shape.end();
 
-        // Titulo (dibujado fuera del stage para mantener posicion exacta)
         batch.begin();
         font.setColor(Color.WHITE);
         GlyphLayout titulo = new GlyphLayout(font, "SOKOBAN");
@@ -255,7 +239,6 @@ public class RegisterScreen implements Screen {
         stage.draw();
     }
 
-    // ── Requisitos ────────────────────────────────────────────────────────────
     private void actualizarRequisitos(String clave) {
         boolean len = clave.length() >= 8;
         boolean may = false, num = false, sim = false;
@@ -281,7 +264,6 @@ public class RegisterScreen implements Screen {
         lbl.setStyle(skin.get(ok ? "req-ok" : "req-nok", Label.LabelStyle.class));
     }
 
-    // ── Acciones ──────────────────────────────────────────────────────────────
     private void confirmar() {
         String nombre = campoNombre.getText().trim();
         String user = campoUser.getText().trim();

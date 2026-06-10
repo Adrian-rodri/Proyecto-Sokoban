@@ -35,7 +35,6 @@ public class VictoryScreen implements Screen {
     private final double tiempoSegundos;
     private final boolean hayNivelSiguiente;
 
-    // btnSiguiente puede ser null si no hay nivel siguiente
     private TextButton btnSiguiente, btnNiveles, btnMenu;
 
     public VictoryScreen(Main game, int numLevel, int movimientos, double tiempoSegundos, int puntaje) {
@@ -77,7 +76,6 @@ public class VictoryScreen implements Screen {
     }
 
     private void crearBotones() {
-        // Limpiar actores previos si se llama desde resize
         stage.clear();
 
         btnNiveles = new TextButton("Niveles",  skin, "default");
@@ -107,7 +105,6 @@ public class VictoryScreen implements Screen {
 
         Table table = new Table();
         table.setFillParent(true);
-        // Posicionar los botones en la misma zona que antes (cy - 132 ≈ 28% desde abajo)
         table.bottom().center().padBottom(Gdx.graphics.getHeight() * 0.28f);
         if (hayNivelSiguiente)
             table.add(btnSiguiente).width(90).height(30).padRight(12);
@@ -126,7 +123,6 @@ public class VictoryScreen implements Screen {
         float cx = Gdx.graphics.getWidth()  / 2f;
         float cy = Gdx.graphics.getHeight() / 2f;
 
-        // Panel
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.setColor(0.1f, 0.18f, 0.12f, 1f);
         shape.rect(cx - 200, cy - 150, 400, 330);

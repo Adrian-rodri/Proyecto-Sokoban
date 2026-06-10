@@ -42,13 +42,11 @@ public class GameScreen implements Screen {
     private boolean isGanado = false;
     private int numLevel;
 
-    // HUD
     private BitmapFont font;
     private Stage stage;
     private Skin skin;
     private TextButton btnReiniciar, btnSalir;
 
-    // Timer
     private int movimientos = 0;
     private volatile double tiempoSegundos = 0;
     private volatile boolean timerActivo = false;
@@ -85,18 +83,14 @@ public class GameScreen implements Screen {
 
         font = new BitmapFont();
 
-        // --- Scene2D setup ---
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-        // Build a minimal skin programmatically (no atlas file needed)
         skin = crearSkin();
 
-        // Buttons
         btnReiniciar = new TextButton("Reiniciar", skin, "reiniciar");
         btnSalir = new TextButton("Salir", skin, "salir");
 
-        // Listeners
         btnReiniciar.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -114,7 +108,6 @@ public class GameScreen implements Screen {
             }
         });
 
-        // Layout: pin buttons to the top-right corner inside a Table
         Table table = new Table();
         table.setFillParent(true);
         table.top().right().pad(6);
@@ -125,18 +118,13 @@ public class GameScreen implements Screen {
         iniciarTimer();
     }
 
-    // ------------------------------------------------------------------
-    // Build a Skin purely in code, no .json / .atlas required
-    // ------------------------------------------------------------------
     private Skin crearSkin() {
         Skin s = new Skin();
 
-        // Shared font
         BitmapFont btnFont = new BitmapFont();
         btnFont.getData().setScale(0.85f);
         s.add("default-font", btnFont, BitmapFont.class);
 
-        // --- "reiniciar" style ---
         TextButton.TextButtonStyle estiloReiniciar = new TextButton.TextButtonStyle();
         estiloReiniciar.font = btnFont;
         estiloReiniciar.fontColor = new Color(0.8f, 0.8f, 1f, 1f);
@@ -144,7 +132,6 @@ public class GameScreen implements Screen {
         estiloReiniciar.downFontColor = new Color(0.6f, 0.6f, 0.9f, 1f);
         s.add("reiniciar", estiloReiniciar, TextButton.TextButtonStyle.class);
 
-        // --- "salir" style ---
         TextButton.TextButtonStyle estiloSalir = new TextButton.TextButtonStyle();
         estiloSalir.font = btnFont;
         estiloSalir.fontColor = new Color(1f, 0.6f, 0.6f, 1f);
@@ -155,7 +142,6 @@ public class GameScreen implements Screen {
         return s;
     }
 
-    // ------------------------------------------------------------------
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
@@ -169,7 +155,6 @@ public class GameScreen implements Screen {
 
         dibujarHUD();
 
-        // Scene2D handles input and draws the buttons
         stage.act(delta);
         stage.draw();
 
@@ -234,7 +219,6 @@ public class GameScreen implements Screen {
         int sw = Gdx.graphics.getWidth();
         int sh = Gdx.graphics.getHeight();
 
-        // Background bar
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.setColor(0.07f, 0.07f, 0.13f, 0.95f);
         shape.rect(0, sh - HUD_H, sw, HUD_H);
@@ -244,7 +228,6 @@ public class GameScreen implements Screen {
         shape.line(0, sh - HUD_H, sw, sh - HUD_H);
         shape.end();
 
-        // Text info
         String nombreNivel = nivelActual.getName().replace(".txt", "");
         int mins = (int) (tiempoSegundos / 60);
         int segs = (int) (tiempoSegundos % 60);
@@ -262,9 +245,6 @@ public class GameScreen implements Screen {
         batch.end();
     }
 
-    // ------------------------------------------------------------------
-    // Timer
-    // ------------------------------------------------------------------
     private void iniciarTimer() {
         timerActivo = true;
         hiloTimer = new Thread(new Runnable() {
@@ -295,9 +275,6 @@ public class GameScreen implements Screen {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Screen lifecycle
-    // ------------------------------------------------------------------
     @Override
     public void resize(int w, int h) {
         camera.viewportWidth = w;

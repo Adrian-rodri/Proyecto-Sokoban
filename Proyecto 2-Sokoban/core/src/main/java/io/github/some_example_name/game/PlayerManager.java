@@ -137,6 +137,9 @@ public class PlayerManager implements Gestionable<Player>{
             System.out.println("Error: "+e.getMessage());
         }
     }
+    public boolean existeUsuario(String userName){
+        return arrayUsernames.contains(userName);
+    }
     private void crearArchivosNuevos(String userName,String nombreCompleto){
         try{
             File playerFiles= new File("users/"+userName);

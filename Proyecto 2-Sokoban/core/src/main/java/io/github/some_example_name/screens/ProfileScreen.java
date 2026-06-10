@@ -107,8 +107,7 @@ public class ProfileScreen implements Screen {
 
         Player p = game.playerManager.getPlayerLogeado();
         float panelH = 400, panelW = 350;
-
-        // Panel izquierdo: perfil
+        
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.setColor(0.13f, 0.13f, 0.2f, 1f);
         shape.rect(cx - panelW - 20, cy - panelH / 2f, panelW, panelH);
@@ -118,7 +117,6 @@ public class ProfileScreen implements Screen {
         shape.rect(cx - panelW - 20, cy - panelH / 2f, panelW, panelH);
         shape.end();
 
-        // Panel derecho: ranking
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.setColor(0.13f, 0.13f, 0.2f, 1f);
         shape.rect(cx + 20, cy - panelH / 2f, panelW, panelH);
@@ -130,7 +128,6 @@ public class ProfileScreen implements Screen {
 
         batch.begin();
 
-        // Titulos
         font.setColor(Color.WHITE);
         GlyphLayout tp = new GlyphLayout(font, "Perfil");
         font.draw(batch, "Perfil",
@@ -139,7 +136,6 @@ public class ProfileScreen implements Screen {
         font.draw(batch, "Ranking",
                 cx + 20 + panelW / 2f - tr.width / 2f, cy + panelH / 2f + 22);
 
-        // Panel de perfil
         if (p != null) {
             float lx = cx - panelW - 10;
             float ly = cy + panelH / 2f - 18;
@@ -177,7 +173,6 @@ public class ProfileScreen implements Screen {
             }
         }
 
-        // Panel de ranking
         float rx = cx + 30;
         float ry = cy + panelH / 2f - 18;
         int top = Math.min(10, ranking.size());

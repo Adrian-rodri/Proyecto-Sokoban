@@ -118,7 +118,6 @@ public class RecordsScreen implements Screen {
         float cx = Gdx.graphics.getWidth() / 2f;
         float cy = Gdx.graphics.getHeight() / 2f;
 
-        // Panel
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.setColor(0.13f, 0.13f, 0.2f, 1f);
         shape.rect(cx - 280, cy - 235, 560, 475);
