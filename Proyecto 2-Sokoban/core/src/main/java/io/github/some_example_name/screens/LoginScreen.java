@@ -3,19 +3,13 @@ package io.github.some_example_name.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import io.github.some_example_name.Main;
 
 public class LoginScreen implements Screen {
@@ -23,8 +17,6 @@ public class LoginScreen implements Screen {
     private final Main game;
     private Stage stage;
     private Skin skin;
-
-    private Texture texPanel, texField, texFieldActive, texBtn, texBtnHover, texPixel;
 
     private Label lblError;
     private float errorTimer = 0f;
@@ -38,101 +30,24 @@ public class LoginScreen implements Screen {
         this.game = game;
     }
 
-    private Texture crearTextura(int w, int h, Color color) {
-        Pixmap p = new Pixmap(w, h, Pixmap.Format.RGBA8888);
-        p.setColor(color);
-        p.fill();
-        Texture t = new Texture(p);
-        p.dispose();
-        return t;
-    }
-
-    private Texture crearTexturaBorde(int w, int h, Color fondo, Color borde, int grosor) {
-        Pixmap p = new Pixmap(w, h, Pixmap.Format.RGBA8888);
-        p.setColor(fondo);
-        p.fill();
-        p.setColor(borde);
-        for (int i = 0; i < grosor; i++) {
-            p.drawRectangle(i, i, w - i * 2, h - i * 2);
-        }
-        Texture t = new Texture(p);
-        p.dispose();
-        return t;
-    }
-
-    private Skin construirSkin() {
-        Skin s = new Skin();
-
-        BitmapFont font = new BitmapFont();
-        font.getData().setScale(1f);
-        s.add("default-font", font);
-
-        Color cFondo = new Color(0.13f, 0.13f, 0.20f, 1f);
-        Color cCampo = new Color(0.07f, 0.07f, 0.16f, 1f);
-        Color cCampoActivo = new Color(0.10f, 0.10f, 0.22f, 1f);
-        Color cBorde = new Color(0.24f, 0.24f, 0.38f, 1f);
-        Color cBordeActivo = new Color(0.44f, 0.44f, 0.67f, 1f);
-        Color cBoton = new Color(0.17f, 0.17f, 0.27f, 1f);
-        Color cBotonHover = new Color(0.21f, 0.21f, 0.35f, 1f);
-
-        texField = crearTexturaBorde(16, 16, cCampo, cBorde, 1);
-        texFieldActive = crearTexturaBorde(16, 16, cCampoActivo, cBordeActivo, 1);
-        texBtn = crearTexturaBorde(16, 16, cBoton, cBorde, 1);
-        texBtnHover = crearTexturaBorde(16, 16, cBotonHover, cBordeActivo, 1);
-        texPanel = crearTexturaBorde(16, 16, cFondo, cBorde, 1);
-        texPixel = crearTextura(1, 1, Color.CLEAR);
-
-        NinePatchDrawable npField = new NinePatchDrawable(new NinePatch(texField, 4, 4, 4, 4));
-        NinePatchDrawable npFieldActive = new NinePatchDrawable(new NinePatch(texFieldActive, 4, 4, 4, 4));
-        NinePatchDrawable npBtn = new NinePatchDrawable(new NinePatch(texBtn, 4, 4, 4, 4));
-        NinePatchDrawable npBtnHover = new NinePatchDrawable(new NinePatch(texBtnHover, 4, 4, 4, 4));
-        NinePatchDrawable npClear = new NinePatchDrawable(new NinePatch(texPixel, 0, 0, 0, 0));
-
-        TextField.TextFieldStyle tsField = new TextField.TextFieldStyle();
-        tsField.font = font;
-        tsField.fontColor = new Color(0.88f, 0.88f, 0.97f, 1f);
-        tsField.background = npField;
-        tsField.focusedBackground = npFieldActive;
-        tsField.cursor = new TextureRegionDrawable(new TextureRegion(crearTextura(2, 20, Color.WHITE)));
-        tsField.selection = new TextureRegionDrawable(new TextureRegion(crearTextura(1, 1, new Color(0.4f, 0.4f, 0.8f, 0.5f))));
-        tsField.messageFontColor = new Color(0.5f, 0.5f, 0.7f, 1f);
-        s.add("default", tsField, TextField.TextFieldStyle.class);
-
-        TextButton.TextButtonStyle tbStyle = new TextButton.TextButtonStyle();
-        tbStyle.font = font;
-        tbStyle.fontColor = new Color(0.75f, 0.75f, 0.91f, 1f);
-        tbStyle.up = npBtn;
-        tbStyle.over = npBtnHover;
-        tbStyle.down = npBtnHover;
-        s.add("default", tbStyle, TextButton.TextButtonStyle.class);
-
-        Label.LabelStyle lsWhite = new Label.LabelStyle(font, Color.WHITE);
-        Label.LabelStyle lsMuted = new Label.LabelStyle(font, new Color(0.56f, 0.56f, 0.72f, 1f));
-        Label.LabelStyle lsError = new Label.LabelStyle(font, new Color(1f, 0.37f, 0.37f, 1f));
-        s.add("default", lsWhite, Label.LabelStyle.class);
-        s.add("muted", lsMuted, Label.LabelStyle.class);
-        s.add("error", lsError, Label.LabelStyle.class);
-
-        Window.WindowStyle wsPanel = new Window.WindowStyle();
-        wsPanel.titleFont = font;
-        wsPanel.titleFontColor = Color.CLEAR;
-        wsPanel.background = new NinePatchDrawable(new NinePatch(texPanel, 4, 4, 4, 4));
-        s.add("default", wsPanel, Window.WindowStyle.class);
-
-        return s;
-    }
-
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
-        skin = construirSkin();
+        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/skin/ui/sgx-ui.atlas"));
+        skin = new Skin(Gdx.files.internal("ui/skin/ui/sgx-ui.json"), atlas);
+
+        Label.LabelStyle mutedStyle = new Label.LabelStyle(skin.getFont("small"),
+                new Color(0.56f, 0.56f, 0.72f, 1f));
+        Label.LabelStyle errorStyle = new Label.LabelStyle(skin.getFont("small"),
+                new Color(1f, 0.37f, 0.37f, 1f));
+        skin.add("muted", mutedStyle, Label.LabelStyle.class);
+        skin.add("error", errorStyle, Label.LabelStyle.class);
 
         Window panel = new Window("", skin);
         panel.setMovable(false);
         panel.pad(28f, 32f, 24f, 32f);
 
-        lblTitulo = new Label("SOKOBAN", skin);
-        lblTitulo.setStyle(new Label.LabelStyle(skin.getFont("default-font"), Color.WHITE));
+        lblTitulo = new Label("SOKOBAN", skin, "title-white");
         lblTitulo.setFontScale(1.4f);
 
         lblSubtitulo = new Label("Iniciar Sesion", skin, "muted");
@@ -145,8 +60,8 @@ public class LoginScreen implements Screen {
         campoClave.setPasswordMode(true);
         campoClave.setPasswordCharacter('*');
 
-        btnIngresar = new TextButton("Ingresar", skin);
-        btnRegistro = new TextButton("Registrarse", skin);
+        btnIngresar = new TextButton("Ingresar", skin, "default");
+        btnRegistro = new TextButton("Registrarse", skin, "default");
 
         lblError = new Label("", skin, "error");
 
@@ -184,21 +99,21 @@ public class LoginScreen implements Screen {
 
         btnIngresar.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent e, Actor a) {
+            public void changed(ChangeListener.ChangeEvent e, Actor a) {
                 onIngresar();
             }
         });
 
         btnRegistro.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent e, Actor a) {
+            public void changed(ChangeListener.ChangeEvent e, Actor a) {
                 onRegistro();
             }
         });
 
         btnIdioma.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent e, Actor a) {
+            public void changed(ChangeListener.ChangeEvent e, Actor a) {
                 cambiarIdioma();
             }
         });
@@ -211,7 +126,6 @@ public class LoginScreen implements Screen {
             mostrarError(esEspanol ? "Completa todos los campos" : "Fill in all fields");
             return;
         }
-        System.out.println("[Login] intentando con usuario: " + user);
         boolean loginExitoso = game.playerManager.logIn(user, clave);
         if (loginExitoso) {
             game.setScreen(new MenuScreen(game));
@@ -222,20 +136,18 @@ public class LoginScreen implements Screen {
     }
 
     private void onRegistro() {
-        System.out.println("[Registro] ir a pantalla de registro");
         game.setScreen(new RegisterScreen(game));
     }
 
     private void cambiarIdioma() {
         esEspanol = !esEspanol;
-        System.out.println("[Idioma] cambiado a: " + (esEspanol ? "Español" : "English"));
 
         lblSubtitulo.setText(esEspanol ? "Iniciar Sesion" : "Log In");
         lblUsuario.setText(esEspanol ? "Usuario" : "Username");
         lblContrasena.setText(esEspanol ? "Contrasena" : "Password");
         btnIngresar.setText(esEspanol ? "Ingresar" : "Log In");
         btnRegistro.setText(esEspanol ? "Registrarse" : "Sign Up");
-        btnIdioma.setText(esEspanol ? "English" : "Español");
+        btnIdioma.setText(esEspanol ? "English" : "Espanol");
     }
 
     private void mostrarError(String msg) {
@@ -280,11 +192,5 @@ public class LoginScreen implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
-        texPanel.dispose();
-        texField.dispose();
-        texFieldActive.dispose();
-        texBtn.dispose();
-        texBtnHover.dispose();
-        texPixel.dispose();
     }
 }

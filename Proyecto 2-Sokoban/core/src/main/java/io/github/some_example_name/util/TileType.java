@@ -20,7 +20,7 @@ public enum TileType {
     public TextureRegion getTexture(){
         if(textura==null){
             if(sheetTiles==null)
-                sheetTiles= new Texture("sheetTiles.png");
+                sheetTiles= new Texture("texturas/sheetTiles.png");
             int x= columna*PIXELS_TILE;
             int y= fila*PIXELS_TILE;
             textura= new TextureRegion(sheetTiles,x,y,PIXELS_TILE,PIXELS_TILE);

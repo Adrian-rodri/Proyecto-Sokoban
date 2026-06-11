@@ -1,6 +1,7 @@
 package io.github.some_example_name.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -24,6 +25,7 @@ import io.github.some_example_name.game.Nivel;
 import io.github.some_example_name.game.NivelManager;
 import io.github.some_example_name.model.Player;
 import io.github.some_example_name.util.TileType;
+import io.github.some_example_name.screens.VictoryScreen;
 
 public class GameScreen implements Screen {
 
@@ -64,13 +66,13 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch = new SpriteBatch();
-        image = new Texture("fondo.png");
-        playerSheet = new Texture("playerSheet.png");
-        sheetTiles = new Texture("sheetTiles.png");
-        wall = new TextureRegion(sheetTiles, 0, 2 * 80, 80, 80);
-        box = new TextureRegion(sheetTiles, 1 * 80, 1 * 80, 80, 80);
-        piso = new TextureRegion(sheetTiles, 2 * 80, 0, 80, 80);
-        objetivo = new TextureRegion(sheetTiles, 3 * 80, 1 * 80, 80, 80);
+        image = new Texture("texturas/fondo.png");
+        playerSheet = new Texture("texturas/playerSheet.png");
+//        sheetTiles = new Texture("texturas/sheetTiles.png");
+//        //wall = new TextureRegion(sheetTiles, 0, 2 * 80, 80, 80);
+//        box = new TextureRegion(sheetTiles, 1 * 80, 1 * 80, 80, 80);
+//        piso = new TextureRegion(sheetTiles, 2 * 80, 0, 80, 80);
+//        objetivo = new TextureRegion(sheetTiles, 3 * 80, 1 * 80, 80, 80);
         shape = new ShapeRenderer();
         player = new Player(0, 0);
         player.cargarSprites(playerSheet, playerSheet, playerSheet);
@@ -93,7 +95,7 @@ public class GameScreen implements Screen {
 
         btnReiniciar.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, Actor actor) {
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
                 nivelActual.reiniciar();
                 GameScreen.initPlayer = false;
             }
@@ -101,7 +103,7 @@ public class GameScreen implements Screen {
 
         btnSalir.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, Actor actor) {
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
                 detenerTimer();
                 game.setScreen(new MenuScreen(game));
                 dispose();
@@ -205,14 +207,34 @@ public class GameScreen implements Screen {
     }
 
     private void logic() {
-        player.tecladoInput(nivelActual);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+            nivelActual.reiniciar();
+            movimientos = 0;
+            tiempoSegundos = 0;
+            GameScreen.initPlayer = false;
+            player.copias.clear();
+        }
+
+        int resultado = player.tecladoInput(nivelActual);
+        if (resultado == 1) {
+            movimientos++;
+        } else if (resultado == -1 && movimientos > 0) {
+            movimientos--;
+        }
         if (nivelActual.nivelCompletado() && !isGanado) {
-            System.out.println("Ganaste");
             isGanado = true;
             detenerTimer();
-            game.setScreen(new MenuScreen(game));
+            int puntaje = calcularPuntaje();
+            game.playerManager.actualizarTrasPartida(numLevel, movimientos, tiempoSegundos, puntaje);
+            game.setScreen(new VictoryScreen(game, numLevel, movimientos, tiempoSegundos, puntaje));
             dispose();
         }
+    }
+
+    private int calcularPuntaje() {
+        int puntajeBase = 200 * (numLevel + 1) - movimientos;
+        int puntajeTiempo = Math.max(0, 30 - (int) tiempoSegundos) * 2;
+        return Math.max(10, puntajeBase + puntajeTiempo);
     }
 
     private void dibujarHUD() {
@@ -228,7 +250,7 @@ public class GameScreen implements Screen {
         shape.line(0, sh - HUD_H, sw, sh - HUD_H);
         shape.end();
 
-        String nombreNivel = nivelActual.getName().replace(".txt", "");
+        String nombreNivel = (numLevel == 0) ? "Tutorial" : "Nivel " + numLevel;
         int mins = (int) (tiempoSegundos / 60);
         int segs = (int) (tiempoSegundos % 60);
         String timer = String.format("%02d:%02d", mins, segs);
@@ -304,7 +326,6 @@ public class GameScreen implements Screen {
         batch.dispose();
         image.dispose();
         shape.dispose();
-        sheetTiles.dispose();
         playerSheet.dispose();
         font.dispose();
         stage.dispose();

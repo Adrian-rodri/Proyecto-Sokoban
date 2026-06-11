@@ -17,7 +17,7 @@ import java.util.Calendar;
  */
 public class PlayerManager implements Gestionable<Player>{
     private ArrayList<String> arrayUsernames= new ArrayList<>();
-    private File usersFile= new File("users.skb");
+    private File usersFile= new File("users/users.skb");
     private Player playerLogeado=null;
     
     

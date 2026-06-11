@@ -108,15 +108,10 @@ public class Player {
         this.spriteFila = 0;
     }
 
-    public void tecladoInput(Nivel nivelActual) {
+    public int tecladoInput(Nivel nivelActual) {
         char[][] level = nivelActual.getLevel();
         int dirX = 0, dirY = 0;
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-            nivelActual.reiniciar();
-            //level=nivelActual.getLevel();
-            GameScreen.initPlayer = false;
-        }
         //undo
         if (Gdx.input.isKeyJustPressed(Input.Keys.U)) {
             if (!copias.isEmpty()) {
@@ -129,6 +124,7 @@ public class Player {
                 spriteCol = estado.spriteCol;
                 spriteFila = estado.spriteFila;
                 level = estado.matriz;
+                return -1;
             }
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
@@ -172,6 +168,7 @@ public class Player {
                     copias.add(new EstadoTurno(nivelActual.copiarLevel(level), x, y, spriteCol, spriteFila));
                     x += dirX * Constantes.TILE_SIZE;
                     y += dirY * Constantes.TILE_SIZE;
+                    return 1;
                     //empujar una caja
                 } else if (destino == 'b' || destino == 'B') {
                     int cajaFila = predictFila - dirY;
@@ -196,6 +193,7 @@ public class Player {
 
                             this.x += dirX * Constantes.TILE_SIZE;
                             this.y += dirY * Constantes.TILE_SIZE;
+                            return 1;
 
                         }
                     }
@@ -203,6 +201,7 @@ public class Player {
             }
 
         }
+        return 0;
     }
 
     public void dibujarPlayer(ShapeRenderer shape) {//metodo temporal-> dibujar un cuadrado en lugar de imagen
