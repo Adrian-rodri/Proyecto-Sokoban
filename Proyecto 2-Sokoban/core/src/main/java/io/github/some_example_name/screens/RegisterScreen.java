@@ -109,9 +109,24 @@ public class RegisterScreen implements Screen {
         panel.add(lblSubtitulo).colspan(2).center().padBottom(20).row();
         panel.add(campoNombre).colspan(2).width(fw).height(fh).padBottom(12).row();
         panel.add(campoUser).colspan(2).width(fw).height(fh).padBottom(12).row();
-        panel.add(campoClave).colspan(2).width(fw).height(fh).padBottom(4).row();
+        TextButton btnVerPass = new TextButton("Ver", skin, "small");
+        Table claveRow = new Table();
+        claveRow.add(campoClave).expandX().fillX().height(fh);
+        claveRow.add(btnVerPass).width(48).height(fh).padLeft(6);
+        panel.add(claveRow).colspan(2).fillX().padBottom(4).row();
+
         panel.add(tablaRequisitos).colspan(2).width(fw).padBottom(6).row();
         panel.add(campoConfirm).colspan(2).width(fw).height(fh).padBottom(10).row();
+
+        btnVerPass.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                boolean oculto = campoClave.isPasswordMode();
+                campoClave.setPasswordMode(!oculto);
+                campoConfirm.setPasswordMode(!oculto);
+                btnVerPass.setText(oculto ? "Ocultar" : "Ver");
+            }
+        });
         panel.add(lblError).colspan(2).width(fw).padBottom(8).row();
 
         Table btnRow = new Table();

@@ -23,7 +23,7 @@ public class LoginScreen implements Screen {
 
     private boolean esEspanol = true;
     private Label lblTitulo, lblSubtitulo, lblUsuario, lblContrasena;
-    private TextButton btnIngresar, btnRegistro, btnIdioma;
+    private TextButton btnIngresar, btnRegistro, btnIdioma, btnVerClave;
     private TextField campoUser, campoClave;
 
     public LoginScreen(Main game) {
@@ -36,11 +36,8 @@ public class LoginScreen implements Screen {
         TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/skin/ui/sgx-ui.atlas"));
         skin = new Skin(Gdx.files.internal("ui/skin/ui/sgx-ui.json"), atlas);
 
-        Label.LabelStyle mutedStyle = new Label.LabelStyle(skin.getFont("small"),
-                new Color(0.56f, 0.56f, 0.72f, 1f));
-        Label.LabelStyle errorStyle = new Label.LabelStyle(skin.getFont("small"),
+        Label.LabelStyle errorStyle = new Label.LabelStyle(skin.getFont("font"),
                 new Color(1f, 0.37f, 0.37f, 1f));
-        skin.add("muted", mutedStyle, Label.LabelStyle.class);
         skin.add("error", errorStyle, Label.LabelStyle.class);
 
         Window panel = new Window("", skin);
@@ -48,12 +45,11 @@ public class LoginScreen implements Screen {
         panel.pad(28f, 32f, 24f, 32f);
 
         lblTitulo = new Label("SOKOBAN", skin, "title-white");
-        lblTitulo.setFontScale(1.4f);
 
-        lblSubtitulo = new Label("Iniciar Sesion", skin, "muted");
+        lblSubtitulo = new Label("Iniciar Sesion", skin, "medium-white");
 
-        lblUsuario = new Label("Usuario", skin, "muted");
-        lblContrasena = new Label("Contrasena", skin, "muted");
+        lblUsuario = new Label("Usuario", skin, "small-white");
+        lblContrasena = new Label("Contrasena", skin, "small-white");
 
         campoUser = new TextField("", skin);
         campoClave = new TextField("", skin);
@@ -72,7 +68,23 @@ public class LoginScreen implements Screen {
         panel.add(campoUser).colspan(2).width(280).height(32).padBottom(14).row();
 
         panel.add(lblContrasena).colspan(2).left().padBottom(4).row();
-        panel.add(campoClave).colspan(2).width(280).height(32).padBottom(22).row();
+
+        btnVerClave = new TextButton("Ver", skin, "small");
+        Table claveRow = new Table();
+        claveRow.add(campoClave).expandX().fillX().height(32);
+        claveRow.add(btnVerClave).width(50).height(32).padLeft(6);
+        panel.add(claveRow).colspan(2).fillX().padBottom(22).row();
+
+        btnVerClave.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                boolean oculto = campoClave.isPasswordMode();
+                campoClave.setPasswordMode(!oculto);
+                btnVerClave.setText(oculto
+                        ? (esEspanol ? "Ocultar" : "Hide")
+                        : (esEspanol ? "Ver" : "Show"));
+            }
+        });
 
         panel.add(btnIngresar).width(130).height(32).padRight(10);
         panel.add(btnRegistro).width(130).height(32).row();
@@ -148,6 +160,9 @@ public class LoginScreen implements Screen {
         btnIngresar.setText(esEspanol ? "Ingresar" : "Log In");
         btnRegistro.setText(esEspanol ? "Registrarse" : "Sign Up");
         btnIdioma.setText(esEspanol ? "English" : "Espanol");
+        btnVerClave.setText(campoClave.isPasswordMode()
+                ? (esEspanol ? "Ver" : "Show")
+                : (esEspanol ? "Ocultar" : "Hide"));
     }
 
     private void mostrarError(String msg) {
