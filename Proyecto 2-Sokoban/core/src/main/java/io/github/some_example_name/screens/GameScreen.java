@@ -53,8 +53,7 @@ public class GameScreen implements Screen {
     private Thread hiloTimer;
 
     private static final int HUD_H = 36;
-
-    // ── Panel y centrado ──
+    
     private int offsetX, offsetY;
     private int boardW, boardH;
     private static final int PANEL_PAD = 10;
@@ -77,9 +76,9 @@ public class GameScreen implements Screen {
         boardW = cols * Constantes.TILE_SIZE;
         boardH = rows * Constantes.TILE_SIZE;
 
-        // Espacio disponible: debajo del HUD hasta el borde inferior
-        int areaY = winH - HUD_H;               // pixeles disponibles en Y
-        int areaX = winW;                        // pixeles disponibles en X
+        
+        int areaY = winH - HUD_H;
+        int areaX = winW;
 
         offsetX = Math.max(PANEL_PAD, (areaX - boardW) / 2);
         offsetY = Math.max(PANEL_PAD, (areaY - boardH) / 2);
@@ -137,7 +136,6 @@ public class GameScreen implements Screen {
             }
         });
 
-        // ── HUD: barra superior con Labels + botones ──
         lblInfo = new Label("", skin, "small-white");
         lblStats = new Label("", skin, "small-white");
 
@@ -172,15 +170,14 @@ public class GameScreen implements Screen {
                 boardW + PANEL_PAD * 2, boardH + PANEL_PAD * 2);
         shape.end();
 
-        // ── Tablero ──
+        
         batch.begin();
         dibujarTexturas(batch);
         batch.end();
-
-        // ── HUD ──
+        
         dibujarBarraHUD();
 
-        // Actualizar Labels cada frame
+        //actualizar Labels cada frame
         String nombreNivel = (numLevel == 0) ? "Tutorial" : "Nivel " + numLevel;
         int mins = (int) (tiempoSegundos / 60);
         int segs = (int) (tiempoSegundos % 60);

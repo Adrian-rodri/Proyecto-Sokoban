@@ -1,7 +1,6 @@
 package io.github.some_example_name.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -13,15 +12,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.some_example_name.Main;
 
-public class RegisterScreen implements Screen {
-
-    private final Main game;
-    private Stage stage;
-    private Skin skin;
+public class RegisterScreen extends BaseScreen {
 
     private TextField campoNombre, campoUser, campoClave, campoConfirm;
     private Label lblError;
@@ -29,7 +23,7 @@ public class RegisterScreen implements Screen {
     private Table tablaRequisitos;
 
     public RegisterScreen(Main game) {
-        this.game = game;
+        super(game);
     }
 
     @Override
@@ -38,9 +32,12 @@ public class RegisterScreen implements Screen {
         TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/skin/ui/sgx-ui.atlas"));
         skin = new Skin(Gdx.files.internal("ui/skin/ui/sgx-ui.json"), atlas);
 
-        Label.LabelStyle lsError = new Label.LabelStyle(skin.getFont("small"), new Color(1f, 0.3f, 0.3f, 1f));
-        Label.LabelStyle lsOk = new Label.LabelStyle(skin.getFont("small"), new Color(0.3f, 0.9f, 0.3f, 1f));
-        Label.LabelStyle lsNok = new Label.LabelStyle(skin.getFont("small"), new Color(0.55f, 0.55f, 0.70f, 1f));
+        Label.LabelStyle lsError = new Label.LabelStyle(skin.getFont("small"),
+                new Color(1f, 0.3f, 0.3f, 1f));
+        Label.LabelStyle lsOk = new Label.LabelStyle(skin.getFont("small"),
+                new Color(0.3f, 0.9f, 0.3f, 1f));
+        Label.LabelStyle lsNok = new Label.LabelStyle(skin.getFont("small"),
+                new Color(0.55f, 0.55f, 0.70f, 1f));
         skin.add("error", lsError, Label.LabelStyle.class);
         skin.add("req-ok", lsOk, Label.LabelStyle.class);
         skin.add("req-nok", lsNok, Label.LabelStyle.class);
@@ -109,6 +106,7 @@ public class RegisterScreen implements Screen {
         panel.add(lblSubtitulo).colspan(2).center().padBottom(20).row();
         panel.add(campoNombre).colspan(2).width(fw).height(fh).padBottom(12).row();
         panel.add(campoUser).colspan(2).width(fw).height(fh).padBottom(12).row();
+
         TextButton btnVerPass = new TextButton("Ver", skin, "small");
         Table claveRow = new Table();
         claveRow.add(campoClave).expandX().fillX().height(fh);
@@ -127,6 +125,7 @@ public class RegisterScreen implements Screen {
                 btnVerPass.setText(oculto ? "Ocultar" : "Ver");
             }
         });
+
         panel.add(lblError).colspan(2).width(fw).padBottom(8).row();
 
         Table btnRow = new Table();
@@ -144,10 +143,12 @@ public class RegisterScreen implements Screen {
     }
 
     @Override
+    protected void buildUI() {
+    }
+
+    @Override
     public void render(float delta) {
-        ScreenUtils.clear(0.08f, 0.08f, 0.12f, 1f);
-        stage.act(delta);
-        stage.draw();
+        super.render(delta);
     }
 
     private void actualizarRequisitos(String clave) {
@@ -164,13 +165,13 @@ public class RegisterScreen implements Screen {
                 sim = true;
             }
         }
-        setReq(lblReqLen, len, "Min 8 caracteres", "Min 8 caracteres");
-        setReq(lblReqMay, may, "Una mayuscula", "Una mayuscula");
-        setReq(lblReqNum, num, "Un numero", "Un numero");
-        setReq(lblReqSim, sim, "Un simbolo", "Un simbolo");
+        setRequisito(lblReqLen, len, "Min 8 caracteres", "Min 8 caracteres");
+        setRequisito(lblReqMay, may, "Una mayuscula", "Una mayuscula");
+        setRequisito(lblReqNum, num, "Un numero", "Un numero");
+        setRequisito(lblReqSim, sim, "Un simbolo", "Un simbolo");
     }
 
-    private void setReq(Label lbl, boolean ok, String txtOk, String txtNok) {
+    private void setRequisito(Label lbl, boolean ok, String txtOk, String txtNok) {
         lbl.setText(ok ? txtOk : txtNok);
         lbl.setStyle(skin.get(ok ? "req-ok" : "req-nok", Label.LabelStyle.class));
     }
@@ -224,29 +225,5 @@ public class RegisterScreen implements Screen {
             }
         }
         return u && d && s;
-    }
-
-    @Override
-    public void resize(int w, int h) {
-        stage.getViewport().update(w, h, true);
-    }
-
-    @Override
-    public void pause() {
-    }
-
-    @Override
-    public void resume() {
-    }
-
-    @Override
-    public void hide() {
-        Gdx.input.setInputProcessor(null);
-    }
-
-    @Override
-    public void dispose() {
-        stage.dispose();
-        skin.dispose();
     }
 }
