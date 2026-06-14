@@ -3,15 +3,14 @@ package io.github.some_example_name.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -25,14 +24,13 @@ import io.github.some_example_name.game.Nivel;
 import io.github.some_example_name.game.NivelManager;
 import io.github.some_example_name.model.Player;
 import io.github.some_example_name.util.TileType;
-import io.github.some_example_name.screens.VictoryScreen;
 
 public class GameScreen implements Screen {
 
     private final Main game;
 
     private SpriteBatch batch;
-    private Texture image, playerSheet, sheetTiles;
+    private Texture playerSheet, sheetTiles;
     private TextureRegion wall, box, objetivo, piso;
     private ShapeRenderer shape;
     private Player player;
@@ -44,10 +42,10 @@ public class GameScreen implements Screen {
     private boolean isGanado = false;
     private int numLevel;
 
-    private BitmapFont font;
     private Stage stage;
     private Skin skin;
     private TextButton btnReiniciar, btnSalir;
+    private Label lblInfo, lblStats;
 
     private int movimientos = 0;
     private volatile double tiempoSegundos = 0;
@@ -56,9 +54,35 @@ public class GameScreen implements Screen {
 
     private static final int HUD_H = 36;
 
+    // ── Panel y centrado ──
+    private int offsetX, offsetY;
+    private int boardW, boardH;
+    private static final int PANEL_PAD = 10;
+
     public GameScreen(Main game, int numLevel) {
         this.game = game;
         this.numLevel = numLevel;
+    }
+
+    private void calcularOffsets() {
+        int winW = Gdx.graphics.getWidth();
+        int winH = Gdx.graphics.getHeight();
+
+        char[][] level = nivelActual.getLevel();
+        int cols = 0;
+        for (char[] fila : level) {
+            if (fila.length > cols) cols = fila.length;
+        }
+        int rows = level.length;
+        boardW = cols * Constantes.TILE_SIZE;
+        boardH = rows * Constantes.TILE_SIZE;
+
+        // Espacio disponible: debajo del HUD hasta el borde inferior
+        int areaY = winH - HUD_H;               // pixeles disponibles en Y
+        int areaX = winW;                        // pixeles disponibles en X
+
+        offsetX = Math.max(PANEL_PAD, (areaX - boardW) / 2);
+        offsetY = Math.max(PANEL_PAD, (areaY - boardH) / 2);
     }
 
     @Override
@@ -66,13 +90,12 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch = new SpriteBatch();
-        image = new Texture("texturas/fondo.png");
         playerSheet = new Texture("texturas/playerSheet.png");
-//        sheetTiles = new Texture("texturas/sheetTiles.png");
-//        //wall = new TextureRegion(sheetTiles, 0, 2 * 80, 80, 80);
-//        box = new TextureRegion(sheetTiles, 1 * 80, 1 * 80, 80, 80);
-//        piso = new TextureRegion(sheetTiles, 2 * 80, 0, 80, 80);
-//        objetivo = new TextureRegion(sheetTiles, 3 * 80, 1 * 80, 80, 80);
+        sheetTiles = new Texture("texturas/sheetTiles.png");
+        wall = new TextureRegion(sheetTiles, 0, 2 * 80, 80, 80);
+        box = new TextureRegion(sheetTiles, 1 * 80, 1 * 80, 80, 80);
+        piso = new TextureRegion(sheetTiles, 2 * 80, 0, 80, 80);
+        objetivo = new TextureRegion(sheetTiles, 3 * 80, 1 * 80, 80, 80);
         shape = new ShapeRenderer();
         player = new Player(0, 0);
         player.cargarSprites(playerSheet, playerSheet, playerSheet);
@@ -83,21 +106,25 @@ public class GameScreen implements Screen {
         nivelActual = nivelMng.getNivel(numLevel);
         initPlayer = false;
 
-        font = new BitmapFont();
+        calcularOffsets();
 
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-        skin = crearSkin();
+        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/skin/ui/sgx-ui.atlas"));
+        skin = new Skin(Gdx.files.internal("ui/skin/ui/sgx-ui.json"), atlas);
 
-        btnReiniciar = new TextButton("Reiniciar", skin, "reiniciar");
-        btnSalir = new TextButton("Salir", skin, "salir");
+        btnReiniciar = new TextButton("Reiniciar", skin, "small");
+        btnSalir = new TextButton("Salir", skin, "small");
 
         btnReiniciar.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
                 nivelActual.reiniciar();
+                movimientos = 0;
+                tiempoSegundos = 0;
                 GameScreen.initPlayer = false;
+                player.copias.clear();
             }
         });
 
@@ -110,52 +137,56 @@ public class GameScreen implements Screen {
             }
         });
 
-        Table table = new Table();
-        table.setFillParent(true);
-        table.top().right().pad(6);
-        table.add(btnReiniciar).width(90).height(24).padRight(4);
-        table.add(btnSalir).width(90).height(24);
-        stage.addActor(table);
+        // ── HUD: barra superior con Labels + botones ──
+        lblInfo = new Label("", skin, "small-white");
+        lblStats = new Label("", skin, "small-white");
+
+        Table hudBar = new Table();
+        hudBar.setFillParent(true);
+        hudBar.top();
+        hudBar.add(lblInfo).left().pad(8).expandX();
+        hudBar.add(lblStats).center().pad(8).expandX();
+        hudBar.add(btnReiniciar).width(90).height(24).padRight(4);
+        hudBar.add(btnSalir).width(90).height(24);
+        stage.addActor(hudBar);
 
         iniciarTimer();
     }
 
-    private Skin crearSkin() {
-        Skin s = new Skin();
-
-        BitmapFont btnFont = new BitmapFont();
-        btnFont.getData().setScale(0.85f);
-        s.add("default-font", btnFont, BitmapFont.class);
-
-        TextButton.TextButtonStyle estiloReiniciar = new TextButton.TextButtonStyle();
-        estiloReiniciar.font = btnFont;
-        estiloReiniciar.fontColor = new Color(0.8f, 0.8f, 1f, 1f);
-        estiloReiniciar.overFontColor = new Color(1f, 1f, 1f, 1f);
-        estiloReiniciar.downFontColor = new Color(0.6f, 0.6f, 0.9f, 1f);
-        s.add("reiniciar", estiloReiniciar, TextButton.TextButtonStyle.class);
-
-        TextButton.TextButtonStyle estiloSalir = new TextButton.TextButtonStyle();
-        estiloSalir.font = btnFont;
-        estiloSalir.fontColor = new Color(1f, 0.6f, 0.6f, 1f);
-        estiloSalir.overFontColor = new Color(1f, 0.8f, 0.8f, 1f);
-        estiloSalir.downFontColor = new Color(0.8f, 0.3f, 0.3f, 1f);
-        s.add("salir", estiloSalir, TextButton.TextButtonStyle.class);
-
-        return s;
-    }
-
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0f, 0f, 0f, 1f);
+        ScreenUtils.clear(0.04f, 0.04f, 0.07f, 1f);
         camera.update();
         batch.setProjectionMatrix(camera.combined);
         shape.setProjectionMatrix(camera.combined);
 
+        // ── Panel de fondo del tablero ──
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.setColor(0.08f, 0.09f, 0.14f, 1f);
+        shape.rect(offsetX - PANEL_PAD, offsetY - PANEL_PAD,
+                boardW + PANEL_PAD * 2, boardH + PANEL_PAD * 2);
+        shape.end();
+        shape.begin(ShapeRenderer.ShapeType.Line);
+        shape.setColor(0.18f, 0.22f, 0.35f, 1f);
+        shape.rect(offsetX - PANEL_PAD, offsetY - PANEL_PAD,
+                boardW + PANEL_PAD * 2, boardH + PANEL_PAD * 2);
+        shape.end();
+
+        // ── Tablero ──
         batch.begin();
         dibujarTexturas(batch);
         batch.end();
 
-        dibujarHUD();
+        // ── HUD ──
+        dibujarBarraHUD();
+
+        // Actualizar Labels cada frame
+        String nombreNivel = (numLevel == 0) ? "Tutorial" : "Nivel " + numLevel;
+        int mins = (int) (tiempoSegundos / 60);
+        int segs = (int) (tiempoSegundos % 60);
+        String timerStr = String.format("%02d:%02d", mins, segs);
+        lblInfo.setText(game.playerManager.getNombreJugador() + "   " + nombreNivel);
+        lblStats.setText("Movimientos: " + movimientos + "   " + timerStr);
 
         stage.act(delta);
         stage.draw();
@@ -164,11 +195,12 @@ public class GameScreen implements Screen {
     }
 
     private void dibujarTexturas(SpriteBatch batch) {
-        batch.draw(image, 0, 0, 832, 640);
         char[][] level = nivelActual.getLevel();
         for (int i = 0; i < level.length; i++) {
             for (int j = 0; j < level[i].length; j++) {
-                int yPos = (level.length - 1 - i) * Constantes.TILE_SIZE;
+                int drawX = offsetX + j * Constantes.TILE_SIZE;
+                int drawY = offsetY + (level.length - 1 - i) * Constantes.TILE_SIZE;
+
                 switch (level[i][j]) {
                     case '~':
                         tiposTiles = TileType.AIRE;
@@ -180,11 +212,13 @@ public class GameScreen implements Screen {
                         tiposTiles = TileType.WALL;
                         break;
                     case 'B':
-                        batch.draw(TileType.META.getTexture(), j * Constantes.TILE_SIZE, yPos, Constantes.TILE_SIZE, Constantes.TILE_SIZE);
+                        batch.draw(TileType.META.getTexture(), drawX, drawY,
+                                Constantes.TILE_SIZE, Constantes.TILE_SIZE);
                         tiposTiles = TileType.BOX_EN_SU_LUGAR;
                         break;
                     case 'b':
-                        batch.draw(TileType.PISO.getTexture(), j * Constantes.TILE_SIZE, yPos, Constantes.TILE_SIZE, Constantes.TILE_SIZE);
+                        batch.draw(TileType.PISO.getTexture(), drawX, drawY,
+                                Constantes.TILE_SIZE, Constantes.TILE_SIZE);
                         tiposTiles = TileType.BOX;
                         break;
                     case '0':
@@ -195,15 +229,16 @@ public class GameScreen implements Screen {
                         if (!initPlayer) {
                             player.setCabeza(2, 0);
                             player.x = j * Constantes.TILE_SIZE;
-                            player.y = yPos;
+                            player.y = (level.length - 1 - i) * Constantes.TILE_SIZE;
                             initPlayer = true;
                         }
                         break;
                 }
-                batch.draw(tiposTiles.getTexture(), j * Constantes.TILE_SIZE, yPos, Constantes.TILE_SIZE, Constantes.TILE_SIZE);
+                batch.draw(tiposTiles.getTexture(), drawX, drawY,
+                        Constantes.TILE_SIZE, Constantes.TILE_SIZE);
             }
         }
-        player.dibujarPlayer(batch);
+        player.dibujarPlayer(batch, offsetX, offsetY);
     }
 
     private void logic() {
@@ -237,7 +272,7 @@ public class GameScreen implements Screen {
         return Math.max(10, puntajeBase + puntajeTiempo);
     }
 
-    private void dibujarHUD() {
+    private void dibujarBarraHUD() {
         int sw = Gdx.graphics.getWidth();
         int sh = Gdx.graphics.getHeight();
 
@@ -249,22 +284,6 @@ public class GameScreen implements Screen {
         shape.setColor(0.3f, 0.3f, 0.5f, 1f);
         shape.line(0, sh - HUD_H, sw, sh - HUD_H);
         shape.end();
-
-        String nombreNivel = (numLevel == 0) ? "Tutorial" : "Nivel " + numLevel;
-        int mins = (int) (tiempoSegundos / 60);
-        int segs = (int) (tiempoSegundos % 60);
-        String timer = String.format("%02d:%02d", mins, segs);
-        String infoIzq = game.playerManager.getNombreJugador() + "   " + nombreNivel;
-        String infoCentro = "Movimientos: " + movimientos + "   " + timer;
-
-        batch.begin();
-        font.setColor(0.8f, 0.8f, 1f, 1f);
-        font.draw(batch, infoIzq, 10, sh - HUD_H + HUD_H * 0.6f);
-        GlyphLayout gl = new GlyphLayout(font, infoCentro);
-        font.draw(batch, infoCentro,
-                (sw - 200) / 2f - gl.width / 2f,
-                sh - HUD_H + HUD_H * 0.6f);
-        batch.end();
     }
 
     private void iniciarTimer() {
@@ -299,10 +318,9 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int w, int h) {
-        camera.viewportWidth = w;
-        camera.viewportHeight = h;
-        camera.update();
+        camera.setToOrtho(false, w, h);
         stage.getViewport().update(w, h, true);
+        calcularOffsets();
     }
 
     @Override
@@ -324,10 +342,9 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
-        image.dispose();
         shape.dispose();
+        sheetTiles.dispose();
         playerSheet.dispose();
-        font.dispose();
         stage.dispose();
         skin.dispose();
         initPlayer = false;

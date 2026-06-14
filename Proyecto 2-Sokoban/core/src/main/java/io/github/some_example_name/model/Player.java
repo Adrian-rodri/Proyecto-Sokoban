@@ -1,8 +1,5 @@
 package io.github.some_example_name.model;
 
-import io.github.some_example_name.game.EstadoTurno;
-import io.github.some_example_name.game.Nivel;
-import io.github.some_example_name.screens.GameScreen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -10,7 +7,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import io.github.some_example_name.util.Constantes;
 import java.util.ArrayList;
 import io.github.some_example_name.game.EstadoTurno;
 import io.github.some_example_name.game.Nivel;
@@ -124,7 +120,7 @@ public class Player {
                 spriteCol = estado.spriteCol;
                 spriteFila = estado.spriteFila;
                 level = estado.matriz;
-                return -1;
+                return -1; // undo: decrementar contador
             }
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
@@ -209,9 +205,9 @@ public class Player {
         shape.rect(x, y, Constantes.TILE_SIZE, Constantes.TILE_SIZE);
     }
 
-    public void dibujarPlayer(SpriteBatch batch) {
+    public void dibujarPlayer(SpriteBatch batch, int offsetX, int offsetY) {
         if (playerSprite != null) {
-            batch.draw(playerSprite, x, y, Constantes.TILE_SIZE, Constantes.TILE_SIZE);
+            batch.draw(playerSprite, x + offsetX, y + offsetY, Constantes.TILE_SIZE, Constantes.TILE_SIZE);
         }
     }
 
@@ -365,13 +361,28 @@ public class Player {
                 + '}';
     }
 
-    //-------------------JJ
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setNombreCompleto(String nombreCompleto) {
+        this.nombreCompleto = nombreCompleto;
+    }
+
     public void setPuntos(int puntos) {
         this.puntos = puntos;
     }
 
     public void setIdioma(String idioma) {
         this.idioma = idioma;
+    }
+
+    public void setVolumen(double volumen) {
+        this.volumen = volumen;
     }
 
     public void setPartidasJugadas(int n) {
