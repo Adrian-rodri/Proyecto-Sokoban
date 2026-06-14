@@ -254,6 +254,8 @@ public class PlayerManager implements Gestionable<Player>{
             rUser= new RandomAccessFile("users/"+playerLogeado.getUserName()+"/progreso.skb","rw");
             rUser.writeInt(playerLogeado.getNivelesDesbloqueados());
             rUser.close();
+            
+            guardarAmigos();
         }catch(IOException e){
             System.out.println("Error: "+e.getMessage());
         }
@@ -330,6 +332,55 @@ public class PlayerManager implements Gestionable<Player>{
         return lista;
     }
     
+    public boolean agregarAmigo(String userNameAmigo) {
+        if (playerLogeado == null) return false;
+        if (!arrayUsernames.contains(userNameAmigo)) return false;      
+        if (userNameAmigo.equals(playerLogeado.getUserName())) return false; 
+        if (playerLogeado.getAmigos().contains(userNameAmigo)) return false; 
+
+        playerLogeado.getAmigos().add(userNameAmigo);
+        guardarAmigos();
+        return true;
+    }
+    
+    private void guardarAmigos() {
+        if (playerLogeado == null) return;
+        try (RandomAccessFile rf = new RandomAccessFile(
+                "users/" + playerLogeado.getUserName() + "/amigos.skb", "rw")) {
+            rf.setLength(0);
+            for (String a : playerLogeado.getAmigos()) {
+                rf.writeUTF(a);
+            }
+        } catch (IOException e) {
+            System.err.println("Error guardando amigos: " + e.getMessage());
+        }
+    }
+    
+     public String[] obtenerStatsAmigo(String userNameAmigo) {
+        if (!arrayUsernames.contains(userNameAmigo)) return null;
+        try (RandomAccessFile rf = new RandomAccessFile(
+                "users/" + userNameAmigo + "/stats.skb", "r")) {
+            int partidas    = rf.readInt();
+            int niveles     = rf.readInt();
+            int mejorPunt   = rf.readInt();
+            int puntGeneral = rf.readInt();
+            double tHoras   = rf.readDouble();
+            double tProm    = rf.readDouble();
+            return new String[]{
+                userNameAmigo,
+                String.valueOf(partidas),
+                String.valueOf(niveles),
+                String.valueOf(mejorPunt),
+                String.valueOf(puntGeneral),
+                String.format("%.2f", tHoras),
+                String.format("%.2f", tProm)
+            };
+        } catch (IOException e) {
+            System.err.println("Error leyendo stats de " + userNameAmigo + ": " + e.getMessage());
+        }
+        return null;
+     }
+        
     public Player getPlayerLogeado() { 
         return playerLogeado; 
     }
