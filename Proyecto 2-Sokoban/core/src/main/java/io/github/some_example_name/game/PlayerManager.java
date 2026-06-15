@@ -97,12 +97,13 @@ public class PlayerManager implements Gestionable<Player>{
             
             //leer avatar.skb
             rUser= new RandomAccessFile("users/"+userName+"/avatar.skb","r");
-            int colCabeza= rUser.readInt();
-            int filaCabeza= rUser.readInt();
-            int colTorso= rUser.readInt();
-            int filaTorso= rUser.readInt();
-            int colAccesorio= rUser.readInt();
-            int filaAccesorio= rUser.readInt();
+            
+            String avatarRuta;
+            try {
+                avatarRuta = rUser.readUTF();
+            } catch (Exception e) {
+                avatarRuta = "1-default.png";
+            }
             rUser.close();
             
             //leer amigos.skb
@@ -131,8 +132,7 @@ public class PlayerManager implements Gestionable<Player>{
             playerLogeado= new Player(userName,password,puntos,nombreCompleto,rutaAvatar,fechaRegistro,
                                         ultimaSesion,volumen,idioma,amigos,partidasJugadas,nivelesCompletados,
                                         mejorPuntaje,puntajeGeneral,tiempoJugadoHoras,tiempoPromedioPorNivel,
-                                        nivelesDesbloqueados,colCabeza,filaCabeza,colTorso,filaTorso,
-                                        colAccesorio,filaAccesorio,historial);
+                                        nivelesDesbloqueados,avatarRuta,historial);
         }catch(IOException e){
             System.out.println("Error: "+e.getMessage());
         }
@@ -149,6 +149,9 @@ public class PlayerManager implements Gestionable<Player>{
             playerFiles.createNewFile();
             
             playerFiles= new File("users/"+userName+"/historial.skb");
+            playerFiles.createNewFile();
+            
+            playerFiles= new File("users/"+userName+"/solicitudes.skb");
             playerFiles.createNewFile();
             
             RandomAccessFile rPlayer= new RandomAccessFile("users/"+userName+"/perfil.skb","rw");//perfil.skb
@@ -174,12 +177,8 @@ public class PlayerManager implements Gestionable<Player>{
             rPlayer.close();
             
             rPlayer= new RandomAccessFile("users/"+userName+"/avatar.skb","rw");//avatar.skb
-            rPlayer.writeInt(0);//colCabeza
-            rPlayer.writeInt(0);//filaCabeza
-            rPlayer.writeInt(0);//colTorso
-            rPlayer.writeInt(0);//filaTorso
-            rPlayer.writeInt(0);//colAccesorio
-            rPlayer.writeInt(0);//filaAccesorio
+            rPlayer.setLength(0);
+            rPlayer.writeUTF("1-default.png");
             rPlayer.close();
             
             
@@ -209,7 +208,7 @@ public class PlayerManager implements Gestionable<Player>{
     }
 
     @Override
-    public synchronized  void guardar() {
+    public synchronized void guardar() {
         if(playerLogeado==null)
             return;
         try{
@@ -259,6 +258,26 @@ public class PlayerManager implements Gestionable<Player>{
         }catch(IOException e){
             System.out.println("Error: "+e.getMessage());
         }
+    }
+    
+    public boolean enviarSolicitud(String receptor){
+        return true;
+    }
+    public boolean solicitudYaEnviada(String receptor){
+        if(!existeUsuario(receptor))
+            return false;
+        try(RandomAccessFile rSoli= new RandomAccessFile("users/"+receptor+"/solicitudes.skb","r")){
+            if(rSoli.length()==0)
+                return false;
+            while(rSoli.getFilePointer()<rSoli.length()){
+                String soli= rSoli.readUTF();
+                if(soli.equals(playerLogeado.getUserName()))
+                    return true;
+            }
+        }catch (IOException e) {
+            System.err.println("Error: "+e.getMessage());
+        }
+        return false;
     }
    
     //-----------JJ

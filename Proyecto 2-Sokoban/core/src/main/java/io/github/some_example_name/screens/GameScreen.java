@@ -97,8 +97,8 @@ public class GameScreen implements Screen {
         objetivo = new TextureRegion(sheetTiles, 3 * 80, 1 * 80, 80, 80);
         shape = new ShapeRenderer();
         player = new Player(0, 0);
-        player.cargarSprites(playerSheet, playerSheet, playerSheet);
-        player.setCabeza(0, 0);
+        player.cargarSprites(playerSheet);
+        player.setSprite(0, 0);
         tiposTiles = TileType.WALL;
         nivelMng = new NivelManager();
         nivelMng.cargar();
@@ -224,7 +224,7 @@ public class GameScreen implements Screen {
                     case 'p':
                         tiposTiles = TileType.PISO;
                         if (!initPlayer) {
-                            player.setCabeza(2, 0);
+                            player.setSprite(2, 0);
                             player.x = j * Constantes.TILE_SIZE;
                             player.y = (level.length - 1 - i) * Constantes.TILE_SIZE;
                             initPlayer = true;

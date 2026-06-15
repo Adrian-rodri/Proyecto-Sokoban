@@ -19,7 +19,7 @@ import io.github.some_example_name.util.Constantes;
 public class Player {
 
     public ArrayList<EstadoTurno> copias = new ArrayList<>();
-    private Texture sheetCabeza, sheetTorso, sheetAccesorio;
+    private Texture playerSheet;
     public int x, y;
     //atributos que se van a guardar en users.skb
     private String userName, password;
@@ -46,12 +46,17 @@ public class Player {
     private int nivelesDesbloqueados;
 
     //avatar.skb
-    private int colCabeza, filaCabeza;
-    private int colTorso, filaTorso;
-    private int colAccesorio, filaAccesorio;
+    private String avatarFile;
 
     private int spriteCol;
     private int spriteFila;
+    
+    //animacion
+    private int walkFrame = 0;
+    public static final int[] WALK_CYCLE = {0, 1, 2, 1};
+    private int offsetPushX = 0;
+    private int offsetPushY = 0;
+    private boolean persistOffset = false;
 
     protected TextureRegion playerSprite;
 
@@ -72,8 +77,7 @@ public class Player {
             String rutaAvatar, long fechaRegistro, long ultimaSesion, double volumen,
             String idioma, ArrayList<String> amigos, int partidasJugadas, int nivelesCompletados,
             int mejorPuntaje, int puntajeGeneral, double tiempoJugadoHoras, double tiempoPromedioPorNivel,
-            int nivelesDesbloqueados, int colCabeza, int filaCabeza, int colTorso, int filaTorso,
-            int colAccesorio, int filaAccesorio, ArrayList<EntradaHistorial> historial) {
+            int nivelesDesbloqueados, String avatarFile,ArrayList<EntradaHistorial> historial) {
         this.x = 0;
         this.y = 0;
         this.userName = userName;
@@ -93,12 +97,7 @@ public class Player {
         this.tiempoJugadoHoras = tiempoJugadoHoras;
         this.tiempoPromedioPorNivel = tiempoPromedioPorNivel;
         this.nivelesDesbloqueados = nivelesDesbloqueados;
-        this.colCabeza = colCabeza;
-        this.filaCabeza = filaCabeza;
-        this.colTorso = colTorso;
-        this.filaTorso = filaTorso;
-        this.colAccesorio = colAccesorio;
-        this.filaAccesorio = filaAccesorio;
+        this.avatarFile=avatarFile;
         this.historial = historial;
         this.spriteCol = 2;
         this.spriteFila = 0;
@@ -119,8 +118,12 @@ public class Player {
                 y = estado.playerY;
                 spriteCol = estado.spriteCol;
                 spriteFila = estado.spriteFila;
+                offsetPushX = estado.offsetPushX;
+                offsetPushY = estado.offsetPushY;
+                this.resetPushOffset();
+                setSprite(spriteCol, spriteFila);
                 level = estado.matriz;
-                return -1; // undo: decrementar contador
+                return -1;
             }
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
@@ -133,7 +136,7 @@ public class Player {
         if (Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
             dirY -= 1;
             //y-=Constantes.TILE_SIZE;
-            spriteCol = 2;
+            spriteCol = 1;
             spriteFila = 0;
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.A) || Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
@@ -148,7 +151,7 @@ public class Player {
             spriteCol = 1;
             spriteFila = 2;
         }
-        this.setCabeza(spriteCol, spriteFila);
+        setSprite(spriteCol, spriteFila);
         if (dirX != 0 || dirY != 0) {
             int posX = x / Constantes.TILE_SIZE;
             int posY = (level.length - 1) - (y / Constantes.TILE_SIZE);
@@ -161,9 +164,20 @@ public class Player {
                 char destino = level[predictFila][predictCol];
                 //caminar a casilla vacio o una meta
                 if (destino == 'a' || destino == '0' || destino == 'p') {
-                    copias.add(new EstadoTurno(nivelActual.copiarLevel(level), x, y, spriteCol, spriteFila));
+                    copias.add(new EstadoTurno(nivelActual.copiarLevel(level), x, y, spriteCol, spriteFila,offsetPushX,offsetPushY));
                     x += dirX * Constantes.TILE_SIZE;
                     y += dirY * Constantes.TILE_SIZE;
+                    if (!persistOffset) {
+                        offsetPushX = 0;
+                        offsetPushY = 0;
+                    } else {
+                        offsetPushX /= 2;
+                        offsetPushY /= 2;
+                    }
+                    persistOffset = false;
+                    walkFrame++;
+                    spriteCol = WALK_CYCLE[walkFrame % 4];
+                    this.setSprite(spriteCol, spriteFila);
                     return 1;
                     //empujar una caja
                 } else if (destino == 'b' || destino == 'B') {
@@ -173,7 +187,7 @@ public class Player {
                     if (cajaFila >= 0 && cajaFila < level.length && cajaCol >= 0 && cajaCol < level[cajaFila].length) {
                         char cajaDestino = level[cajaFila][cajaCol];
                         if (cajaDestino == 'a' || cajaDestino == 'p' || cajaDestino == '0') {
-                            copias.add(new EstadoTurno(nivelActual.copiarLevel(level), x, y, spriteCol, spriteFila));
+                            copias.add(new EstadoTurno(nivelActual.copiarLevel(level), x, y, spriteCol, spriteFila,offsetPushX,offsetPushY));
                             if (destino == 'B') {
                                 level[predictFila][predictCol] = '0';
                             } else {
@@ -189,6 +203,12 @@ public class Player {
 
                             this.x += dirX * Constantes.TILE_SIZE;
                             this.y += dirY * Constantes.TILE_SIZE;
+                            offsetPushX = dirX * Constantes.TILE_SIZE / 2;
+                            offsetPushY = (dirY < 0) ? 0 : dirY * Constantes.TILE_SIZE / 2;
+                            persistOffset = true;
+                            walkFrame++;
+                            spriteCol = WALK_CYCLE[walkFrame % 4];
+                            this.setSprite(spriteCol, spriteFila);
                             return 1;
 
                         }
@@ -211,35 +231,63 @@ public class Player {
         }
     }
 
-    public void setCabeza(int col, int fila) {
-        playerSprite = new TextureRegion(sheetCabeza, col * 32, fila * 32, 32, 32);
+    public void setSprite(int col, int fila) {
+        playerSprite = new TextureRegion(playerSheet, col * 32, fila * 32, 32, 32);
     }
 
-    public void setTorso(int col, int fila) {
-        //Vacio por momento, falta crear el spriteSheet
+    public void cargarSprites(Texture playerSheet) {
+        this.playerSheet=playerSheet;
+    }
+    public void avanzarWalkFrame(){
+        walkFrame= (walkFrame+1)%WALK_CYCLE.length;
+    }
+    public void resetPushOffset() {
+        this.offsetPushX = 0;
+        this.offsetPushY = 0;
+        this.persistOffset = false;
     }
 
-    public void setAccesorio(int col, int fila) {
-        //Vacio por momento, falta crear el spriteSheet
+    public void setAvatarFile(String avatarFile) {
+        this.avatarFile = avatarFile;
     }
 
-    public void cargarSprites(Texture cabeza, Texture torso, Texture accesorio) {
-        this.sheetCabeza = cabeza;
-        this.sheetTorso = torso;
-        this.sheetAccesorio = accesorio;
+    public void setWalkFrame(int walkFrame) {
+        this.walkFrame = walkFrame;
+    }
+    
+
+    public String getAvatarFile() {
+        return avatarFile;
     }
 
-    public Texture getSheetCabeza() {
-        return sheetCabeza;
+    public int getWalkFrame() {
+        return walkFrame;
     }
 
-    public Texture getSheetTorso() {
-        return sheetTorso;
+    public int getOffsetPushX() {
+        return offsetPushX;
     }
 
-    public Texture getSheetAccesorio() {
-        return sheetAccesorio;
+    public int getOffsetPushY() {
+        return offsetPushY;
     }
+
+    public boolean getPersistOffset() {
+        return persistOffset;
+    }
+
+    public void setOffsetPushX(int offsetPushX) {
+        this.offsetPushX = offsetPushX;
+    }
+
+    public void setOffsetPushY(int offsetPushY) {
+        this.offsetPushY = offsetPushY;
+    }
+
+    public void setPersistOffset(boolean persistOffset) {
+        this.persistOffset = persistOffset;
+    }
+    
 
     public int getX() {
         return x;
@@ -321,29 +369,6 @@ public class Player {
         return nivelesDesbloqueados;
     }
 
-    public int getColCabeza() {
-        return colCabeza;
-    }
-
-    public int getFilaCabeza() {
-        return filaCabeza;
-    }
-
-    public int getColTorso() {
-        return colTorso;
-    }
-
-    public int getFilaTorso() {
-        return filaTorso;
-    }
-
-    public int getColAccesorio() {
-        return colAccesorio;
-    }
-
-    public int getFilaAccesorio() {
-        return filaAccesorio;
-    }
 
     public TextureRegion getPlayerSprite() {
         return playerSprite;

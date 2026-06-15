@@ -1,6 +1,5 @@
 package io.github.some_example_name;
 
-import io.github.some_example_name.game.PlayerManager;
 import io.github.some_example_name.game.NivelManager;
 import io.github.some_example_name.screens.LoginScreen;
 import io.github.some_example_name.game.PlayerManager;

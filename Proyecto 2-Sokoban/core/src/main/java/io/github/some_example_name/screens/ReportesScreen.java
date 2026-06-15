@@ -1,6 +1,5 @@
 package io.github.some_example_name.screens;
 
-import io.github.some_example_name.screens.ProfileScreen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -22,22 +21,18 @@ import io.github.some_example_name.Main;
 import io.github.some_example_name.model.Player;
 import java.util.ArrayList;
 
-public class RecordsScreen implements Screen {
+public class ReportesScreen extends BaseScreen {
 
-    private final Main game;
     private SpriteBatch batch;
     private BitmapFont font;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
-    private Stage stage;
-    private Skin skin;
-
     private TextButton btnVolver;
     private int totalNiveles;
     private int[][] mejores;
 
-    public RecordsScreen(Main game) {
-        this.game = game;
+    public ReportesScreen(Main game) {
+        super(game);
     }
 
     @Override
@@ -227,5 +222,10 @@ public class RecordsScreen implements Screen {
         shape.dispose();
         stage.dispose();
         skin.dispose();
+    }
+
+    @Override
+    protected void buildUI() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

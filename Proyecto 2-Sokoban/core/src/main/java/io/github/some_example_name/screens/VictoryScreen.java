@@ -1,29 +1,23 @@
 package io.github.some_example_name.screens;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.some_example_name.Main;
 
-public class VictoryScreen implements Screen {
-
-    private final Main game;
-    private Stage stage;
-    private Skin skin;
+public class VictoryScreen extends BaseScreen {
 
     private final int numLevel, movimientos, puntaje;
     private final double tiempoSegundos;
     private final boolean hayNivelSiguiente;
 
     public VictoryScreen(Main game, int numLevel, int movimientos, double tiempoSegundos, int puntaje) {
-        this.game = game;
+        super(game);
         this.numLevel = numLevel;
         this.movimientos = movimientos;
         this.tiempoSegundos = tiempoSegundos;
@@ -32,21 +26,19 @@ public class VictoryScreen implements Screen {
     }
 
     @Override
-    public void show() {
-        stage = new Stage(new ScreenViewport());
-        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/skin/ui/sgx-ui.atlas"));
-        skin = new Skin(Gdx.files.internal("ui/skin/ui/sgx-ui.json"), atlas);
+    protected void buildUI() {
+        skin.add("titulo", new Label.LabelStyle(skin.getFont("title"),
+                new Color(0.4f, 1f, 0.5f, 1f)), Label.LabelStyle.class);
+        skin.add("dato", new Label.LabelStyle(skin.getFont("font"),
+                new Color(0.85f, 0.95f, 0.88f, 1f)), Label.LabelStyle.class);
+        skin.add("dato-valor", new Label.LabelStyle(skin.getFont("font"),
+                Color.WHITE), Label.LabelStyle.class);
+        skin.add("mensaje-final", new Label.LabelStyle(skin.getFont("font"),
+                new Color(1f, 0.85f, 0.25f, 1f)), Label.LabelStyle.class);
 
-        skin.add("titulo", new Label.LabelStyle(skin.getFont("title"), new Color(0.4f, 1f, 0.5f, 1f)), Label.LabelStyle.class);
-        skin.add("dato", new Label.LabelStyle(skin.getFont("small"), new Color(0.85f, 0.95f, 0.88f, 1f)), Label.LabelStyle.class);
-        skin.add("dato-valor", new Label.LabelStyle(skin.getFont("font"), Color.WHITE), Label.LabelStyle.class);
-        skin.add("mensaje-final", new Label.LabelStyle(skin.getFont("small"), new Color(1f, 0.85f, 0.25f, 1f)), Label.LabelStyle.class);
-
-        Window panel = new Window("", skin);
-        panel.setMovable(false);
-        panel.pad(20f, 30f, 18f, 30f);
-
-        Label lblTitulo = new Label("¡NIVEL COMPLETADO!", skin, "titulo");
+        Window panel = createWindow();
+        
+        Label lblTitulo = new Label("NIVEL COMPLETADO!", skin, "titulo");
         panel.add(lblTitulo).colspan(2).center().padBottom(4).row();
 
         String strNivel = "Nivel " + (numLevel + 1);
@@ -73,12 +65,11 @@ public class VictoryScreen implements Screen {
         panel.add(lblPuntajeValor).right().padBottom(14).row();
 
         if (!hayNivelSiguiente) {
-            Label lblFinal = new Label("¡Completaste todos los niveles!", skin, "mensaje-final");
+            Label lblFinal = new Label("Completaste todos los niveles!", skin, "mensaje-final");
             panel.add(lblFinal).colspan(2).center().padBottom(14).row();
         }
 
         Table btnRow = new Table();
-
         if (hayNivelSiguiente) {
             TextButton btnSiguiente = new TextButton("Siguiente", skin, "big");
             btnSiguiente.addListener(new ChangeListener() {
@@ -113,15 +104,8 @@ public class VictoryScreen implements Screen {
         btnRow.add(btnMenu).width(130).height(38);
 
         panel.add(btnRow).colspan(2).center().padTop(4);
-
         panel.pack();
-
-        Table root = new Table();
-        root.setFillParent(true);
-        root.center();
-        root.add(panel);
-        stage.addActor(root);
-        Gdx.input.setInputProcessor(stage);
+        setRoot(panel);
     }
 
     @Override
@@ -129,29 +113,5 @@ public class VictoryScreen implements Screen {
         ScreenUtils.clear(0.06f, 0.10f, 0.07f, 1f);
         stage.act(delta);
         stage.draw();
-    }
-
-    @Override
-    public void resize(int w, int h) {
-        stage.getViewport().update(w, h, true);
-    }
-
-    @Override
-    public void pause() {
-    }
-
-    @Override
-    public void resume() {
-    }
-
-    @Override
-    public void hide() {
-        Gdx.input.setInputProcessor(null);
-    }
-
-    @Override
-    public void dispose() {
-        stage.dispose();
-        skin.dispose();
     }
 }

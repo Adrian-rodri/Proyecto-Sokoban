@@ -13,47 +13,40 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.some_example_name.Main;
 
-public class MenuScreen implements Screen {
-
-    private final Main game;
-    private Stage stage;
-    private Skin skin;
-
+public class MenuScreen extends BaseScreen {
+    private TextButton btnNotif;
+    
     public MenuScreen(Main game) {
-        this.game = game;
+        super(game);
     }
-
+    
     @Override
-    public void show() {
-        stage = new Stage(new ScreenViewport());
-        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/skin/ui/sgx-ui.atlas"));
-        skin = new Skin(Gdx.files.internal("ui/skin/ui/sgx-ui.json"), atlas);
-
+    protected void buildUI() {
         String nombreJugador = game.playerManager.getNombreJugador();
 
         Label lblTitulo = new Label("SOKOBAN", skin, "title-white");
         Label lblSaludo = new Label("Hola, " + nombreJugador, skin, "medium-white");
 
-        TextButton btnJugar = new TextButton("Jugar", skin, "big");
-        TextButton btnPerfil = new TextButton("Mi perfil", skin, "big");
-        TextButton btnReporte = new TextButton("Reportes", skin, "big");
-        TextButton btnSalir = new TextButton("Salir", skin, "default");
-        TextButton btnConfig = new TextButton("[Config]", skin, "small");
-        TextButton btnAmigos = new TextButton("[Amigos]", skin, "small");
-      //TextButton btnAmigos = new TextButton("[Log Out]", skin, "small");
+        TextButton btnJugar = new TextButton(traducir("Jugar","Play"), skin, "big");
+        TextButton btnPerfil = new TextButton(traducir("Mi perfil", "My profile"), skin, "big");
+        TextButton btnReporte = new TextButton(traducir("Reportes", "Reports"), skin, "big");
+        TextButton btnSalir = new TextButton(traducir("Salir", "Exit"), skin, "default");
+        TextButton btnConfig = new TextButton(traducir("Config", "Config"), skin, "small");
+        TextButton btnAmigos = new TextButton(traducir("Amigos", "Friends"), skin, "small");
         TextButton btnAyuda = new TextButton("  ?  ", skin, "small");
+        btnNotif = new TextButton("Notif", skin, "small");
 
         float bw = 240, bh = 42, iconW = 64, iconH = 32;
 
         Window panel = new Window("", skin);
         panel.setMovable(false);
         panel.pad(28f, 32f, 24f, 32f); 
-        panel.add(lblTitulo).colspan(3).center().padBottom(4).row();
-        panel.add(lblSaludo).colspan(3).center().padBottom(18).row();
-        panel.add(btnJugar).colspan(3).width(bw).height(bh).padBottom(8).row();
-        panel.add(btnPerfil).colspan(3).width(bw).height(bh).padBottom(8).row();
-        panel.add(btnReporte).colspan(3).width(bw).height(bh).padBottom(8).row();
-        panel.add(btnSalir).colspan(3).width(bw).height(bh).padBottom(14).row();
+        panel.add(lblTitulo).colspan(4).center().padBottom(4).row();
+        panel.add(lblSaludo).colspan(4).center().padBottom(18).row();
+        panel.add(btnJugar).colspan(4).width(bw).height(bh).padBottom(8).row();
+        panel.add(btnPerfil).colspan(4).width(bw).height(bh).padBottom(8).row();
+        panel.add(btnReporte).colspan(4).width(bw).height(bh).padBottom(8).row();
+        panel.add(btnSalir).colspan(4).width(bw).height(bh).padBottom(14).row();
         panel.add(btnConfig).width(iconW).height(iconH).padRight(6);
         panel.add(btnAmigos).width(iconW).height(iconH).padRight(6);
         panel.add(btnAyuda).width(iconW).height(iconH).row();
@@ -84,8 +77,8 @@ public class MenuScreen implements Screen {
             @Override
             public void changed(ChangeListener.ChangeEvent e, Actor a) {
                 System.out.println("Reportes");
-//                game.setScreen(new ReportesScreen(game));
-//                dispose();
+                game.setScreen(new ReportesScreen(game));
+                dispose();
             }
         });
         btnSalir.addListener(new ChangeListener() {
@@ -99,17 +92,10 @@ public class MenuScreen implements Screen {
             @Override
             public void changed(ChangeListener.ChangeEvent e, Actor a) {
                 game.playerManager.cerrarSesion();
-                game.setScreen(new LoginScreen(game));
+                game.setScreen(new SettingScreen(game));
                 dispose();
             }
         });
-        
-        /*btnConfig.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
-                System.out.println("[Menu] Config");
-            }
-        });*/
         
         btnAmigos.addListener(new ChangeListener() {
             @Override
@@ -315,4 +301,5 @@ public class MenuScreen implements Screen {
         stage.dispose();
         skin.dispose();
     }
+
 }
