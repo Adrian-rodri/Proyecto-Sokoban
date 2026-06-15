@@ -261,7 +261,87 @@ public class PlayerManager implements Gestionable<Player>{
     }
     
     public boolean enviarSolicitud(String receptor){
-        return true;
+        if(!existeUsuario(receptor))
+            return false;
+        if(receptor.equals(playerLogeado.getUserName()))
+            return false;
+        if(playerLogeado.getAmigos().contains(receptor))
+            return false;
+        if(solicitudYaEnviada(receptor))
+            return false;
+        
+        ArrayList<String> misSolis= getSolicitudes();
+        for(String soli: misSolis){
+            if(soli.equals(receptor)){
+                aceptarSolicitud(receptor);
+                return true;
+            }
+        }
+        try(RandomAccessFile rSoli= new RandomAccessFile("users/"+receptor+ "/solicitudes.skb","rw")){
+            rSoli.seek(rSoli.length());
+            rSoli.writeUTF(playerLogeado.getUserName());
+        }catch(IOException e){
+            System.err.println("Error: "+e.getMessage());
+        }
+        return false;
+    }
+    public ArrayList<String> getSolicitudes() {
+        ArrayList<String> solicitudes = new ArrayList<>();
+        try {
+            File file = new File("users/"+playerLogeado.getUserName() + "/solicitudes.skb");
+            if (!file.exists()) 
+                return solicitudes;
+            RandomAccessFile rSoli= new RandomAccessFile(file, "r");
+            while(rSoli.getFilePointer() < rSoli.length()){
+                solicitudes.add(rSoli.readUTF());
+            }
+            rSoli.close();
+        } catch (IOException e) {
+            System.err.println("Error: "+e.getMessage());
+        }
+        return solicitudes;
+    }
+    
+    public int getCantSolicitudes() {
+        return getSolicitudes().size();
+    }
+    
+    public void aceptarSolicitud(String nuevoAmigo) {
+        if(!existeUsuario(nuevoAmigo))
+            return;
+        try(RandomAccessFile rAmigos= new RandomAccessFile("users/"+playerLogeado.getUserName()+"/amigos.skb","rw")){
+            rAmigos.seek(rAmigos.length());
+            rAmigos.writeUTF(nuevoAmigo);
+        }catch(IOException e){
+            System.err.println("Error: "+e.getMessage());
+        }
+        try(RandomAccessFile rAmigos= new RandomAccessFile("users/"+nuevoAmigo+"/amigos.skb","rw")){
+            rAmigos.seek(rAmigos.length());
+            rAmigos.writeUTF(playerLogeado.getUserName());
+        }catch(IOException e){
+            System.err.println("Error: "+e.getMessage());
+        }
+        playerLogeado.getAmigos().add(nuevoAmigo);
+        removerSolicitud(playerLogeado.getUserName(),nuevoAmigo);
+    }
+    public void rechazarSolicitud(String emisor) {
+        removerSolicitud(playerLogeado.getUserName(),emisor);
+    }
+    public void removerSolicitud(String userA, String userB){
+        try(RandomAccessFile rSoli= new RandomAccessFile("users/"+userA+"/solicitudes.skb","rw")){
+            ArrayList<String> arraySolis= new ArrayList<>();
+            while(rSoli.getFilePointer()<rSoli.length()){
+                String solicitud=rSoli.readUTF();
+                if(!solicitud.equals(userB))
+                    arraySolis.add(solicitud);
+            }
+            rSoli.setLength(0);
+            for(String soli: arraySolis){
+                rSoli.writeUTF(soli);
+            }
+        }catch(IOException e){
+            System.out.println("Error: "+e.getMessage());
+        }
     }
     public boolean solicitudYaEnviada(String receptor){
         if(!existeUsuario(receptor))
