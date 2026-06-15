@@ -283,7 +283,7 @@ public class PlayerManager implements Gestionable<Player>{
         }catch(IOException e){
             System.err.println("Error: "+e.getMessage());
         }
-        return false;
+        return true;
     }
     public ArrayList<String> getSolicitudes() {
         ArrayList<String> solicitudes = new ArrayList<>();

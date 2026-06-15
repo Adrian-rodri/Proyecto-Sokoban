@@ -100,15 +100,6 @@ public class MenuScreen extends BaseScreen {
             }
         });
         
-        /*
-        btnAmigos.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
-                game.playerManager.cerrarSesion();
-                game.setScreen(new LoginScreen(game));
-                dispose();
-            }
-        });*/
         
         btnAyuda.addListener(new ChangeListener() {
             @Override
@@ -135,8 +126,8 @@ public class MenuScreen extends BaseScreen {
             public void changed(ChangeListener.ChangeEvent ev, Actor a) {
                 String nombre = txtAmigo.getText().trim();
                 if (nombre.isEmpty()) return;
-                if (game.playerManager.agregarAmigo(nombre)) {
-                    lblMsg.setText( nombre + " agregado");
+                if (game.playerManager.enviarSolicitud(nombre)) {
+                    lblMsg.setText( "Solicitud enviada a "+nombre);
                     txtAmigo.setText("");
                 } else {
                     lblMsg.setText(" No se pudo agregar (no existe / ya es amigo)");
@@ -177,7 +168,6 @@ public class MenuScreen extends BaseScreen {
     
      private void refrescarListaAmigos(Table contenedor, Window ventana,
                                        TextField txtAmigo, TextButton btnAgregar, Label lblMsg) {
-        // Limpiar todo y reconstruir desde cero
         contenedor.clearChildren();
 
         contenedor.add(txtAmigo).width(180).padRight(6);
@@ -226,11 +216,11 @@ public class MenuScreen extends BaseScreen {
         w.setModal(true);
         w.pad(16);
 
-        Table t = new Table();
-        t.add("",          "bold").width(100);
-        t.add("Tú",         "bold").width(100);
-        t.add(amigo,        "bold").width(100);
-        t.row();
+        Table tabla = new Table();
+        tabla.add("",          "bold").width(100);
+        tabla.add("Tú",         "bold").width(100);
+        tabla.add(amigo,        "bold").width(100);
+        tabla.row();
 
         String[][] filas = {
             {"Partidas",      statsYo[1], statsEl[1]},
@@ -241,10 +231,10 @@ public class MenuScreen extends BaseScreen {
             {"Tiempo prom.",   statsYo[6], statsEl[6]}
         };
         for (String[] f : filas) {
-            t.add(f[0]).width(100);
-            t.add(f[1]).width(100);
-            t.add(f[2]).width(100);
-            t.row();
+            tabla.add(f[0]).width(100);
+            tabla.add(f[1]).width(100);
+            tabla.add(f[2]).width(100);
+            tabla.row();
         }
 
         TextButton btnOk = new TextButton("Cerrar", skin, "default");
@@ -254,9 +244,9 @@ public class MenuScreen extends BaseScreen {
                 w.remove();
             }
         });
-        t.add(btnOk).colspan(3).padTop(12);
+        tabla.add(btnOk).colspan(4).padTop(12);
 
-        w.add(t);
+        w.add(tabla);
         w.pack();
         Table root = (Table) stage.getActors().first();
         root.addActor(w);
