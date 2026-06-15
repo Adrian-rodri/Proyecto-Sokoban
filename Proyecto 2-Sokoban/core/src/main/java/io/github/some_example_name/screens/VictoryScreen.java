@@ -40,8 +40,11 @@ public class VictoryScreen extends BaseScreen {
         
         Label lblTitulo = new Label("NIVEL COMPLETADO!", skin, "titulo");
         panel.add(lblTitulo).colspan(2).center().padBottom(4).row();
-
-        String strNivel = "Nivel " + (numLevel + 1);
+        String strNivel;
+        if(numLevel==0)
+            strNivel= "Tutorial";
+        else
+            strNivel= "Nivel " + (numLevel + 1);
         Label lblNivel = new Label(strNivel, skin, "dato");
         panel.add(lblNivel).colspan(2).center().padBottom(18).row();
 

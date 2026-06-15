@@ -12,7 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.some_example_name.Main;
 
 public class LoginScreen extends BaseScreen {
@@ -32,10 +31,6 @@ public class LoginScreen extends BaseScreen {
 
     @Override
     protected void buildUI() {
-        stage = new Stage(new ScreenViewport());
-        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/skin/ui/sgx-ui.atlas"));
-        skin = new Skin(Gdx.files.internal("ui/skin/ui/sgx-ui.json"), atlas);
-
         Label.LabelStyle errorStyle = new Label.LabelStyle(skin.getFont("font"),
                 new Color(1f, 0.37f, 0.37f, 1f));
         skin.add("error", errorStyle, Label.LabelStyle.class);

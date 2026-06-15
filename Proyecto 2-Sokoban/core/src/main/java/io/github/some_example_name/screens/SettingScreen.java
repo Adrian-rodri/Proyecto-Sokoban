@@ -1,5 +1,6 @@
 package io.github.some_example_name.screens;
 
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import io.github.some_example_name.Main;
 
 /**
@@ -14,7 +15,7 @@ public class SettingScreen extends BaseScreen{
 
     @Override
     protected void buildUI() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Window panel = new Window("", skin);
     }
     
     
