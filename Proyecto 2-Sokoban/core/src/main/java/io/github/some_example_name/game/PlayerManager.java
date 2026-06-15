@@ -402,29 +402,46 @@ public class PlayerManager implements Gestionable<Player>{
     //-----------JJ
     
     public void actualizarTrasPartida(int nivel, int movimientos, double tiempoSeg, int puntaje) {
-        if (playerLogeado == null) return;
-
-        int  numIntento = playerLogeado.getHistorial() != null ? playerLogeado.getHistorial().size() + 1 : 1;
-        long fecha      = System.currentTimeMillis();
-        EntradaHistorial entrada = new EntradaHistorial(numIntento, nivel, puntaje, movimientos, tiempoSeg, fecha);
-
-        if (playerLogeado.getHistorial() != null) playerLogeado.getHistorial().add(entrada);
+        if(playerLogeado==null)
+            return;
+        boolean yaCompletado=false;
+        int mejorPuntajeAnterior=0;
+        for(EntradaHistorial entrada: playerLogeado.getHistorial()){
+            if(entrada.getNivel()==nivel){
+                yaCompletado=true;
+                if(entrada.getPuntaje()>mejorPuntajeAnterior){
+                    mejorPuntajeAnterior= entrada.getPuntaje();
+                }
+            }
+        }
+        playerLogeado.agregarPartidaJugada();
+        if(!yaCompletado)
+            playerLogeado.agregarNivelCompletado();
+        
+        int puntos= puntaje-mejorPuntajeAnterior;
+        if(puntos>0)
+            playerLogeado.sumarPuntajeGeneral(puntos);
+        
+        playerLogeado.compararMjeorPuntaje(puntaje);
+        double nuevashoras= playerLogeado.getTiempoJugadoHoras()+(tiempoSeg/3600.0);
+        playerLogeado.setTiempoJugadoHoras(nuevashoras);
+        
+        int totalPartidas= playerLogeado.getPartidasJugadas();
+        double promActual= playerLogeado.getTiempoPromedioPorNivel();
+        double nuevoPromedio= ((promActual *(totalPartidas-1))+tiempoSeg)/totalPartidas;
+        playerLogeado.setTiempoPromedioPorNivel(nuevoPromedio);
+        
+        int  numIntento= playerLogeado.getHistorial() != null ? playerLogeado.getHistorial().size() + 1 : 1;
+        long fecha= System.currentTimeMillis();
+        EntradaHistorial entrada= new EntradaHistorial(numIntento, nivel, puntaje, movimientos, tiempoSeg, fecha);
+        
+        if (playerLogeado.getHistorial()!= null) 
+            playerLogeado.getHistorial().add(entrada);
         appendHistorial(entrada);
-
-        playerLogeado.setPartidasJugadas(playerLogeado.getPartidasJugadas() + 1);
-        playerLogeado.setNivelesCompletados(playerLogeado.getNivelesCompletados() + 1);
-        playerLogeado.setPuntajeGeneral(playerLogeado.getPuntajeGeneral() + puntaje);
-        if (puntaje > playerLogeado.getMejorPuntaje()) playerLogeado.setMejorPuntaje(puntaje);
-
-        double nuevasHoras = playerLogeado.getTiempoJugadoHoras() + tiempoSeg / 3600.0;
-        playerLogeado.setTiempoJugadoHoras(nuevasHoras);
-        int nc = playerLogeado.getNivelesCompletados();
-        if (nc > 0) playerLogeado.setTiempoPromedioPorNivel(nuevasHoras * 3600.0 / nc);
-
+        
         int siguiente = nivel + 1;
-        if (siguiente > playerLogeado.getNivelesDesbloqueados())
+        if(siguiente> playerLogeado.getNivelesDesbloqueados())
             playerLogeado.setNivelesDesbloqueados(siguiente);
-
         guardar();
     }
     public void cambiarVolumen(int porcentaje) {
@@ -497,30 +514,30 @@ public class PlayerManager implements Gestionable<Player>{
         }
     }
     
-     public String[] obtenerStatsAmigo(String userNameAmigo) {
-        if (!arrayUsernames.contains(userNameAmigo)) return null;
-        try (RandomAccessFile rf = new RandomAccessFile(
-                "users/" + userNameAmigo + "/stats.skb", "r")) {
-            int partidas    = rf.readInt();
-            int niveles     = rf.readInt();
-            int mejorPunt   = rf.readInt();
-            int puntGeneral = rf.readInt();
-            double tHoras   = rf.readDouble();
-            double tProm    = rf.readDouble();
-            return new String[]{
-                userNameAmigo,
-                String.valueOf(partidas),
-                String.valueOf(niveles),
-                String.valueOf(mejorPunt),
-                String.valueOf(puntGeneral),
-                String.format("%.2f", tHoras),
-                String.format("%.2f", tProm)
-            };
-        } catch (IOException e) {
-            System.err.println("Error leyendo stats de " + userNameAmigo + ": " + e.getMessage());
-        }
-        return null;
-     }
+    public String[] obtenerStatsAmigo(String userNameAmigo) {
+        String[] stats= new String[7];
+        try (RandomAccessFile raf= new RandomAccessFile("users/" + userNameAmigo+"/stats.skb", "r")){
+            int partidas= raf.readInt();
+            int niveles= raf.readInt();
+            int mejorPuntaje= raf.readInt();
+            int puntajeGeneral= raf.readInt();
+            double tiempoHoras= raf.readDouble();
+            double tiempoPromedio= raf.readDouble();
+
+            stats[0]= String.valueOf(partidas);
+            stats[1]= String.valueOf(niveles);
+            stats[2]= String.valueOf(mejorPuntaje);
+            stats[3]= String.valueOf(puntajeGeneral);
+            stats[4]= String.valueOf(tiempoHoras);
+            stats[5]= String.format("%.1f", tiempoPromedio);
+            stats[6]= userNameAmigo;
+        } catch (IOException e){
+            for(int i = 0;i<6; i++)
+                stats[i] = "0";
+            stats[6]= userNameAmigo;
+    }
+    return stats;
+}
         
     public Player getPlayerLogeado() { 
         return playerLogeado; 

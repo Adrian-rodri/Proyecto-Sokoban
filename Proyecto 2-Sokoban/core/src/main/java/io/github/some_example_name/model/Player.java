@@ -413,6 +413,12 @@ public class Player {
     public void setPartidasJugadas(int n) {
         this.partidasJugadas = n;
     }
+    public void agregarPartidaJugada(){
+        this.partidasJugadas+=1;
+    }
+    public void agregarNivelCompletado(){
+        nivelesCompletados+=1;
+    }
 
     public void setNivelesCompletados(int n) {
         this.nivelesCompletados = n;
@@ -420,6 +426,13 @@ public class Player {
 
     public void setMejorPuntaje(int n) {
         this.mejorPuntaje = n;
+    }
+    public void compararMjeorPuntaje(int nuevoPuntaje){
+        if(nuevoPuntaje>mejorPuntaje)
+            mejorPuntaje=nuevoPuntaje;
+    }
+    public void sumarPuntajeGeneral(int puntaje){
+        puntajeGeneral+=puntaje;
     }
 
     public void setPuntajeGeneral(int n) {
