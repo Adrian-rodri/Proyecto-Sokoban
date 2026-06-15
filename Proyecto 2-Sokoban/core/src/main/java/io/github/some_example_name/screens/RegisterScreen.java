@@ -27,7 +27,7 @@ public class RegisterScreen extends BaseScreen {
     }
 
     @Override
-    public void show() {
+    protected void buildUI() {
         stage = new Stage(new ScreenViewport());
         TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/skin/ui/sgx-ui.atlas"));
         skin = new Skin(Gdx.files.internal("ui/skin/ui/sgx-ui.json"), atlas);
@@ -140,10 +140,6 @@ public class RegisterScreen extends BaseScreen {
         root.add(panel);
         stage.addActor(root);
         Gdx.input.setInputProcessor(stage);
-    }
-
-    @Override
-    protected void buildUI() {
     }
 
     @Override

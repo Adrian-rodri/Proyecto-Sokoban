@@ -1,16 +1,11 @@
 package io.github.some_example_name.screens;
 
-import io.github.some_example_name.screens.LoginScreen;
 import io.github.some_example_name.screens.LevelSelectScreen;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.some_example_name.Main;
 
 public class MenuScreen extends BaseScreen {
@@ -36,20 +31,21 @@ public class MenuScreen extends BaseScreen {
         TextButton btnAyuda = new TextButton("  ?  ", skin, "small");
         btnNotif = new TextButton("Notif", skin, "small");
 
-        float bw = 240, bh = 42, iconW = 64, iconH = 32;
+        float botonAncho = 240, botonAlto = 42, iconAncho = 64, iconAlto = 32;
 
         Window panel = new Window("", skin);
         panel.setMovable(false);
         panel.pad(28f, 32f, 24f, 32f); 
         panel.add(lblTitulo).colspan(4).center().padBottom(4).row();
         panel.add(lblSaludo).colspan(4).center().padBottom(18).row();
-        panel.add(btnJugar).colspan(4).width(bw).height(bh).padBottom(8).row();
-        panel.add(btnPerfil).colspan(4).width(bw).height(bh).padBottom(8).row();
-        panel.add(btnReporte).colspan(4).width(bw).height(bh).padBottom(8).row();
-        panel.add(btnSalir).colspan(4).width(bw).height(bh).padBottom(14).row();
-        panel.add(btnConfig).width(iconW).height(iconH).padRight(6);
-        panel.add(btnAmigos).width(iconW).height(iconH).padRight(6);
-        panel.add(btnAyuda).width(iconW).height(iconH).row();
+        panel.add(btnJugar).colspan(4).width(botonAncho).height(botonAlto).padBottom(8).row();
+        panel.add(btnPerfil).colspan(4).width(botonAncho).height(botonAlto).padBottom(8).row();
+        panel.add(btnReporte).colspan(4).width(botonAncho).height(botonAlto).padBottom(8).row();
+        panel.add(btnSalir).colspan(4).width(botonAncho).height(botonAlto).padBottom(14).row();
+        panel.add(btnConfig).width(iconAncho).height(iconAlto).padRight(6);
+        panel.add(btnAmigos).width(iconAncho).height(iconAlto).padRight(6);
+        panel.add(btnNotif).width(iconAncho).height(iconAlto).padRight(6);
+        panel.add(btnAyuda).width(iconAncho).height(iconAlto).row();
         panel.pack();
 
         Table root = new Table();

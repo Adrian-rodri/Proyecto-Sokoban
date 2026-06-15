@@ -48,7 +48,7 @@ public class LevelSelectScreen extends BaseScreen {
         
         Table grid = new Table();
         int cols = Math.min(totalNiveles, COLS);
-        float tileW = 96f, tileH = 64f;
+        float tileAncho = 96f, tileAlto = 64f;
 
         for (int i = 0; i < totalNiveles; i++) {
             boolean bloqueado = i >= nivelesDisponibles;
@@ -70,7 +70,7 @@ public class LevelSelectScreen extends BaseScreen {
 
             btn.addListener(new ChangeListener() {
                 @Override
-                public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                public void changed(ChangeEvent event, Actor actor) {
                     if (idx < nivelesDisponibles) {
                         GameScreen.initPlayer = false;
                         game.setScreen(new GameScreen(game, idx));
@@ -99,7 +99,7 @@ public class LevelSelectScreen extends BaseScreen {
                 }
             });
 
-            grid.add(btn).width(tileW).height(tileH).pad(5);
+            grid.add(btn).width(tileAncho).height(tileAlto).pad(5);
             if ((i + 1) % cols == 0) {
                 grid.row();
             }
@@ -121,7 +121,7 @@ public class LevelSelectScreen extends BaseScreen {
         TextButton btnVolver = new TextButton("Volver", skin, "default");
         btnVolver.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new MenuScreen(game));
                 dispose();
             }

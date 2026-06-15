@@ -29,8 +29,9 @@ public class LoginScreen extends BaseScreen {
         super(game);
     }
 
+
     @Override
-    public void show() {
+    protected void buildUI() {
         stage = new Stage(new ScreenViewport());
         TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/skin/ui/sgx-ui.atlas"));
         skin = new Skin(Gdx.files.internal("ui/skin/ui/sgx-ui.json"), atlas);
@@ -119,10 +120,6 @@ public class LoginScreen extends BaseScreen {
         });
     }
 
-    @Override
-    protected void buildUI() {
-    }
-
     private void onIngresar() {
         String user = campoUser.getText().trim();
         String clave = campoClave.getText();
@@ -160,14 +157,4 @@ public class LoginScreen extends BaseScreen {
         errorTimer = 3f;
     }
 
-    @Override
-    public void render(float delta) {
-        if (errorTimer > 0) {
-            errorTimer -= delta;
-            if (errorTimer <= 0) {
-                lblError.setText("");
-            }
-        }
-        super.render(delta);
-    }
 }

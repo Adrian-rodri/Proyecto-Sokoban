@@ -196,7 +196,6 @@ public class Player {
 
                             if (cajaDestino == '0') {
                                 level[cajaFila][cajaCol] = 'B';
-                                System.out.println("Una caja en su lugar");
                             } else {
                                 level[cajaFila][cajaCol] = 'b';
                             }
@@ -227,7 +226,7 @@ public class Player {
 
     public void dibujarPlayer(SpriteBatch batch, int offsetX, int offsetY) {
         if (playerSprite != null) {
-            batch.draw(playerSprite, x + offsetX, y + offsetY, Constantes.TILE_SIZE, Constantes.TILE_SIZE);
+            batch.draw(playerSprite, x + offsetX+offsetPushX, y + offsetY+offsetPushY, Constantes.TILE_SIZE, Constantes.TILE_SIZE);
         }
     }
 
