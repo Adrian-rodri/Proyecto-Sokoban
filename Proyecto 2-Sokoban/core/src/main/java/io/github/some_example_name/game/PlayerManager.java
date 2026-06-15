@@ -359,6 +359,45 @@ public class PlayerManager implements Gestionable<Player>{
         }
         return false;
     }
+    
+    public boolean eliminarAmigo(String feka){
+        if(!existeUsuario(feka))
+            return false;
+        //borrar feka de logeado
+        try(RandomAccessFile rAmigos= new RandomAccessFile("users/"+playerLogeado.getUserName() + "/amigos.skb","rw")){
+            ArrayList<String> arrayAmigos= new ArrayList<>();
+            while(rAmigos.getFilePointer()<rAmigos.length()){
+                String amigo= rAmigos.readUTF();
+                if(!amigo.equals(feka)){
+                    arrayAmigos.add(amigo);
+                }
+            }
+            rAmigos.setLength(0);
+            for(String amigo:arrayAmigos){
+                rAmigos.writeUTF(amigo);
+            }
+            playerLogeado.getAmigos().remove(feka);
+        }catch(IOException e){
+            System.out.println("Error: "+e.getMessage());
+        }
+        //Borrar logeado del otro
+        try(RandomAccessFile rAmigos= new RandomAccessFile("users/" + feka+ "/amigos.skb","rw")){
+            ArrayList<String> arrayAmigos= new ArrayList<>();
+            while(rAmigos.getFilePointer()<rAmigos.length()){
+                String amigo= rAmigos.readUTF();
+                if(!amigo.equals(playerLogeado.getUserName())){
+                    arrayAmigos.add(amigo);
+                }
+            }
+            rAmigos.setLength(0);
+            for(String amigo:arrayAmigos){
+                rAmigos.writeUTF(amigo);
+            }
+        }catch(IOException e){
+            System.out.println("Error: "+e.getMessage());
+        }
+        return true;
+    }
    
     //-----------JJ
     
@@ -388,10 +427,13 @@ public class PlayerManager implements Gestionable<Player>{
 
         guardar();
     }
-    
-         public void cambiarIdioma(String nuevoIdioma) {
-        if (playerLogeado == null) return;
-        playerLogeado.setIdioma(nuevoIdioma);
+    public void cambiarVolumen(int porcentaje) {
+        playerLogeado.setVolumen(porcentaje/100.0);
+        guardar();
+    }
+
+    public void cambiarIdioma(String idioma) {
+        playerLogeado.setIdioma(idioma);
         guardar();
     }
     
