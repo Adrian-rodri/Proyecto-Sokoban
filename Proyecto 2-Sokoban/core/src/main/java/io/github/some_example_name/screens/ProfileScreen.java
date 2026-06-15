@@ -1,42 +1,28 @@
 package io.github.some_example_name.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.some_example_name.Main;
 import io.github.some_example_name.model.EntradaHistorial;
 import io.github.some_example_name.model.Player;
 import java.util.ArrayList;
 
-public class ProfileScreen implements Screen {
+public class ProfileScreen extends BaseScreen {
 
-    private final Main game;
-    private Stage stage;
-    private Skin skin;
 
     private TextButton btnVolver;
 
     public ProfileScreen(Main game) {
-        this.game = game;
+        super(game);
     }
-
     @Override
-    public void show() {
-        stage = new Stage(new ScreenViewport());
-        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/skin/ui/sgx-ui.atlas"));
-        skin = new Skin(Gdx.files.internal("ui/skin/ui/sgx-ui.json"), atlas);
-
+    protected void buildUI() {
         Player p = game.playerManager.getPlayerLogeado();
 
         Table perfilTable = new Table();
@@ -54,25 +40,25 @@ public class ProfileScreen implements Screen {
                     new Color(0.75f, 0.75f, 0.95f, 1f));
             skin.add("dato-perfil", estiloDato, Label.LabelStyle.class);
 
-            perfilTable.add(new Label("Partidas: " + p.getPartidasJugadas(), skin, "dato-perfil")).left().padBottom(3).row();
-            perfilTable.add(new Label("Niveles completados: " + p.getNivelesCompletados(), skin, "dato-perfil")).left().padBottom(3).row();
-            perfilTable.add(new Label("Mejor puntaje: " + p.getMejorPuntaje(), skin, "dato-perfil")).left().padBottom(3).row();
-            perfilTable.add(new Label("Puntaje total: " + p.getPuntajeGeneral(), skin, "dato-perfil")).left().padBottom(3).row();
-            perfilTable.add(new Label("Tiempo jugado: " + String.format("%.2f", p.getTiempoJugadoHoras()) + " h", skin, "dato-perfil")).left().padBottom(3).row();
-            perfilTable.add(new Label("Promedio/nivel: " + String.format("%.0f", p.getTiempoPromedioPorNivel()) + " s", skin, "dato-perfil")).left().padBottom(3).row();
-            perfilTable.add(new Label("Desbloqueados: " + (p.getNivelesDesbloqueados() + 1), skin, "dato-perfil")).left().padBottom(10).row();
+            perfilTable.add(new Label(traducir("Partidas:", "Games:  ")+ p.getPartidasJugadas(), skin, "dato-perfil")).left().padBottom(3).row();
+            perfilTable.add(new Label(traducir("Niveles completados: ","Completed Levels: ") + p.getNivelesCompletados(), skin, "dato-perfil")).left().padBottom(3).row();
+            perfilTable.add(new Label(traducir("Mejor puntaje: ","Best puntutation: ") + p.getMejorPuntaje(), skin, "dato-perfil")).left().padBottom(3).row();
+            perfilTable.add(new Label(traducir("Puntaje total: ","Total Points: ") + p.getPuntajeGeneral(), skin, "dato-perfil")).left().padBottom(3).row();
+            perfilTable.add(new Label(traducir("Tiempo jugado: ","Played Time:  ") + String.format("%.2f", p.getTiempoJugadoHoras()) + " h", skin, "dato-perfil")).left().padBottom(3).row();
+            perfilTable.add(new Label(traducir("Promedio/nivel: ","Average/level") + String.format("%.0f", p.getTiempoPromedioPorNivel()) + " s", skin, "dato-perfil")).left().padBottom(3).row();
+            perfilTable.add(new Label(traducir("Desbloqueados: ","Unlocked: ") + (p.getNivelesDesbloqueados() + 1), skin, "dato-perfil")).left().padBottom(10).row();
 
             ArrayList<EntradaHistorial> hist = p.getHistorial();
             if (hist != null && !hist.isEmpty()) {
-                Label lblUltimas = new Label("Ultimas partidas:", skin, "small-white");
+                Label lblUltimas = new Label(traducir("Ultimas partidas:","Last games:"), skin, "small-white");
                 lblUltimas.setColor(0.5f, 0.5f, 0.75f, 1f);
                 perfilTable.add(lblUltimas).left().padBottom(4).row();
 
                 int desde = Math.max(0, hist.size() - 4);
                 for (int i = desde; i < hist.size(); i++) {
                     EntradaHistorial e = hist.get(i);
-                    String linea = "Nv." + (e.getNivel() + 1)
-                            + "  Movs:" + e.getMovimientos()
+                    String linea = traducir("Nv.","Lvl.") + (e.getNivel() + 1)
+                            + traducir("  Movs:" ,"Stps.")+ e.getMovimientos()
                             + "  Pts:" + e.getPuntaje();
                     Label lblLinea = new Label(linea, skin, "small-white");
                     lblLinea.setColor(0.65f, 0.65f, 0.65f, 1f);
@@ -84,14 +70,14 @@ public class ProfileScreen implements Screen {
         Table avatarTable = new Table();
         avatarTable.top().center();
 
-        Label lblAvatarTitle = new Label("Personalizar avatar", skin, "medium-white");
+        Label lblAvatarTitle = new Label(traducir("Personalizar avatar","Change Avatar"), skin, "medium-white");
         avatarTable.add(lblAvatarTitle).center().padBottom(16).row();
 
         Label lblPlaceholder = new Label("[ proximamente ]", skin, "small-white");
         lblPlaceholder.setColor(0.5f, 0.5f, 0.6f, 1f);
         avatarTable.add(lblPlaceholder).center().row();
         
-        btnVolver = new TextButton("Volver", skin, "default");
+        btnVolver = new TextButton(traducir("Volver","Back"), skin, "default");
 
         btnVolver.addListener(new ChangeListener() {
             @Override
@@ -121,13 +107,8 @@ public class ProfileScreen implements Screen {
         stage.addActor(root);
         Gdx.input.setInputProcessor(stage);
     }
+    
 
-    @Override
-    public void render(float delta) {
-        ScreenUtils.clear(0.08f, 0.08f, 0.12f, 1f);
-        stage.act(delta);
-        stage.draw();
-    }
 
     @Override
     public void resize(int w, int h) {
@@ -150,4 +131,6 @@ public class ProfileScreen implements Screen {
         stage.dispose();
         skin.dispose();
     }
+
+    
 }

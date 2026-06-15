@@ -108,153 +108,170 @@ public class MenuScreen extends BaseScreen {
             }
         });
     }
+    private void actualizarBotonNotificaciones() {
+        int cant= game.playerManager.getCantSolicitudes();
+        String txt= traducir("Notif", "Notif");
+        if (cant>0){
+            txt+= " (" + cant + ")";
+        }
+        btnNotif.setText(txt);
+    }
 
     private void mostrarDialogoAmigos() {
-        final Window ventana = new Window("Amigos", skin);
-        ventana.setMovable(false);
-        ventana.setModal(true);
-        ventana.pad(20);
+        Dialog dialogo= new Dialog(traducir("Amigos","Friends"), skin,"tool");
+        dialogo.setMovable(false);
+        dialogo.setModal(true);
+        dialogo.pad(20);
+        
+        TextField txtAmigo= new TextField("", skin);
+        txtAmigo.setMessageText(traducir("Username del amigo...", "Friend's username..."));
+        TextButton btnAgregar= new TextButton(traducir("Enviar solicitud", "Send request"), skin, "default");
+        Label lblMsg= new Label("", skin, "small-white");
+        
+        Table scrollContent= new Table();
+        ScrollPane scroll= new ScrollPane(scrollContent, skin);
 
-        final Table contenido = new Table();
-
-        final TextField txtAmigo = new TextField("", skin);
-        txtAmigo.setMessageText("Username del amigo...");
-        final TextButton btnAgregar = new TextButton("Agregar", skin, "default");
-        final Label lblMsg = new Label("", skin, "small-white");
         btnAgregar.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent ev, Actor a) {
                 String nombre = txtAmigo.getText().trim();
-                if (nombre.isEmpty()) return;
-                if (game.playerManager.enviarSolicitud(nombre)) {
-                    lblMsg.setText( "Solicitud enviada a "+nombre);
+                if (nombre.isEmpty())
+                    return;
+                boolean ok= game.playerManager.enviarSolicitud(nombre);
+                if (ok){
+                    lblMsg.setText(traducir("Solicitud enviada a ", "Request sent to ") + nombre);
                     txtAmigo.setText("");
-                } else {
-                    lblMsg.setText(" No se pudo agregar (no existe / ya es amigo)");
+                }else{
+                    lblMsg.setText(traducir("No se pudo enviar", "Could not send"));
                 }
-                refrescarListaAmigos(contenido, ventana, txtAmigo, btnAgregar, lblMsg);
+                refrescarDialogo(scrollContent, dialogo, txtAmigo, btnAgregar, lblMsg, scroll);
             }
         });
+        Table topRow= new Table();
+        topRow.add(txtAmigo).width(200).padRight(6);
+        topRow.add(btnAgregar).row();
+        topRow.add(lblMsg).colspan(2).padTop(4);
 
-        TextButton btnCerrar = new TextButton("Cerrar", skin, "default");
-        btnCerrar.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeListener.ChangeEvent ev, Actor a) {
-                ventana.remove();
-            }
-        });
+        dialogo.getContentTable().add(topRow).padBottom(8).row();
+        dialogo.getContentTable().add(scroll).width(340).height(260).padBottom(8).row();
+        dialogo.button(traducir("Cerrar", "Close"), null);
 
-        contenido.add(txtAmigo).width(180).padRight(6);
-        contenido.add(btnAgregar).padRight(6);
-        contenido.row();
-        contenido.add(lblMsg).colspan(2).padBottom(10);
-        contenido.row();
+        refrescarDialogo(scrollContent, dialogo, txtAmigo, btnAgregar, lblMsg, scroll);
 
-        refrescarListaAmigos(contenido, ventana, txtAmigo, btnAgregar, lblMsg);
-
-        contenido.add(btnCerrar).colspan(2).padTop(10);
-
-        ventana.add(contenido);
-        ventana.pack();
-
-        Table root = (Table) stage.getActors().first();
-        root.addActor(ventana);
-        ventana.setPosition(
-            (stage.getWidth() - ventana.getWidth()) / 2f,
-            (stage.getHeight() - ventana.getHeight()) / 2f
-        );
+        dialogo.pack();
+        dialogo.show(stage);
     }
     
     
-     private void refrescarListaAmigos(Table contenedor, Window ventana,
-                                       TextField txtAmigo, TextButton btnAgregar, Label lblMsg) {
-        contenedor.clearChildren();
+    private void refrescarDialogo(Table scrollContent, Window ventana,TextField txtAmigo, TextButton btnAgregar,Label lblMsg, ScrollPane scroll) {
+        scrollContent.clearChildren();
+        scrollContent.top().left();
 
-        contenedor.add(txtAmigo).width(180).padRight(6);
-        contenedor.add(btnAgregar).padRight(6);
-        contenedor.row();
-        contenedor.add(lblMsg).colspan(2).padBottom(10);
-        contenedor.row();
+        java.util.ArrayList<String> solicitudes= game.playerManager.getSolicitudes();
+        if (solicitudes!=null &&!solicitudes.isEmpty()){
+            Label lblSec= new Label("* " + traducir("Solicitudes pendientes", "Pending requests") + " *", skin, "small-white");
+            lblSec.setColor(0.6f, 0.8f, 0.4f, 1f);
+            scrollContent.add(lblSec).colspan(3).left().padBottom(6);
+            scrollContent.row();
 
-        java.util.ArrayList<String> amigos = game.playerManager.getPlayerLogeado().getAmigos();
-        if (amigos == null || amigos.isEmpty()) {
-            contenedor.add(new Label("(sin amigos aún)", skin, "small-white"))
-                     .colspan(2).padBottom(6);
-            contenedor.row();
+            for (String sol: solicitudes) {
+                scrollContent.add(new Label(sol, skin, "small-white")).left().padRight(8).padBottom(4);
+
+                TextButton btnAceptar= new TextButton(traducir("Aceptar", "Accept"), skin, "small");
+                btnAceptar.addListener(new ChangeListener() {
+                    @Override
+                    public void changed(ChangeListener.ChangeEvent ev, Actor a) {
+                        game.playerManager.aceptarSolicitud(sol);
+                        actualizarBotonNotificaciones();
+                        refrescarDialogo(scrollContent, ventana, txtAmigo, btnAgregar, lblMsg, scroll);
+                    }
+                });
+                scrollContent.add(btnAceptar).width(60).height(24).padRight(4);
+
+                TextButton btnRechazar= new TextButton(traducir("Rechazar", "Reject"), skin, "small");
+                btnRechazar.addListener(new ChangeListener() {
+                    @Override
+                    public void changed(ChangeListener.ChangeEvent ev, Actor a) {
+                        game.playerManager.rechazarSolicitud(sol);
+                        actualizarBotonNotificaciones();
+                        refrescarDialogo(scrollContent, ventana, txtAmigo, btnAgregar, lblMsg, scroll);
+                    }
+                });
+                scrollContent.add(btnRechazar).width(70).height(24).padBottom(4);
+                scrollContent.row();
+            }
+            Label lblSep= new Label("***", skin, "small-white");
+            lblSep.setColor(0.4f, 0.4f, 0.4f, 1f);
+            scrollContent.add(lblSep).colspan(3).padBottom(6);
+            scrollContent.row();
+        }
+
+        java.util.ArrayList<String> amigos= game.playerManager.getPlayerLogeado().getAmigos();
+        if (amigos== null|| amigos.isEmpty()) {
+            scrollContent.add(new Label(traducir("(sin amigos aun)", "(no friends yet)"), skin, "small-white")).colspan(3).padBottom(6);
+            scrollContent.row();
             ventana.pack();
+            scroll.layout();
             return;
         }
 
-        for (final String amigo : amigos) {
-            TextButton btnAmigo = new TextButton(amigo, skin, "default");
+        for (String amigo: amigos) {
+            TextButton btnAmigo= new TextButton(amigo, skin, "default");
             btnAmigo.addListener(new ChangeListener() {
                 @Override
-                public void changed(ChangeListener.ChangeEvent ev, Actor a) {
+                public void changed(ChangeEvent ev, Actor a) {
                     mostrarComparativa(amigo);
                 }
             });
-            contenedor.add(btnAmigo).colspan(2).fillX().padBottom(4);
-            contenedor.row();
+            scrollContent.add(btnAmigo).colspan(3).fillX().padBottom(4);
+            scrollContent.row();
         }
+
         ventana.pack();
+        scroll.layout();
     }
     
     private void mostrarComparativa(String amigo) {
-        String[] statsYo = new String[]{
-            game.playerManager.getPlayerLogeado().getUserName(),
-            String.valueOf(game.playerManager.getPlayerLogeado().getPartidasJugadas()),
-            String.valueOf(game.playerManager.getPlayerLogeado().getNivelesCompletados()),
-            String.valueOf(game.playerManager.getPlayerLogeado().getMejorPuntaje()),
-            String.valueOf(game.playerManager.getPlayerLogeado().getPuntajeGeneral()),
-            String.format("%.2f", game.playerManager.getPlayerLogeado().getTiempoJugadoHoras()),
-            String.format("%.2f", game.playerManager.getPlayerLogeado().getTiempoPromedioPorNivel())
-        };
-        String[] statsEl = game.playerManager.obtenerStatsAmigo(amigo);
-        if (statsEl == null) return;
+     String[] statsYo = {
+         String.valueOf(game.playerManager.getPlayerLogeado().getPartidasJugadas()),
+         String.valueOf(game.playerManager.getPlayerLogeado().getNivelesCompletados()),
+         String.valueOf(game.playerManager.getPlayerLogeado().getMejorPuntaje()),
+         String.valueOf(game.playerManager.getPlayerLogeado().getPuntajeGeneral()),
+         String.format("%.2f", game.playerManager.getPlayerLogeado().getTiempoJugadoHoras()),
+         String.format("%.2f", game.playerManager.getPlayerLogeado().getTiempoPromedioPorNivel())
+     };
+     String[] statsEl = game.playerManager.obtenerStatsAmigo(amigo);
+     if (statsEl == null) return;
 
-        final Window w = new Window("Comparativa: " + amigo, skin);
-        w.setModal(true);
-        w.pad(16);
+     String[][] filas={
+         {traducir("Partidas","Games"),statsYo[0],statsEl[0]},
+         {traducir("Niveles Complet.","Complet. Levels"), statsYo[1], statsEl[1]},
+         {traducir("Mejor Puntaje","Best Score"),statsYo[2], statsEl[2]},
+         {traducir("Puntaje General","General Score"),statsYo[3], statsEl[3]},
+         {traducir("Tiempo (h)","Time (h)"),statsYo[4], statsEl[4]},
+         {traducir("Tiempo prom.","Average Time"),statsYo[5], statsEl[5]}
+     };
 
-        Table tabla = new Table();
-        tabla.add("",          "bold").width(100);
-        tabla.add("Tú",         "bold").width(100);
-        tabla.add(amigo,        "bold").width(100);
-        tabla.row();
+     Dialog dialogo= new Dialog("Comparativa: " + amigo, skin);
+     dialogo.setMovable(false);
+     dialogo.pad(16);
 
-        String[][] filas = {
-            {"Partidas",      statsYo[1], statsEl[1]},
-            {"Niveles Complet.", statsYo[2], statsEl[2]},
-            {"Mejor Puntaje", statsYo[3], statsEl[3]},
-            {"Puntaje Gral.",  statsYo[4], statsEl[4]},
-            {"Tiempo (h)",    statsYo[5], statsEl[5]},
-            {"Tiempo prom.",   statsYo[6], statsEl[6]}
-        };
-        for (String[] f : filas) {
-            tabla.add(f[0]).width(100);
-            tabla.add(f[1]).width(100);
-            tabla.add(f[2]).width(100);
-            tabla.row();
-        }
+     Table tabla= dialogo.getContentTable();
+     tabla.add("").width(120);
+     tabla.add("Tú").width(100);
+     tabla.add(amigo).width(100);
+     tabla.row();
 
-        TextButton btnOk = new TextButton("Cerrar", skin, "default");
-        btnOk.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeListener.ChangeEvent ev, Actor a) {
-                w.remove();
-            }
-        });
-        tabla.add(btnOk).colspan(4).padTop(12);
+     for (String[] f: filas){
+         tabla.add(f[0]).width(120);
+         tabla.add(f[1]).width(100);
+         tabla.add(f[2]).width(100);
+         tabla.row();
+     }
 
-        w.add(tabla);
-        w.pack();
-        Table root = (Table) stage.getActors().first();
-        root.addActor(w);
-        w.setPosition(
-            (stage.getWidth() - w.getWidth()) / 2f,
-            (stage.getHeight() - w.getHeight()) / 2f
-        );
-    }
+     dialogo.button("Cerrar");
+     dialogo.show(stage);
+ }
     
     
     @Override
