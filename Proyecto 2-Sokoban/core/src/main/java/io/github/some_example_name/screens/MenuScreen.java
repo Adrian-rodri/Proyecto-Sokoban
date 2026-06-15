@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.some_example_name.Main;
+import java.util.ArrayList;
 
 public class MenuScreen extends BaseScreen {
     private TextButton btnNotif;
@@ -100,7 +101,12 @@ public class MenuScreen extends BaseScreen {
             }
         });
         
-        
+        btnNotif.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent e, Actor a) {
+                mostrarDialogoNotificaciones();
+            }
+        });
         btnAyuda.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent e, Actor a) {
@@ -232,54 +238,98 @@ public class MenuScreen extends BaseScreen {
     }
     
     private void mostrarComparativa(String amigo) {
-     String[] statsYo = {
-         String.valueOf(game.playerManager.getPlayerLogeado().getPartidasJugadas()),
-         String.valueOf(game.playerManager.getPlayerLogeado().getNivelesCompletados()),
-         String.valueOf(game.playerManager.getPlayerLogeado().getMejorPuntaje()),
-         String.valueOf(game.playerManager.getPlayerLogeado().getPuntajeGeneral()),
-         String.format("%.2f", game.playerManager.getPlayerLogeado().getTiempoJugadoHoras()),
-         String.format("%.2f", game.playerManager.getPlayerLogeado().getTiempoPromedioPorNivel())
-     };
-     String[] statsEl = game.playerManager.obtenerStatsAmigo(amigo);
-     if (statsEl == null) return;
+        String[] statsYo = {
+            String.valueOf(game.playerManager.getPlayerLogeado().getPartidasJugadas()),
+            String.valueOf(game.playerManager.getPlayerLogeado().getNivelesCompletados()),
+            String.valueOf(game.playerManager.getPlayerLogeado().getMejorPuntaje()),
+            String.valueOf(game.playerManager.getPlayerLogeado().getPuntajeGeneral()),
+            String.format("%.2f", game.playerManager.getPlayerLogeado().getTiempoJugadoHoras()),
+            String.format("%.2f", game.playerManager.getPlayerLogeado().getTiempoPromedioPorNivel())
+        };
+        String[] statsEl = game.playerManager.obtenerStatsAmigo(amigo);
+        if (statsEl == null) return;
 
-     String[][] filas={
-         {traducir("Partidas","Games"),statsYo[0],statsEl[0]},
-         {traducir("Niveles Complet.","Complet. Levels"), statsYo[1], statsEl[1]},
-         {traducir("Mejor Puntaje","Best Score"),statsYo[2], statsEl[2]},
-         {traducir("Puntaje General","General Score"),statsYo[3], statsEl[3]},
-         {traducir("Tiempo (h)","Time (h)"),statsYo[4], statsEl[4]},
-         {traducir("Tiempo prom.","Average Time"),statsYo[5], statsEl[5]}
-     };
+        String[][] filas={
+            {traducir("Partidas","Games"),statsYo[0],statsEl[0]},
+            {traducir("Niveles Complet.","Complet. Levels"), statsYo[1], statsEl[1]},
+            {traducir("Mejor Puntaje","Best Score"),statsYo[2], statsEl[2]},
+            {traducir("Puntaje total","Total Score"),statsYo[3], statsEl[3]},
+            {traducir("Tiempo (h)","Time (h)"),statsYo[4], statsEl[4]},
+            {traducir("Tiempo prom.","Average Time"),statsYo[5], statsEl[5]}
+        };
 
-     Dialog dialogo= new Dialog("Comparativa: " + amigo, skin);
-     dialogo.setMovable(false);
-     dialogo.pad(16);
+        Dialog dialogo= new Dialog("Comparativa: " + amigo, skin);
+        dialogo.setMovable(false);
+        dialogo.pad(16);
 
-     Table tabla= dialogo.getContentTable();
-     tabla.add("").width(120);
-     tabla.add("Tú").width(100);
-     tabla.add(amigo).width(100);
-     tabla.row();
+        Table tabla= dialogo.getContentTable();
+        tabla.add("").width(120);
+        tabla.add(new Label(traducir("TU", "YOU"), skin)).width(100);
+        tabla.add(amigo).width(100);
+        tabla.row();
 
-     for (String[] f: filas){
-         tabla.add(f[0]).width(120);
-         tabla.add(f[1]).width(100);
-         tabla.add(f[2]).width(100);
-         tabla.row();
-     }
+        for (String[] f: filas){
+            tabla.add(lbl(f[0])).width(120);
+            tabla.add(lbl(f[1])).width(100);
+            tabla.add(lbl(f[2])).width(100);
+            tabla.row();
+        }
 
-     dialogo.button("Cerrar");
-     dialogo.show(stage);
- }
-    
-    
-    @Override
-    public void render(float delta) {
-        ScreenUtils.clear(0.08f, 0.08f, 0.12f, 1f);
-        stage.act(delta);
-        stage.draw();
+        dialogo.button("Cerrar");
+        dialogo.show(stage);
     }
+    private Label lbl(String texto){
+        return new Label(texto, skin, "small-white");
+    }
+    private void mostrarDialogoNotificaciones() {
+        ArrayList<String> solicitudes = game.playerManager.getSolicitudes();
+
+        Dialog dialogo= new Dialog(traducir("Notificaciones", "Notifications"), skin, "tool");
+        dialogo.setModal(true);
+        dialogo.setMovable(false);
+        dialogo.pad(20, 40, 20, 40);
+
+        Table content= dialogo.getContentTable();
+
+        if(solicitudes.isEmpty()){
+            content.add(new Label(traducir("No tienes solicitudes pendientes", "No pending requests"),skin, "small-white")).center().row();
+        }else{
+            content.add(new Label(traducir("Solicitudes de amistad:", "Friend requests:"),skin, "small-white")).left().padBottom(8).row();
+            for(String from :solicitudes){
+                Table fila= new Table();
+                fila.add(new Label(from, skin, "small-white")).left().expandX();
+
+                TextButton btnAceptar= new TextButton(traducir("Aceptar", "Accept"), skin, "small");
+                TextButton btnRechazar= new TextButton(traducir("Rechazar", "Decline"), skin, "small");
+
+                btnAceptar.addListener(new ChangeListener() {
+                    public void changed(ChangeEvent e, Actor a) {
+                        game.playerManager.aceptarSolicitud(from);
+                        dialogo.hide();
+                        mostrarDialogoNotificaciones();
+                        actualizarBotonNotificaciones();
+                    }
+                });
+                btnRechazar.addListener(new ChangeListener() {
+                    public void changed(ChangeEvent e, Actor a) {
+                        game.playerManager.rechazarSolicitud(from);
+                        dialogo.hide();
+                        mostrarDialogoNotificaciones();
+                        actualizarBotonNotificaciones();
+                    }
+                });
+
+                fila.add(btnAceptar).width(70).padRight(4);
+                fila.add(btnRechazar).width(70);
+                content.add(fila).fillX().padBottom(3).row();
+            }
+        }
+
+        dialogo.button(traducir("Cerrar", "Close"), null);
+        dialogo.show(stage);
+    }
+    
+    
 
     @Override
     public void resize(int w, int h) {

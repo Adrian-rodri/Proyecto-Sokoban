@@ -418,9 +418,8 @@ public class PlayerManager implements Gestionable<Player>{
         if(!yaCompletado)
             playerLogeado.agregarNivelCompletado();
         
-        int puntos= puntaje-mejorPuntajeAnterior;
-        if(puntos>0)
-            playerLogeado.sumarPuntajeGeneral(puntos);
+        if (puntaje > mejorPuntajeAnterior) 
+            playerLogeado.sumarPuntajeGeneral(puntaje - mejorPuntajeAnterior);
         
         playerLogeado.compararMjeorPuntaje(puntaje);
         double nuevashoras= playerLogeado.getTiempoJugadoHoras()+(tiempoSeg/3600.0);
