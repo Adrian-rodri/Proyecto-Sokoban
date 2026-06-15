@@ -1,231 +1,172 @@
 package io.github.some_example_name.screens;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import io.github.some_example_name.model.EntradaHistorial;
 import io.github.some_example_name.Main;
+import io.github.some_example_name.model.EntradaHistorial;
 import io.github.some_example_name.model.Player;
 import java.util.ArrayList;
 
 public class ReportesScreen extends BaseScreen {
 
-    private SpriteBatch batch;
-    private BitmapFont font;
-    private ShapeRenderer shape;
-    private OrthographicCamera camera;
     private TextButton btnVolver;
-    private int totalNiveles;
+    private int totalNiveles, nivelesDesbloqueados;
     private int[][] mejores;
+    private Player player;
 
     public ReportesScreen(Main game) {
         super(game);
     }
 
     @Override
-    public void show() {
-        batch = new SpriteBatch();
-        font = new BitmapFont();
-        shape = new ShapeRenderer();
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
+    protected void buildUI() {
         totalNiveles = game.nivelManager.getCantidad();
-        mejores = new int[totalNiveles][];
+        player= game.playerManager.getPlayerLogeado();
+        nivelesDesbloqueados=player.getNivelesDesbloqueados();
+
+        mejores= new int[totalNiveles][];
         computarMejores();
 
-        stage = new Stage(new ScreenViewport());
-        skin = crearSkin();
+        TextButton.TextButtonStyle btnBase= skin.get("small", TextButton.TextButtonStyle.class);
 
-        btnVolver = new TextButton("Volver", skin, "default");
+        TextButton.TextButtonStyle estiloCompletado= new TextButton.TextButtonStyle(btnBase);
+        estiloCompletado.fontColor= new Color(0.30f, 0.70f, 0.35f, 1f);
+        estiloCompletado.overFontColor= new Color(0.45f, 0.85f, 0.50f, 1f);
+        skin.add("reporte-completado", estiloCompletado);
+
+        TextButton.TextButtonStyle estiloDisponible= new TextButton.TextButtonStyle(btnBase);
+        estiloDisponible.fontColor= Color.WHITE;
+        estiloDisponible.overFontColor= new Color(0.80f, 0.85f, 1f, 1f);
+        skin.add("reporte-disponible", estiloDisponible);
+
+        Table nivelTable= new Table();
+        for(int i=0;i <totalNiveles;i++){
+            String nombre=(i==0)? "Tutorial" : traducir("Nivel","Level") + i;
+
+            String texto= nombre;
+            String estilo;
+            if(mejores[i]!= null){
+                estilo= "reporte-completado";
+            }else if(mejores[i]== null && i <=nivelesDesbloqueados) {
+                estilo= "reporte-disponible";
+            }else{
+                estilo= "small";
+            }
+
+            TextButton btnNivel= new TextButton(texto, skin, estilo);
+            final int index= i;
+            btnNivel.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                    if (mejores[index] != null) {
+                        int puntaje= mejores[index][0];
+                        int movimientos= mejores[index][1];
+                        int segundos = mejores[index][2];
+                        String minutos = String.format("%02d", segundos / 60);
+                        String segundosStr = String.format("%02d", segundos % 60);
+                        System.out.println("--- Mejor partida - " + nombre
+                                + " ---  Puntaje: " + puntaje
+                                + "  Movimientos: " + movimientos
+                                + "  Tiempo: " + minutos + ":" + segundosStr);
+                    } else {
+                        System.out.println("--- " + nombre + " - Sin partidas registradas ---");
+                    }
+                }
+            });
+            nivelTable.add(btnNivel).width(170).height(22).padBottom(3).row();
+        }
+
+        ScrollPane scroll= new ScrollPane(nivelTable, skin);
+        scroll.setForceScroll(false, true);
+
+        Table rankingTable = new Table();
+        rankingTable.top().left();
+
+        ArrayList<String[]> ranking= game.playerManager.getRanking();
+        rankingTable.add(new Label("Ranking", skin, "medium-white")).left().padBottom(8).row();
+
+        int top= Math.min(10, ranking.size());
+        if (top== 0){
+            Label lblSinDatos = new Label(traducir("Sin datos","No Data"), skin, "small-white");
+            lblSinDatos.setColor(0.4f, 0.4f, 0.6f, 1f);
+            rankingTable.add(lblSinDatos).left().row();
+        }else{
+            for(int i=0; i<top; i++){
+                String[] entry= ranking.get(i);
+                boolean soyYo= player != null && entry[0].equals(player.getUserName());
+                
+                Color txtColor;
+                if(i==0){
+                    txtColor= new Color(1f, 0.85f, 0.2f, 1f);
+                }else if(i==1){
+                    txtColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+                }else if(i==2){
+                    txtColor= new Color(0.8f, 0.55f, 0.3f, 1f);
+                }else if(soyYo){
+                    txtColor= Color.YELLOW;
+                }else{
+                    txtColor= Color.LIGHT_GRAY;
+                }
+
+                String linea= (i+1)+".  "+entry[0]+"  -  "+entry[1]+" pts";
+                if(soyYo) 
+                    linea +="  <";
+
+                Label lblRank= new Label(linea, skin, "small-white");
+                lblRank.setColor(txtColor);
+                rankingTable.add(lblRank).left().padBottom(3).row();
+            }
+        }
+        
+        btnVolver= new TextButton("Volver", skin, "default");
         btnVolver.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new ProfileScreen(game));
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                game.setScreen(new MenuScreen(game));
                 dispose();
             }
         });
 
-        Table table = new Table();
-        table.setFillParent(true);
-        table.bottom().center().pad(20);
-        table.add(btnVolver).width(140).height(32);
-        stage.addActor(table);
+        TextButton btnComparar= new TextButton("Comparar stats", skin, "small");
+        btnComparar.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                System.out.println("[Reportes] Comparar stats con otro jugador");
+            }
+        });
 
-        Gdx.input.setInputProcessor(stage);
+        Table btnRow= new Table();
+        btnRow.add(btnComparar).width(140).height(28).padRight(14);
+        btnRow.add(btnVolver).width(140).height(32);
+
+        Window panel= createWindow();
+        panel.add(new Label("Reportes", skin, "title-white")).colspan(2).center().padBottom(18).row();
+        panel.add(scroll).left().width(200).padRight(20);
+        panel.add(rankingTable).left().width(260).row();
+        panel.add(btnRow).colspan(2).center().padTop(14);
+        panel.pack();
+        setRoot(panel);
     }
 
-    private Skin crearSkin() {
-        Skin s = new Skin();
-        BitmapFont f = new BitmapFont();
-        f.getData().setScale(0.9f);
-        s.add("default-font", f, BitmapFont.class);
-
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
-        style.font = f;
-        style.fontColor = new Color(0.8f, 0.8f, 1f, 1f);
-        style.overFontColor = Color.WHITE;
-        style.downFontColor = new Color(0.5f, 0.5f, 0.8f, 1f);
-        s.add("default", style, TextButton.TextButtonStyle.class);
-        return s;
-    }
-
-    private void computarMejores() {
-        Player p = game.playerManager.getPlayerLogeado();
-        if (p == null) {
+    private void computarMejores(){
+        if (player==null) 
             return;
-        }
-        ArrayList<EntradaHistorial> hist = p.getHistorial();
-        if (hist == null) {
+        ArrayList<EntradaHistorial> hist= player.getHistorial();
+        if (hist==null) 
             return;
-        }
-        for (EntradaHistorial e : hist) {
-            int nv = e.getNivel();
-            if (nv < 0 || nv >= totalNiveles) {
+        for (EntradaHistorial entrada:hist) {
+            int numNivel= entrada.getNivel();
+            if (numNivel <0 || numNivel >=totalNiveles) 
                 continue;
-            }
-            if (mejores[nv] == null || e.getPuntaje() > mejores[nv][0]) {
-                mejores[nv] = new int[]{e.getPuntaje(), e.getMovimientos(), (int) e.getTiempo()};
-            }
-        }
-    }
-
-    @Override
-    public void render(float delta) {
-        ScreenUtils.clear(0.08f, 0.08f, 0.12f, 1f);
-        camera.update();
-        batch.setProjectionMatrix(camera.combined);
-        shape.setProjectionMatrix(camera.combined);
-
-        float cx = Gdx.graphics.getWidth() / 2f;
-        float cy = Gdx.graphics.getHeight() / 2f;
-
-        shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.setColor(0.13f, 0.13f, 0.2f, 1f);
-        shape.rect(cx - 280, cy - 235, 560, 475);
-        shape.end();
-        shape.begin(ShapeRenderer.ShapeType.Line);
-        shape.setColor(0.35f, 0.35f, 0.55f, 1f);
-        shape.rect(cx - 280, cy - 235, 560, 475);
-        shape.end();
-
-        float headerY = cy + 185;
-        shape.begin(ShapeRenderer.ShapeType.Line);
-        shape.setColor(0.35f, 0.35f, 0.55f, 1f);
-        shape.line(cx - 265, headerY - 4, cx + 265, headerY - 4);
-        shape.end();
-
-        float colNivel = cx - 260;
-        float colPuntaje = cx - 60;
-        float colMovs = cx + 80;
-        float colTiempo = cx + 170;
-
-        batch.begin();
-
-        font.setColor(Color.WHITE);
-        GlyphLayout titulo = new GlyphLayout(font, "Records");
-        font.draw(batch, "Records", cx - titulo.width / 2f, cy + 223);
-
-        font.setColor(0.45f, 0.45f, 0.65f, 1f);
-        GlyphLayout hint = new GlyphLayout(font, "Mejor resultado por nivel");
-        font.draw(batch, "Mejor resultado por nivel", cx - hint.width / 2f, cy + 202);
-
-        font.setColor(0.65f, 0.65f, 0.88f, 1f);
-        font.draw(batch, "Nivel", colNivel, headerY);
-        font.draw(batch, "Puntaje", colPuntaje, headerY);
-        font.draw(batch, "Movs", colMovs, headerY);
-        font.draw(batch, "Tiempo", colTiempo, headerY);
-
-        float rowStep = 36f;
-        float rowY = headerY - rowStep;
-
-        for (int i = 0; i < totalNiveles; i++) {
-            String nombreNivel = game.nivelManager.getNivel(i).getName().replace(".txt", "");
-            if (mejores[i] == null) {
-                font.setColor(0.40f, 0.40f, 0.50f, 1f);
-                font.draw(batch, nombreNivel, colNivel, rowY);
-                font.draw(batch, "-", colPuntaje, rowY);
-            } else {
-                int pts = mejores[i][0];
-                int movs = mejores[i][1];
-                int segs = mejores[i][2];
-                String tiempo = String.format("%02d:%02d", segs / 60, segs % 60);
-                if (esMejorDeTodos(i)) {
-                    font.setColor(1f, 0.85f, 0.2f, 1f);
-                } else {
-                    font.setColor(0.80f, 0.80f, 0.95f, 1f);
-                }
-                font.draw(batch, nombreNivel, colNivel, rowY);
-                font.draw(batch, String.valueOf(pts), colPuntaje, rowY);
-                font.draw(batch, String.valueOf(movs), colMovs, rowY);
-                font.draw(batch, tiempo, colTiempo, rowY);
-            }
-            rowY -= rowStep;
-        }
-        batch.end();
-
-        stage.act(delta);
-        stage.draw();
-    }
-
-    private boolean esMejorDeTodos(int idx) {
-        if (mejores[idx] == null) {
-            return false;
-        }
-        int max = mejores[idx][0];
-        for (int i = 0; i < totalNiveles; i++) {
-            if (i != idx && mejores[i] != null && mejores[i][0] > max) {
-                return false;
+            if (mejores[numNivel] ==null || entrada.getPuntaje() >mejores[numNivel][0]){
+                mejores[numNivel]= new int[]{entrada.getPuntaje(), entrada.getMovimientos(), (int) entrada.getTiempo()};
             }
         }
-        return true;
-    }
-
-    @Override
-    public void resize(int w, int h) {
-        camera.viewportWidth = w;
-        camera.viewportHeight = h;
-        camera.update();
-        stage.getViewport().update(w, h, true);
-    }
-
-    @Override
-    public void pause() {
-    }
-
-    @Override
-    public void resume() {
-    }
-
-    @Override
-    public void hide() {
-        Gdx.input.setInputProcessor(null);
-    }
-
-    @Override
-    public void dispose() {
-        batch.dispose();
-        font.dispose();
-        shape.dispose();
-        stage.dispose();
-        skin.dispose();
-    }
-
-    @Override
-    protected void buildUI() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

@@ -260,18 +260,18 @@ public class MenuScreen extends BaseScreen {
 
         Dialog dialogo= new Dialog("Comparativa: " + amigo, skin);
         dialogo.setMovable(false);
-        dialogo.pad(16);
+        dialogo.pad(28, 20, 16, 20);
 
         Table tabla= dialogo.getContentTable();
-        tabla.add("").width(120);
-        tabla.add(new Label(traducir("TU", "YOU"), skin)).width(100);
-        tabla.add(amigo).width(100);
+        tabla.add("").width(150).padTop(12);
+        tabla.add(new Label(traducir("TU", "YOU"), skin)).width(70);
+        tabla.add(amigo).width(70);
         tabla.row();
 
         for (String[] f: filas){
-            tabla.add(lbl(f[0])).width(120);
-            tabla.add(lbl(f[1])).width(100);
-            tabla.add(lbl(f[2])).width(100);
+            tabla.add(lbl(f[0])).width(150);
+            tabla.add(lbl(f[1])).width(70);
+            tabla.add(lbl(f[2])).width(70);
             tabla.row();
         }
 
