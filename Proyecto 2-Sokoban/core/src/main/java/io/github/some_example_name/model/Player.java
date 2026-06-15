@@ -133,19 +133,19 @@ public class Player {
             spriteFila = 3;
 
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+        else if (Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
             dirY -= 1;
             //y-=Constantes.TILE_SIZE;
             spriteCol = 1;
             spriteFila = 0;
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.A) || Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+        else if (Gdx.input.isKeyJustPressed(Input.Keys.A) || Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
             dirX -= 1;
             //x-=Constantes.TILE_SIZE;
             spriteCol = 1;
             spriteFila = 1;
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.D) || Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+        else if (Gdx.input.isKeyJustPressed(Input.Keys.D) || Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
             dirX += 1;
             //x+=Constantes.TILE_SIZE;
             spriteCol = 1;
