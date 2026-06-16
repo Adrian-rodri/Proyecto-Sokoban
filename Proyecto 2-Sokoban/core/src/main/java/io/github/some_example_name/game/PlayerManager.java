@@ -710,6 +710,75 @@ public class PlayerManager implements Gestionable<Player>{
         }
         return false;
     }
+    public ArrayList<String[]> getRetos(){
+        ArrayList<String[]> retos= new ArrayList<>();
+        if(playerLogeado==null) 
+            return retos;
+        try{
+            File file= new File("users/" + playerLogeado.getUserName() + "/retos.skb");
+            if(!file.exists()) 
+                return retos;
+            try(RandomAccessFile rf= new RandomAccessFile(file, "r")){
+                while (rf.getFilePointer() <rf.length()){
+                    String retador= rf.readUTF();
+                    int nivel= rf.readInt();
+                    retos.add(new String[]{ retador, String.valueOf(nivel)});
+                }
+            }
+        }catch(IOException e){
+            System.err.println("Error: "+e.getMessage());
+        }
+        return retos;
+    }
+    public int getCantRetos(){
+        return getRetos().size();
+    }
+    public void removerReto(String retador, int nivel) {
+        if (playerLogeado==null) 
+            return;
+        File file= new File("users/" + playerLogeado.getUserName() + "/retos.skb");
+        if(!file.exists())
+            return;
+        ArrayList<String[]> restantes= new ArrayList<>();
+        boolean removido= false;
+        try(RandomAccessFile rRetos= new RandomAccessFile(file, "rw")){
+            while (rRetos.getFilePointer() < rRetos.length()) {
+                String recep= rRetos.readUTF();
+                int numLevel= rRetos.readInt();
+                if(!removido && recep.equals(retador) && numLevel==nivel){
+                    removido= true;
+                }else{
+                    restantes.add(new String[]{ recep, String.valueOf(numLevel) });
+                }
+            }
+            rRetos.setLength(0);
+            for(String[] entry: restantes){
+                rRetos.writeUTF(entry[0]);
+                rRetos.writeInt(Integer.parseInt(entry[1]));
+            }
+        }catch(IOException e){
+            System.err.println("Error: "+e.getMessage());
+        }
+    }
+    
+    public int getMejorPuntajeEnNivel(String userName, int nivel){
+        int mejor= -1;
+        try(RandomAccessFile rf= new RandomAccessFile("users/" + userName + "/historial.skb", "r")){
+            while(rf.getFilePointer()<rf.length()){
+                rf.readInt();//numIntento
+                int numLevel= rf.readInt();
+                int puntaje= rf.readInt();
+                rf.readInt();//movimientos
+                rf.readDouble();//tiempo
+                rf.readLong();//fecha
+                if(numLevel==nivel &&puntaje>mejor) 
+                    mejor= puntaje;
+            }
+        } catch (IOException e) {
+            System.err.println("Error:"+ e.getMessage());
+        }
+        return mejor;
+    }
     public Player getPlayerLogeado() { 
         return playerLogeado; 
     }
