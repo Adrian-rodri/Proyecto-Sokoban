@@ -3,6 +3,8 @@ package io.github.some_example_name.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -51,6 +53,11 @@ public class GameScreen implements Screen {
     private volatile double tiempoSegundos = 0;
     private volatile boolean timerActivo = false;
     private Thread hiloTimer;
+
+    //audio
+    private Music gameMusic;
+    private Sound boxSound;
+    private Sound ganarSound;
 
     private static final int HUD_H = 36;
     
@@ -110,7 +117,14 @@ public class GameScreen implements Screen {
         nivelActual = nivelMng.getNivel(numLevel);
         initPlayer = false;
         
-        
+        //cargar audio
+        gameMusic = Gdx.audio.newMusic(Gdx.files.internal("ui/sonido/musica/gameMusic.mp3"));
+        gameMusic.setLooping(true);
+        double vol = game.playerManager.getPlayerLogeado().getVolumen();
+        gameMusic.setVolume((float) vol);
+        gameMusic.play();
+        boxSound = Gdx.audio.newSound(Gdx.files.internal("ui/sonido/fx/boxfx.wav"));
+        ganarSound = Gdx.audio.newSound(Gdx.files.internal("ui/sonido/fx/ganarfx.mp3"));
 
         calcularOffsets();
 
@@ -254,20 +268,40 @@ public class GameScreen implements Screen {
             player.copias.clear();
         }
 
+        //contar cajas en su sitio antes del movimiento
+        int cajasAntes = contarCajasEnSitio(nivelActual.getLevel());
         int resultado = player.tecladoInput(nivelActual);
         if (resultado == 1) {
             movimientos++;
+            //si aumento la cantidad de cajas en su sitio, una caja llego a su destino
+            int cajasAhora = contarCajasEnSitio(nivelActual.getLevel());
+            if (cajasAhora > cajasAntes && boxSound != null) {
+                boxSound.play((float) game.playerManager.getPlayerLogeado().getVolumen());
+            }
         } else if (resultado == -1 && movimientos > 0) {
             movimientos--;
         }
         if (nivelActual.nivelCompletado() && !isGanado) {
             isGanado = true;
             detenerTimer();
+            if (ganarSound != null) {
+                ganarSound.play((float) game.playerManager.getPlayerLogeado().getVolumen());
+            }
             int puntaje = calcularPuntaje();
             game.playerManager.actualizarTrasPartida(numLevel, movimientos, tiempoSegundos, puntaje);
             game.setScreen(new VictoryScreen(game, numLevel, movimientos, tiempoSegundos, puntaje));
             dispose();
         }
+    }
+
+    private int contarCajasEnSitio(char[][] level) {
+        int count = 0;
+        for (char[] fila : level) {
+            for (char c : fila) {
+                if (c == 'B') count++;
+            }
+        }
+        return count;
     }
 
     private int calcularPuntaje() {
@@ -353,5 +387,12 @@ public class GameScreen implements Screen {
         skin.dispose();
         initPlayer = false;
         detenerTimer();
+        if (gameMusic != null) {
+            gameMusic.stop();
+            gameMusic.dispose();
+        }
+        if (boxSound != null) boxSound.dispose();
+        //no disponer ganarSound si se gano el nivel para que el sonido termine de reproducirse
+        if (!isGanado && ganarSound != null) ganarSound.dispose();
     }
 }

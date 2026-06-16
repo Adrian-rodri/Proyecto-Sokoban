@@ -2,6 +2,7 @@ package io.github.some_example_name.screens;
 
 import io.github.some_example_name.screens.LevelSelectScreen;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 
 public class MenuScreen extends BaseScreen {
     private TextButton btnNotif;
+    private Music menuMusic;
     
     public MenuScreen(Main game) {
         super(game);
@@ -112,6 +114,12 @@ public class MenuScreen extends BaseScreen {
                 System.out.println("[Menu] Ayuda");
             }
         });
+
+        //cargar y reproducir musica del menu en bucle
+        menuMusic = Gdx.audio.newMusic(Gdx.files.internal("ui/sonido/musica/menuMusic.mp3"));
+        menuMusic.setLooping(true);
+        menuMusic.setVolume((float) game.playerManager.getPlayerLogeado().getVolumen());
+        menuMusic.play();
     }
     private void actualizarBotonNotificaciones() {
         int cant= game.playerManager.getCantSolicitudes();
@@ -355,6 +363,10 @@ public class MenuScreen extends BaseScreen {
 
     @Override
     public void dispose() {
+        if (menuMusic != null) {
+            menuMusic.stop();
+            menuMusic.dispose();
+        }
         stage.dispose();
         skin.dispose();
     }
