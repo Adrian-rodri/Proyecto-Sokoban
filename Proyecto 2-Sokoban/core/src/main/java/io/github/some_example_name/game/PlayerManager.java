@@ -670,7 +670,46 @@ public class PlayerManager implements Gestionable<Player>{
         
         return true;
     }
+    //logica Retos
+    public boolean enviarReto(String receptor,int nivel){
+        if(!existeUsuario(receptor)) 
+            return false;
+        if(receptor.equals(playerLogeado.getUserName())) 
+            return false;
+        if(retoYaEnviado(receptor, nivel)) 
+            return false;
+
+        try(RandomAccessFile rf= new RandomAccessFile("users/" + receptor + "/retos.skb", "rw")){
+            rf.seek(rf.length());
+            rf.writeUTF(playerLogeado.getUserName());
+            rf.writeInt(nivel);
+        }catch(IOException e){
+            System.err.println("Error: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
     
+    public boolean retoYaEnviado(String receptor, int nivel){
+        if(!existeUsuario(receptor)) 
+            return false;
+        try{
+            File file= new File("users/" + receptor + "/retos.skb");
+            if(!file.exists()) 
+                return false;
+            try(RandomAccessFile rf= new RandomAccessFile(file, "r")){
+                while(rf.getFilePointer()<rf.length()){
+                    String recep= rf.readUTF();
+                    int numLevel= rf.readInt();
+                    if (recep.equals(playerLogeado.getUserName()) && numLevel==nivel) 
+                        return true;
+                }
+            }
+        }catch(IOException e){
+            System.err.println("Error: " + e.getMessage());
+        }
+        return false;
+    }
     public Player getPlayerLogeado() { 
         return playerLogeado; 
     }
