@@ -1,19 +1,23 @@
 package io.github.some_example_name.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.some_example_name.Main;
 import io.github.some_example_name.model.EntradaHistorial;
 import io.github.some_example_name.model.Player;
@@ -26,6 +30,7 @@ public class ProfileScreen extends BaseScreen {
     private Texture avatarTexture;
     private Label lblError;
     private float errorTimer = 0f;
+    private String seleccionado;
 
     public ProfileScreen(Main game) {
         super(game);
@@ -117,7 +122,7 @@ public class ProfileScreen extends BaseScreen {
         btnCambiarAvatar.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-                //mostrarSelectorAvatar(avatarImage);
+                mostrarSelectorAvatar(avatarImage);
             }
         });
 
@@ -372,6 +377,127 @@ public class ProfileScreen extends BaseScreen {
         dialog.button(traducir("Cancelar","Cancel"), false);
         dialog.pack();
         dialog.show(stage);
+    }
+    
+    private void mostrarSelectorAvatar(Image avatarImage) {
+        FileHandle dir= Gdx.files.internal("texturas/avatares/");
+        FileHandle[] archivos= dir.list(".png");
+        if (archivos.length == 0) 
+            return;
+
+        ArrayList<Texture> thumbsTextures= new ArrayList<>();
+
+        seleccionado= game.playerManager.getPlayerLogeado().getAvatarFile();
+        ArrayList<Label> selLabels= new ArrayList<>();
+        ArrayList<Table> cards= new ArrayList<>();
+
+        Dialog dialogo= new Dialog(traducir("Seleccionar avatar","Select Avatar"), skin, "tool") {
+            @Override
+            protected void result(Object object){
+                for(Texture t:thumbsTextures) 
+                    t.dispose();
+                remove();
+            }
+        };
+        dialogo.setModal(true);
+        dialogo.setMovable(false);
+
+        Table grid= new Table();
+
+        for(FileHandle archivo :archivos){
+            Texture thumbTex= new Texture(archivo.path());
+            thumbsTextures.add(thumbTex);
+            TextureRegion region= new TextureRegion(thumbTex, 0, 0, 32, 32);
+            Image thumb= new Image(region);
+
+            Table card= new Table();
+            card.add(thumb).size(96, 96).pad(4).row();
+
+            Label lblNombre= new Label(archivo.nameWithoutExtension(), skin, "small-white");
+            card.add(lblNombre).padBottom(4).row();
+
+            Label selLabel= new Label("", skin, "small-white");
+            selLabel.setColor(0.2f, 0.9f, 0.2f, 1f);
+            card.add(selLabel);
+
+            //resaltar la seleccionada
+            if(archivo.name().equals(seleccionado)){
+                lblNombre.setColor(0.2f, 0.9f, 0.2f, 1f);
+                selLabel.setText(traducir("SELECCIONADO","SELECTED"));
+            }else{
+                lblNombre.setColor(0.7f, 0.7f, 0.8f, 1f);
+            }
+
+            String nombreArchivo= archivo.name();
+            final Label selLabelRef= selLabel;
+            final Label lblNombreRef= lblNombre;
+
+            card.addListener(new ClickListener(){
+                @Override
+                public void clicked(InputEvent event, float x, float y){
+                    seleccionado= nombreArchivo;
+                    for(Label s:selLabels) 
+                        s.setText("");
+                    
+                    selLabelRef.setText(traducir("SELECCIONADO","SELECTED"));
+                    for(Table c:cards){
+                        Label lbl= (Label) c.getChildren().get(1);
+                        lbl.setColor(0.7f, 0.7f, 0.8f, 1f);
+                    }
+                    lblNombreRef.setColor(0.2f, 0.9f, 0.2f, 1f);
+                }
+            });
+
+            cards.add(card);
+            selLabels.add(selLabel);
+            grid.add(card).pad(10);
+            if(grid.getColumns() >=4) 
+                grid.row();
+        }
+
+        ScrollPane scroll= new ScrollPane(grid, skin);
+        scroll.setFadeScrollBars(false);
+        
+        TextButton btnGuardar= new TextButton(traducir("Guardar","Save"), skin, "default");
+        btnGuardar.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                String archivoElegido= seleccionado;
+                if(archivoElegido==null) 
+                    return;
+                game.playerManager.cambiarAvatar(archivoElegido);
+                if(avatarTexture!=null) 
+                    avatarTexture.dispose();
+                try{
+                    avatarTexture= new Texture("texturas/avatares/" + archivoElegido);
+                }catch(Exception e){
+                    avatarTexture= new Texture("texturas/avatares/1-default.png");
+                }
+                TextureRegion newRegion= new TextureRegion(avatarTexture, 0, 0, 32, 32);
+                avatarImage.setDrawable(new Image(newRegion).getDrawable());
+                dialogo.hide();
+            }
+        });
+
+        TextButton btnCancelar= new TextButton(traducir("Cancelar","Cancel"), skin, "default");
+        btnCancelar.addListener(new ChangeListener(){
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                dialogo.hide();
+            }
+        });
+
+        Table bottomRow= new Table();
+        bottomRow.add(btnGuardar).width(130).height(36).padRight(12);
+        bottomRow.add(btnCancelar).width(130).height(36);
+
+    
+        Table content= new Table();
+        content.add(scroll).width(520).height(300).pad(10).row();
+        content.add(bottomRow).padTop(8);
+
+        dialogo.add(content);
+        dialogo.show(stage);
     }
     private void setReqStyle(Label lbl, boolean ok){
         if(ok){
