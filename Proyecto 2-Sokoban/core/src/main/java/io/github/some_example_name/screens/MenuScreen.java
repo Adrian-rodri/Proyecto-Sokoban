@@ -131,7 +131,7 @@ public class MenuScreen extends BaseScreen {
         }
     }
     private void actualizarBotonNotificaciones() {
-        int cant= game.playerManager.getCantSolicitudes();
+        int cant= game.playerManager.getCantSolicitudes() + game.playerManager.getCantRetos();
         String txt= traducir("Notif", "Notif");
         if (cant>0){
             txt+= " (" + cant + ")";
@@ -298,31 +298,25 @@ public class MenuScreen extends BaseScreen {
         return new Label(texto, skin, "small-white");
     }
     private void mostrarDialogoNotificaciones() {
-        ArrayList<String> solicitudes = game.playerManager.getSolicitudes();
-
         Dialog dialogo= new Dialog(traducir("Notificaciones", "Notifications"), skin, "default");
         dialogo.setModal(true);
         dialogo.setMovable(false);
 
         Table contenido= new Table();
         contenido.top().left();
-        
         ScrollPane scroll= new ScrollPane(contenido, skin);
-        
         Table content= dialogo.getContentTable();
         content.pad(10, 16, 10, 16);
-        
-        if(solicitudes.isEmpty()){
-            content.add(new Label(traducir("No tienes solicitudes", "No pending requests"),skin, "small-white")).left().expandX().fillX().row();
-        }else{
-            content.add(new Label(traducir("Solicitudes de amistad:", "Friend requests:"),skin, "small-white")).left().expandX().fillX().padBottom(8).row();
+
+        //mostrar solicitudes
+        ArrayList<String> solicitudes= game.playerManager.getSolicitudes();
+        if(!solicitudes.isEmpty()){
+            contenido.add(new Label(traducir("Solicitudes de amistad:", "Friend requests:"), skin, "small-white")).left().expandX().fillX().padBottom(8).row();
             for(String from :solicitudes){
                 Table fila= new Table();
                 fila.add(new Label(from, skin, "small-white")).left().expandX();
-
-                TextButton btnAceptar= new TextButton(traducir("Aceptar", "Accept"), skin, "small");
+                TextButton btnAceptar= new TextButton(traducir("Aceptar", "Accept"),  skin, "small");
                 TextButton btnRechazar= new TextButton(traducir("Rechazar", "Decline"), skin, "small");
-
                 btnAceptar.addListener(new ChangeListener() {
                     public void changed(ChangeEvent e, Actor a) {
                         game.playerManager.aceptarSolicitud(from);
@@ -339,11 +333,51 @@ public class MenuScreen extends BaseScreen {
                         actualizarBotonNotificaciones();
                     }
                 });
-
                 fila.add(btnAceptar).width(70).padRight(4);
                 fila.add(btnRechazar).width(70);
                 contenido.add(fila).expandX().fillX().padBottom(3).row();
             }
+        }
+
+        //mostrar retos
+        ArrayList<String[]> retos= game.playerManager.getRetos();
+        if(!retos.isEmpty()){
+            contenido.add(new Label(traducir("Retos recibidos:", "Challenges:"), skin, "small-white")).left().expandX().fillX().padBottom(8).padTop(solicitudes.isEmpty() ? 0 : 6).row();
+            for(String[] reto:retos){
+                String retador= reto[0];
+                int numNivel= Integer.parseInt(reto[1]);
+                String nombreNivel= (numNivel==0)?"Tutorial" :traducir("Nivel ", "Level ")+numNivel;
+                Table fila= new Table();
+                fila.add(new Label(retador + "  →  " + nombreNivel, skin, "small-white")).left().expandX();
+                TextButton btnJugar= new TextButton(traducir("Jugar",   "Play"),   skin, "small");
+                TextButton btnIgnorar= new TextButton(traducir("Ignorar", "Ignore"), skin, "small");
+                btnJugar.addListener(new ChangeListener() {
+                    public void changed(ChangeEvent e, Actor a) {
+                        game.playerManager.removerReto(retador, numNivel);
+                        actualizarBotonNotificaciones();
+                        GameScreen.retoRetador= retador;
+                        GameScreen.retoNivel= numNivel;
+                        GameScreen.initPlayer= false;
+                        dialogo.hide();
+                        game.setScreen(new GameScreen(game, numNivel));
+                        dispose();
+                    }
+                });
+                btnIgnorar.addListener(new ChangeListener() {
+                    public void changed(ChangeEvent e, Actor a) {
+                        game.playerManager.removerReto(retador, numNivel);
+                        dialogo.hide();
+                        mostrarDialogoNotificaciones();
+                        actualizarBotonNotificaciones();
+                    }
+                });
+                fila.add(btnJugar).width(60).padRight(4);
+                fila.add(btnIgnorar).width(70);
+                contenido.add(fila).expandX().fillX().padBottom(3).row();
+            }
+        }
+        if (solicitudes.isEmpty()&&retos.isEmpty()){
+            contenido.add(new Label(traducir("No tienes notificaciones", "No notifications"), skin, "small-white")).left().expandX().fillX().row();
         }
         content.add(scroll).width(320).height(200).padBottom(8).row();
         dialogo.button(traducir("Cerrar", "Close"), null);
