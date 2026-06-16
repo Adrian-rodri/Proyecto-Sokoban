@@ -31,6 +31,7 @@ public class MenuScreen extends BaseScreen {
         TextButton btnAmigos = new TextButton(traducir("Amigos", "Friends"), skin, "small");
         TextButton btnAyuda = new TextButton("  ?  ", skin, "small");
         btnNotif = new TextButton("Notif", skin, "small");
+        actualizarBotonNotificaciones();
 
         float botonAncho = 240, botonAlto = 42, iconAncho = 64, iconAlto = 32;
 
@@ -286,15 +287,19 @@ public class MenuScreen extends BaseScreen {
         Dialog dialogo= new Dialog(traducir("Notificaciones", "Notifications"), skin, "default");
         dialogo.setModal(true);
         dialogo.setMovable(false);
-        dialogo.pad(20);
 
+        Table contenido= new Table();
+        contenido.top().left();
+        
+        ScrollPane scroll= new ScrollPane(contenido, skin);
+        
         Table content= dialogo.getContentTable();
         content.pad(10, 16, 10, 16);
-
+        
         if(solicitudes.isEmpty()){
-            content.add(new Label(traducir("No tienes solicitudes", "No pending requests"),skin, "small-white")).left();
+            content.add(new Label(traducir("No tienes solicitudes", "No pending requests"),skin, "small-white")).left().expandX().fillX().row();
         }else{
-            content.add(new Label(traducir("Solicitudes de amistad:", "Friend requests:"),skin, "small-white")).left();
+            content.add(new Label(traducir("Solicitudes de amistad:", "Friend requests:"),skin, "small-white")).left().expandX().fillX().padBottom(8).row();
             for(String from :solicitudes){
                 Table fila= new Table();
                 fila.add(new Label(from, skin, "small-white")).left().expandX();
@@ -321,10 +326,10 @@ public class MenuScreen extends BaseScreen {
 
                 fila.add(btnAceptar).width(70).padRight(4);
                 fila.add(btnRechazar).width(70);
-                content.add(fila).fillX().padBottom(3).row();
+                contenido.add(fila).expandX().fillX().padBottom(3).row();
             }
         }
-
+        content.add(scroll).width(320).height(200).padBottom(8).row();
         dialogo.button(traducir("Cerrar", "Close"), null);
         dialogo.show(stage);
     }
