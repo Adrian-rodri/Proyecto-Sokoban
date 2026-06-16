@@ -254,6 +254,12 @@ public class PlayerManager implements Gestionable<Player>{
             rUser.writeInt(playerLogeado.getNivelesDesbloqueados());
             rUser.close();
             
+            //guardar avatar.skb
+            rUser= new RandomAccessFile("users/"+playerLogeado.getUserName()+"/avatar.skb","rw");
+            rUser.setLength(0);
+            rUser.writeUTF(playerLogeado.getAvatarFile() != null ? playerLogeado.getAvatarFile() : "1-default.png");
+            rUser.close();
+            
             guardarAmigos();
         }catch(IOException e){
             System.out.println("Error: "+e.getMessage());
@@ -549,6 +555,108 @@ public class PlayerManager implements Gestionable<Player>{
     return stats;
 }
         
+    public boolean cambiarNombreCompleto(String nuevoNombre) {
+        if (playerLogeado==null) 
+            return false;
+        if (nuevoNombre==null ||nuevoNombre.isEmpty()) 
+            return false;
+        playerLogeado.setNombreCompleto(nuevoNombre);
+        try(RandomAccessFile rf=new RandomAccessFile("users/" + playerLogeado.getUserName() + "/perfil.skb", "rw")){
+            rf.setLength(0);
+            rf.writeUTF(playerLogeado.getNombreCompleto());
+            rf.writeLong(playerLogeado.getFechaRegistro());
+            rf.writeLong(playerLogeado.getUltimaSesion());
+            rf.writeDouble(playerLogeado.getVolumen());
+            rf.writeUTF(playerLogeado.getIdioma());
+            rf.writeUTF(playerLogeado.getRutaAvatar());
+        }catch (IOException e){
+            System.err.println("Error: "+ e.getMessage());
+            return false;
+        }
+        return true;
+    }
+    
+    public boolean cambiarPassword(String vieja, String nueva){
+        if(playerLogeado==null) 
+            return false;
+        if(!playerLogeado.getPassword().equals(vieja)) 
+            return false;
+        if(nueva == null || nueva.trim().isEmpty()) 
+            return false;
+        playerLogeado.setPassword(nueva);
+        try(RandomAccessFile rUser= new RandomAccessFile(usersFile, "rw")){
+            while(rUser.getFilePointer() < rUser.length()){
+                long pos= rUser.getFilePointer();
+                String user= rUser.readUTF();
+                if (user.equals(playerLogeado.getUserName())) {
+                    rUser.writeUTF(nueva);
+                    break;
+                } else {
+                    rUser.readUTF();
+                    rUser.readInt();
+                }
+            }
+        }catch(IOException e){
+            System.err.println("Error: "+e.getMessage());
+            return false;
+        }
+        return true;
+    }
+    
+    public boolean cambiarUserName(String nuevoUserName){
+        if(playerLogeado==null) 
+            return false;
+        if(nuevoUserName==null ||nuevoUserName.isEmpty()) 
+            return false;
+        if(arrayUsernames.contains(nuevoUserName)) 
+            return false;
+        
+        String viejoUserName= playerLogeado.getUserName();
+        
+        //renombrar la carpeta
+        File oldDir= new File("users/"+ viejoUserName);
+        File newDir= new File("users/" +nuevoUserName);
+        if (!oldDir.exists()) 
+            return false;
+        if (!oldDir.renameTo(newDir)) 
+            return false;
+        
+        
+        try (RandomAccessFile rUser= new RandomAccessFile(usersFile, "rw")){
+            ArrayList<String> lines= new ArrayList<>();
+            rUser.seek(0);
+            while (rUser.getFilePointer()<rUser.length()) {
+                String user= rUser.readUTF();
+                String pass= rUser.readUTF();
+                int pts= rUser.readInt();
+                if (user.equals(viejoUserName)) {
+                    lines.add(nuevoUserName);
+                } else {
+                    lines.add(user);
+                }
+                lines.add(pass);
+                lines.add(String.valueOf(pts));
+            }
+            rUser.setLength(0);
+            for (int i=0; i<lines.size(); i+=3){
+                rUser.writeUTF(lines.get(i));
+                rUser.writeUTF(lines.get(i + 1));
+                rUser.writeInt(Integer.parseInt(lines.get(i + 2)));
+            }
+        } catch (IOException e) {
+            System.err.println("Error: "+e.getMessage());
+            newDir.renameTo(oldDir);
+            return false;
+        }
+        
+        arrayUsernames.remove(viejoUserName);
+        arrayUsernames.add(nuevoUserName);
+        
+        playerLogeado.setUserName(nuevoUserName);
+        
+        return true;
+    }
+    
     public Player getPlayerLogeado() { 
         return playerLogeado; 
     }

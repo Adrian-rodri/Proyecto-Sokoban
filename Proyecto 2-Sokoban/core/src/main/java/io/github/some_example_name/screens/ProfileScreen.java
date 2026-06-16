@@ -97,15 +97,15 @@ public class ProfileScreen extends BaseScreen {
         editTable.top().left();
         float anchoBoton = 260;
 
-        String avatarPath = "texturas/avatares/" + p.getAvatarFile();
-        try {
-            avatarTexture = new Texture(avatarPath);
-        } catch (Exception e) {
-            avatarTexture = new Texture("texturas/avatares/1-default.png");
+        String avatarPath= "texturas/avatares/" + p.getAvatarFile();
+        try{
+            avatarTexture= new Texture(avatarPath);
+        }catch(Exception e){
+            avatarTexture= new Texture("texturas/avatares/1-default.png");
             p.setAvatarFile("1-default.png");
         }
-        TextureRegion avatarRegion = new TextureRegion(avatarTexture, 0, 0, 32, 32);
-        Image avatarImage = new Image(avatarRegion);
+        TextureRegion avatarRegion= new TextureRegion(avatarTexture, 0, 0, 32, 32);
+        Image avatarImage= new Image(avatarRegion);
 
         editTable.add(avatarImage).center().size(128, 128).padBottom(8).row();
 
@@ -118,7 +118,7 @@ public class ProfileScreen extends BaseScreen {
             }
         });
 
-        TextButton btnEditarPerfil = new TextButton("Editar perfil", skin, "default");
+        TextButton btnEditarPerfil= new TextButton("Editar perfil", skin, "default");
         editTable.add(btnEditarPerfil).center().width(anchoBoton).height(32).padBottom(10).row();
         btnEditarPerfil.addListener(new ChangeListener() {
             @Override
@@ -127,10 +127,10 @@ public class ProfileScreen extends BaseScreen {
             }
         });
 
-        lblError = new Label("", skin, "error");
+        lblError= new Label("", skin, "error");
         editTable.add(lblError).width(anchoBoton).padBottom(8).row();
 
-        btnVolver = new TextButton("Volver", skin, "default");
+        btnVolver= new TextButton("Volver", skin, "default");
 
         btnVolver.addListener(new ChangeListener() {
             @Override
@@ -140,7 +140,7 @@ public class ProfileScreen extends BaseScreen {
             }
         });
 
-        Table btnRow = new Table();
+        Table btnRow= new Table();
         btnRow.add(btnVolver).width(155).height(32);
 
         Window panel = createWindow();
