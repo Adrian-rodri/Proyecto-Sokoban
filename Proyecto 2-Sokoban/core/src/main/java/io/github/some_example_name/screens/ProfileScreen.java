@@ -2,7 +2,10 @@ package io.github.some_example_name.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -17,6 +20,9 @@ public class ProfileScreen extends BaseScreen {
 
 
     private TextButton btnVolver;
+    private Texture avatarTexture;
+    private Label lblError;
+    private float errorTimer = 0f;
 
     public ProfileScreen(Main game) {
         super(game);
@@ -87,25 +93,63 @@ public class ProfileScreen extends BaseScreen {
             }
         });
 
+        Table editTable = new Table();
+        editTable.top().left();
+        float anchoBoton = 260;
+
+        String avatarPath = "texturas/avatares/" + p.getAvatarFile();
+        try {
+            avatarTexture = new Texture(avatarPath);
+        } catch (Exception e) {
+            avatarTexture = new Texture("texturas/avatares/1-default.png");
+            p.setAvatarFile("1-default.png");
+        }
+        TextureRegion avatarRegion = new TextureRegion(avatarTexture, 0, 0, 32, 32);
+        Image avatarImage = new Image(avatarRegion);
+
+        editTable.add(avatarImage).center().size(128, 128).padBottom(8).row();
+
+        TextButton btnCambiarAvatar = new TextButton("Cambiar avatar", skin, "small");
+        editTable.add(btnCambiarAvatar).center().padBottom(20).row();
+        btnCambiarAvatar.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                //mostrarSelectorAvatar(avatarImage);
+            }
+        });
+
+        TextButton btnEditarPerfil = new TextButton("Editar perfil", skin, "default");
+        editTable.add(btnEditarPerfil).center().width(anchoBoton).height(32).padBottom(10).row();
+        btnEditarPerfil.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                //mostrarDialogoEditarPerfil();
+            }
+        });
+
+        lblError = new Label("", skin, "error");
+        editTable.add(lblError).width(anchoBoton).padBottom(8).row();
+
+        btnVolver = new TextButton("Volver", skin, "default");
+
+        btnVolver.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                game.setScreen(new MenuScreen(game));
+                dispose();
+            }
+        });
+
         Table btnRow = new Table();
         btnRow.add(btnVolver).width(155).height(32);
 
-        Window panel = new Window("", skin);
-        panel.setMovable(false);
-        panel.pad(28f, 32f, 24f, 32f);
-
-        panel.add(new Label(traducir("Mi Perfil","My Profile"), skin, "title-white")).colspan(2).center().padBottom(16).row();
-        panel.add(perfilTable).left().width(250).padRight(20).expandY();
-        panel.add(avatarTable).left().width(250).expandY().row();
+        Window panel = createWindow();
+        panel.add(new Label("Mi Perfil", skin, "title-white")).colspan(2).center().padBottom(16).row();
+        panel.add(perfilTable).left().width(260).padRight(20).expandY();
+        panel.add(editTable).left().width(anchoBoton).expandY().row();
         panel.add(btnRow).colspan(2).center().padTop(10);
         panel.pack();
-
-        Table root = new Table();
-        root.setFillParent(true);
-        root.center();
-        root.add(panel);
-        stage.addActor(root);
-        Gdx.input.setInputProcessor(stage);
+        setRoot(panel);
     }
     
 
