@@ -443,6 +443,17 @@ public class PlayerManager implements Gestionable<Player>{
             playerLogeado.setNivelesDesbloqueados(siguiente);
         guardar();
     }
+    public void cambiarAvatar(String avatarFile) {
+        if (playerLogeado==null) 
+            return;
+        playerLogeado.setAvatarFile(avatarFile);
+        try(RandomAccessFile rf =new RandomAccessFile("users/" + playerLogeado.getUserName() + "/avatar.skb", "rw")){
+            rf.setLength(0);
+            rf.writeUTF(avatarFile);
+        } catch (IOException e){
+            System.err.println("Error: "+ e.getMessage());
+        }
+    }
     public void cambiarVolumen(int porcentaje) {
         playerLogeado.setVolumen(porcentaje/100.0);
         guardar();

@@ -283,17 +283,18 @@ public class MenuScreen extends BaseScreen {
     private void mostrarDialogoNotificaciones() {
         ArrayList<String> solicitudes = game.playerManager.getSolicitudes();
 
-        Dialog dialogo= new Dialog(traducir("Notificaciones", "Notifications"), skin, "tool");
+        Dialog dialogo= new Dialog(traducir("Notificaciones", "Notifications"), skin, "default");
         dialogo.setModal(true);
         dialogo.setMovable(false);
-        dialogo.pad(20, 40, 20, 40);
+        dialogo.pad(20);
 
         Table content= dialogo.getContentTable();
+        content.pad(10, 16, 10, 16);
 
         if(solicitudes.isEmpty()){
-            content.add(new Label(traducir("No tienes solicitudes", "No pending requests"),skin, "small-white")).center().row();
+            content.add(new Label(traducir("No tienes solicitudes", "No pending requests"),skin, "small-white")).left();
         }else{
-            content.add(new Label(traducir("Solicitudes de amistad:", "Friend requests:"),skin, "small-white")).left().padBottom(8).row();
+            content.add(new Label(traducir("Solicitudes de amistad:", "Friend requests:"),skin, "small-white")).left();
             for(String from :solicitudes){
                 Table fila= new Table();
                 fila.add(new Label(from, skin, "small-white")).left().expandX();

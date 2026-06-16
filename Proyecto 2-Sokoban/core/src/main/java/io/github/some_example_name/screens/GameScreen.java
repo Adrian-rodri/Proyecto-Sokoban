@@ -89,7 +89,6 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch = new SpriteBatch();
-        playerSheet = new Texture("texturas/playerSheet.png");
         sheetTiles = new Texture("texturas/sheetTiles.png");
         wall = new TextureRegion(sheetTiles, 0, 2 * 80, 80, 80);
         box = new TextureRegion(sheetTiles, 1 * 80, 1 * 80, 80, 80);
@@ -97,13 +96,21 @@ public class GameScreen implements Screen {
         objetivo = new TextureRegion(sheetTiles, 3 * 80, 1 * 80, 80, 80);
         shape = new ShapeRenderer();
         player = new Player(0, 0);
+        String avatarFile= game.playerManager.getPlayerLogeado().getAvatarFile();
+        try {
+            playerSheet= new Texture("texturas/avatares/" + avatarFile);
+        } catch(Exception e){
+            playerSheet= new Texture("texturas/avatares/1-default.png");
+        }
         player.cargarSprites(playerSheet);
-        player.setSprite(0, 0);
+        player.setSprite(32, 0);
         tiposTiles = TileType.WALL;
         nivelMng = new NivelManager();
         nivelMng.cargar();
         nivelActual = nivelMng.getNivel(numLevel);
         initPlayer = false;
+        
+        
 
         calcularOffsets();
 
