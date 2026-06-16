@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -42,6 +43,8 @@ public class GameScreen implements Screen {
     private NivelManager nivelMng;
     private Nivel nivelActual;
     private boolean isGanado = false;
+    private boolean isPerdido = false;
+    private int fallosDisponibles = 10;
     private int numLevel;
 
     private Stage stage;
@@ -118,6 +121,10 @@ public class GameScreen implements Screen {
         initPlayer = false;
         
         //cargar audio
+        //pausar musica del menu mientras se juega
+        if (MenuScreen.menuMusic != null) {
+            MenuScreen.menuMusic.pause();
+        }
         gameMusic = Gdx.audio.newMusic(Gdx.files.internal("ui/sonido/musica/gameMusic.mp3"));
         gameMusic.setLooping(true);
         double vol = game.playerManager.getPlayerLogeado().getVolumen();
@@ -145,6 +152,7 @@ public class GameScreen implements Screen {
                 tiempoSegundos = 0;
                 GameScreen.initPlayer = false;
                 player.copias.clear();
+                fallosDisponibles = 10;
             }
         });
 
@@ -204,7 +212,7 @@ public class GameScreen implements Screen {
         int segs = (int) (tiempoSegundos % 60);
         String timerStr = String.format("%02d:%02d", mins, segs);
         lblInfo.setText(game.playerManager.getNombreJugador() + "   " + nombreNivel);
-        lblStats.setText("Movimientos: " + movimientos + "   " + timerStr);
+        lblStats.setText("Movimientos: " + movimientos + "   " + timerStr + "   Fallos: " + fallosDisponibles + "/10");
 
         stage.act(delta);
         stage.draw();
@@ -260,12 +268,15 @@ public class GameScreen implements Screen {
     }
 
     private void logic() {
+        if (isPerdido) return;
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             nivelActual.reiniciar();
             movimientos = 0;
             tiempoSegundos = 0;
             GameScreen.initPlayer = false;
             player.copias.clear();
+            fallosDisponibles = 10;
         }
 
         //contar cajas en su sitio antes del movimiento
@@ -280,6 +291,12 @@ public class GameScreen implements Screen {
             }
         } else if (resultado == -1 && movimientos > 0) {
             movimientos--;
+            fallosDisponibles--;
+            if (fallosDisponibles <= 0) {
+                fallosDisponibles = 0;
+                perder();
+                return;
+            }
         }
         if (nivelActual.nivelCompletado() && !isGanado) {
             isGanado = true;
@@ -302,6 +319,60 @@ public class GameScreen implements Screen {
             }
         }
         return count;
+    }
+
+    private void perder() {
+        isPerdido = true;
+        detenerTimer();
+        mostrarDialogoPerder();
+    }
+
+    private void mostrarDialogoPerder() {
+        Dialog dialogo = new Dialog("", skin, "tool");
+        dialogo.setMovable(false);
+        dialogo.setModal(true);
+        dialogo.pad(24);
+
+        Label lblTitulo = new Label("¡Has perdido!", skin, "small-white");
+        lblTitulo.setFontScale(1.8f);
+        Label lblMensaje = new Label("Te quedaste sin Fallos.", skin, "small-white");
+
+        TextButton btnReintentar = new TextButton("Reintentar", skin, "big");
+        btnReintentar.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                fallosDisponibles = 10;
+                isPerdido = false;
+                nivelActual.reiniciar();
+                movimientos = 0;
+                tiempoSegundos = 0;
+                GameScreen.initPlayer = false;
+                player.copias.clear();
+                iniciarTimer();
+                dialogo.hide();
+            }
+        });
+
+        TextButton btnMenu = new TextButton("Menú", skin, "default");
+        btnMenu.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                dialogo.hide();
+                game.setScreen(new MenuScreen(game));
+                dispose();
+            }
+        });
+
+        Table filaBotones = new Table();
+        filaBotones.add(btnReintentar).width(130).height(38).padRight(10);
+        filaBotones.add(btnMenu).width(130).height(38);
+
+        dialogo.getContentTable().add(lblTitulo).colspan(2).center().padBottom(6).row();
+        dialogo.getContentTable().add(lblMensaje).colspan(2).center().padBottom(18).row();
+        dialogo.getContentTable().add(filaBotones).colspan(2).center();
+
+        dialogo.pack();
+        dialogo.show(stage);
     }
 
     private int calcularPuntaje() {
@@ -392,7 +463,11 @@ public class GameScreen implements Screen {
             gameMusic.dispose();
         }
         if (boxSound != null) boxSound.dispose();
-        //no disponer ganarSound si se gano el nivel para que el sonido termine de reproducirse
+
         if (!isGanado && ganarSound != null) ganarSound.dispose();
+        //reanudar musica del menu al volver a pantallas de menu
+        if (MenuScreen.menuMusic != null) {
+            MenuScreen.menuMusic.play();
+        }
     }
 }
