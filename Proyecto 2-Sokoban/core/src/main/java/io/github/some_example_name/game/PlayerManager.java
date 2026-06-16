@@ -583,26 +583,40 @@ public class PlayerManager implements Gestionable<Player>{
             return false;
         if(nueva == null || nueva.trim().isEmpty()) 
             return false;
-        playerLogeado.setPassword(nueva);
         try(RandomAccessFile rUser= new RandomAccessFile(usersFile, "rw")){
-            while(rUser.getFilePointer() < rUser.length()){
-                long pos= rUser.getFilePointer();
-                String user= rUser.readUTF();
-                if (user.equals(playerLogeado.getUserName())) {
-                    rUser.writeUTF(nueva);
+            ArrayList<String> users= new ArrayList<>();
+            ArrayList<String> passwords= new ArrayList<>();
+            ArrayList<Integer> puntos= new ArrayList<>();
+
+            rUser.seek(0);
+            while(rUser.getFilePointer()< rUser.length()){
+                users.add(rUser.readUTF());
+                passwords.add(rUser.readUTF());
+                puntos.add(rUser.readInt());
+            }
+
+            for(int i=0; i<users.size(); i++){
+                if(users.get(i).equals(playerLogeado.getUserName())){
+                    passwords.set(i, nueva);
                     break;
-                } else {
-                    rUser.readUTF();
-                    rUser.readInt();
                 }
             }
+
+            rUser.setLength(0);
+            for(int i=0; i<users.size(); i++){
+                rUser.writeUTF(users.get(i));
+                rUser.writeUTF(passwords.get(i));
+                rUser.writeInt(puntos.get(i));
+            }
+
         }catch(IOException e){
             System.err.println("Error: "+e.getMessage());
             return false;
         }
+
+        playerLogeado.setPassword(nueva);
         return true;
-    }
-    
+    }    
     public boolean cambiarUserName(String nuevoUserName){
         if(playerLogeado==null) 
             return false;
