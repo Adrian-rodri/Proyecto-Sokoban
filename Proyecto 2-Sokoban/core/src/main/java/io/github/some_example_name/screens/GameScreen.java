@@ -119,9 +119,7 @@ public class GameScreen implements Screen {
         nivelMng.cargar();
         nivelActual = nivelMng.getNivel(numLevel);
         initPlayer = false;
-        
-        //cargar audio
-        //pausar musica del menu mientras se juega
+
         if (MenuScreen.menuMusic != null) {
             MenuScreen.menuMusic.pause();
         }
@@ -212,7 +210,7 @@ public class GameScreen implements Screen {
         int segs = (int) (tiempoSegundos % 60);
         String timerStr = String.format("%02d:%02d", mins, segs);
         lblInfo.setText(game.playerManager.getNombreJugador() + "   " + nombreNivel);
-        lblStats.setText("Movimientos: " + movimientos + "   " + timerStr + "   Fallos: " + fallosDisponibles + "/10");
+        lblStats.setText("Movimientos: " + movimientos + "   " + timerStr + "   " + traducir("Fallos","Undos") + ": " + fallosDisponibles + "/10");
 
         stage.act(delta);
         stage.draw();
@@ -311,6 +309,15 @@ public class GameScreen implements Screen {
         }
     }
 
+    private String traducir(String es, String en) {
+        String lang = null;
+        if (game.playerManager != null) {
+            Player p = game.playerManager.getPlayerLogeado();
+            if (p != null) lang = p.getIdioma();
+        }
+        return "english".equals(lang) ? en : es;
+    }
+
     private int contarCajasEnSitio(char[][] level) {
         int count = 0;
         for (char[] fila : level) {
@@ -333,11 +340,11 @@ public class GameScreen implements Screen {
         dialogo.setModal(true);
         dialogo.pad(24);
 
-        Label lblTitulo = new Label("¡Has perdido!", skin, "small-white");
+        Label lblTitulo = new Label(traducir("¡Has perdido!","Game Over"), skin, "small-white");
         lblTitulo.setFontScale(1.8f);
-        Label lblMensaje = new Label("Te quedaste sin Fallos.", skin, "small-white");
+        Label lblMensaje = new Label(traducir("Te quedaste sin Fallos.","You ran out of undos."), skin, "small-white");
 
-        TextButton btnReintentar = new TextButton("Reintentar", skin, "big");
+        TextButton btnReintentar = new TextButton(traducir("Reintentar","Retry"), skin, "big");
         btnReintentar.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
@@ -353,7 +360,7 @@ public class GameScreen implements Screen {
             }
         });
 
-        TextButton btnMenu = new TextButton("Menú", skin, "default");
+        TextButton btnMenu = new TextButton(traducir("Menu","Menu"), skin, "default");
         btnMenu.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
@@ -463,9 +470,7 @@ public class GameScreen implements Screen {
             gameMusic.dispose();
         }
         if (boxSound != null) boxSound.dispose();
-
         if (!isGanado && ganarSound != null) ganarSound.dispose();
-        //reanudar musica del menu al volver a pantallas de menu
         if (MenuScreen.menuMusic != null) {
             MenuScreen.menuMusic.play();
         }
