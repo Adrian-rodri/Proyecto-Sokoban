@@ -21,7 +21,7 @@ public class MenuScreen extends BaseScreen {
         String nombreJugador = game.playerManager.getNombreJugador();
 
         Label lblTitulo = new Label("SOKOBAN", skin, "title-white");
-        Label lblSaludo = new Label("Hola, " + nombreJugador, skin, "medium-white");
+        Label lblSaludo = new Label(traducir("Hola, ","Hello, ")+ nombreJugador, skin, "medium-white");
 
         TextButton btnJugar = new TextButton(traducir("Jugar","Play"), skin, "big");
         TextButton btnPerfil = new TextButton(traducir("Mi perfil", "My profile"), skin, "big");
@@ -88,7 +88,6 @@ public class MenuScreen extends BaseScreen {
         btnConfig.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent e, Actor a) {
-                game.playerManager.cerrarSesion();
                 game.setScreen(new SettingScreen(game));
                 dispose();
             }
@@ -258,7 +257,7 @@ public class MenuScreen extends BaseScreen {
             {traducir("Tiempo prom.","Average Time"),statsYo[5], statsEl[5]}
         };
 
-        Dialog dialogo= new Dialog("Comparativa: " + amigo, skin);
+        Dialog dialogo= new Dialog(traducir("Comparar con ","Compare with ") + amigo, skin);
         dialogo.setMovable(false);
         dialogo.pad(28, 20, 16, 20);
 
@@ -292,7 +291,7 @@ public class MenuScreen extends BaseScreen {
         Table content= dialogo.getContentTable();
 
         if(solicitudes.isEmpty()){
-            content.add(new Label(traducir("No tienes solicitudes pendientes", "No pending requests"),skin, "small-white")).center().row();
+            content.add(new Label(traducir("No tienes solicitudes", "No pending requests"),skin, "small-white")).center().row();
         }else{
             content.add(new Label(traducir("Solicitudes de amistad:", "Friend requests:"),skin, "small-white")).left().padBottom(8).row();
             for(String from :solicitudes){

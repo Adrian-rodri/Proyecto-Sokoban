@@ -59,7 +59,7 @@ public abstract class BaseScreen implements Screen {
             Player p = game.playerManager.getPlayerLogeado();
             if (p != null) lang = p.getIdioma();
         }
-        return "en".equals(lang) ? en : es;
+        return "english".equals(lang) ? en : es;
     }
 
     @Override

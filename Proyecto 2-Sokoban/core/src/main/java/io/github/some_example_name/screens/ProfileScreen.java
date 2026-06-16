@@ -58,7 +58,7 @@ public class ProfileScreen extends BaseScreen {
                 for (int i = desde; i < hist.size(); i++) {
                     EntradaHistorial e = hist.get(i);
                     String linea = traducir("Nv.","Lvl.") + (e.getNivel() + 1)
-                            + traducir("  Movs:" ,"Stps.")+ e.getMovimientos()
+                            + traducir("  Movs:" ,"  Steps")+ e.getMovimientos()
                             + "  Pts:" + e.getPuntaje();
                     Label lblLinea = new Label(linea, skin, "small-white");
                     lblLinea.setColor(0.65f, 0.65f, 0.65f, 1f);
@@ -94,7 +94,7 @@ public class ProfileScreen extends BaseScreen {
         panel.setMovable(false);
         panel.pad(28f, 32f, 24f, 32f);
 
-        panel.add(new Label("Mi Perfil", skin, "title-white")).colspan(2).center().padBottom(16).row();
+        panel.add(new Label(traducir("Mi Perfil","My Profile"), skin, "title-white")).colspan(2).center().padBottom(16).row();
         panel.add(perfilTable).left().width(250).padRight(20).expandY();
         panel.add(avatarTable).left().width(250).expandY().row();
         panel.add(btnRow).colspan(2).center().padTop(10);

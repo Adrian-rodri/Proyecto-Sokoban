@@ -2,6 +2,7 @@ package io.github.some_example_name.screens;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -47,7 +48,7 @@ public class ReportesScreen extends BaseScreen {
 
         Table nivelTable= new Table();
         for(int i=0;i <totalNiveles;i++){
-            String nombre=(i==0)? "Tutorial" : traducir("Nivel","Level") + i;
+            String nombre=(i==0)? "Tutorial" : traducir("Nivel ","Level ") + i;
 
             String texto= nombre;
             String estilo;
@@ -64,19 +65,7 @@ public class ReportesScreen extends BaseScreen {
             btnNivel.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-                    if (mejores[index] != null) {
-                        int puntaje= mejores[index][0];
-                        int movimientos= mejores[index][1];
-                        int segundos = mejores[index][2];
-                        String minutos = String.format("%02d", segundos / 60);
-                        String segundosStr = String.format("%02d", segundos % 60);
-                        System.out.println("--- Mejor partida - " + nombre
-                                + " ---  Puntaje: " + puntaje
-                                + "  Movimientos: " + movimientos
-                                + "  Tiempo: " + minutos + ":" + segundosStr);
-                    } else {
-                        System.out.println("--- " + nombre + " - Sin partidas registradas ---");
-                    }
+                    mostrarDialogoNivel(index,nombre);
                 }
             });
             nivelTable.add(btnNivel).width(170).height(22).padBottom(3).row();
@@ -133,25 +122,48 @@ public class ReportesScreen extends BaseScreen {
             }
         });
 
-        TextButton btnComparar= new TextButton("Comparar stats", skin, "small");
-        btnComparar.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-                System.out.println("[Reportes] Comparar stats con otro jugador");
-            }
-        });
-
         Table btnRow= new Table();
-        btnRow.add(btnComparar).width(140).height(28).padRight(14);
         btnRow.add(btnVolver).width(140).height(32);
 
         Window panel= createWindow();
-        panel.add(new Label("Reportes", skin, "title-white")).colspan(2).center().padBottom(18).row();
+        panel.add(new Label(traducir("Reportes","Reports"), skin, "title-white")).colspan(2).center().padBottom(18).row();
         panel.add(scroll).left().width(200).padRight(20);
         panel.add(rankingTable).left().width(260).row();
         panel.add(btnRow).colspan(2).center().padTop(14);
         panel.pack();
         setRoot(panel);
+    }
+    private void mostrarDialogoNivel(int index, String nombre){
+        Dialog dialogo= new Dialog(nombre, skin, "default");
+        dialogo.setMovable(false);
+        dialogo.setModal(true);
+        dialogo.pad(40, 60, 40, 60);
+
+        Table content= dialogo.getContentTable();
+
+        if(mejores[index]!= null){
+            int puntaje= mejores[index][0];
+            int movimientos= mejores[index][1];
+            int segundos= mejores[index][2];
+            String tiempo= String.format("%02d:%02d", segundos / 60, segundos % 60);
+            
+            String[][] filas={
+                {traducir("Mejor puntaje","Best score"),String.valueOf(puntaje)},
+                {traducir("Pasos","Moves"),String.valueOf(movimientos)},
+                {traducir("Tiempo","Time"),tiempo}
+            };
+
+            for (String[] f :filas){
+                content.add(new Label(f[0], skin, "default")).left().padRight(20).padBottom(6);
+                content.add(new Label(f[1], skin, "default")).right().padBottom(6);
+                content.row();
+            }
+        }else{
+            content.add(new Label(traducir("Sin partidas registradas", "No games recorded"),skin, "default")).center().row();
+        }
+
+        dialogo.button(traducir("Cerrar", "Close"), null);
+        dialogo.show(stage);
     }
 
     private void computarMejores(){

@@ -55,7 +55,7 @@ public class LevelSelectScreen extends BaseScreen {
             boolean completado = !bloqueado && i < nivelesDesbloqueados;
             boolean siguiente = !bloqueado && !completado;
 
-            String texto = (i == 0 ? "Tutorial" : "Nivel " + i);
+            String texto = (i == 0 ? "Tutorial" : traducir("Nivel ","Level ") + i);
             String estilo;
             if (completado) {
                 estilo = "nivel-completado";
@@ -84,11 +84,11 @@ public class LevelSelectScreen extends BaseScreen {
                 public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
                     if (idx < nivelesDisponibles) {
                         Nivel nv = game.nivelManager.getNivel(idx);
-                        String nombre = (idx == 0) ? "Tutorial" : "Nivel " + idx;
-                        lblInfo.setText(nombre + "   -   Cajas: " + nv.getCantidadCajas());
+                        String nombre = (idx == 0) ? "Tutorial" : traducir("Nivel ","Level ") + idx;
+                        lblInfo.setText(nombre + "   -   "+traducir("Cajas: ","Boxes: ") + nv.getCantidadCajas());
                         lblInfo.setColor(0.65f, 0.65f, 0.9f, 1f);
                     } else {
-                        lblInfo.setText("Nivel bloqueado");
+                        lblInfo.setText(traducir("Nivel bloqueado","Locked Level"));
                         lblInfo.setColor(0.5f, 0.5f, 0.5f, 1f);
                     }
                 }
@@ -108,17 +108,17 @@ public class LevelSelectScreen extends BaseScreen {
         lblInfo = new Label("", skin, "small-white");
 
         Table leyenda = new Table();
-        Label lblCompletado = new Label("  Completado", skin, "small-white");
+        Label lblCompletado = new Label(traducir("  Completado"," Completed"), skin, "small-white");
         lblCompletado.setColor(0.95f, 0.85f, 0.40f, 1f);
-        Label lblDisponible = new Label("  Disponible", skin, "small-white");
+        Label lblDisponible = new Label(traducir("  Disponible","  Unlocked"), skin, "small-white");
         lblDisponible.setColor(Color.WHITE);
-        Label lblBloqueado = new Label("  Bloqueado", skin, "small-white");
+        Label lblBloqueado = new Label(traducir("  Bloqueado","  Blocked"), skin, "small-white");
         lblBloqueado.setColor(0.4f, 0.4f, 0.4f, 1f);
         leyenda.add(lblCompletado).padRight(16);
         leyenda.add(lblDisponible).padRight(16);
         leyenda.add(lblBloqueado);
 
-        TextButton btnVolver = new TextButton("Volver", skin, "default");
+        TextButton btnVolver = new TextButton(traducir("Volver","Back"), skin, "default");
         btnVolver.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -128,7 +128,7 @@ public class LevelSelectScreen extends BaseScreen {
         });
 
         Window panel = createWindow();
-        panel.add(new Label("Seleccionar nivel", skin, "title-white")).colspan(cols + 1).center().padBottom(12).row();
+        panel.add(new Label(traducir("Seleccionar nivel","Select Level"), skin, "title-white")).colspan(cols + 1).center().padBottom(12).row();
         panel.add(grid).colspan(cols + 1).center().row();
         panel.add(lblInfo).colspan(cols + 1).center().padTop(8).padBottom(6).row();
         panel.add(leyenda).colspan(cols + 1).center().padBottom(14).row();
