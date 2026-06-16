@@ -158,7 +158,7 @@ public class PlayerManager implements Gestionable<Player>{
             rPlayer.writeUTF(nombreCompleto);
             rPlayer.writeLong(Calendar.getInstance().getTimeInMillis());//Fecha de inicio de sesion
             rPlayer.writeLong(Calendar.getInstance().getTimeInMillis());//Ultima fecha de sesion
-            rPlayer.writeDouble(0);//volumen
+            rPlayer.writeDouble(0.4);//volumen
             rPlayer.writeUTF("espanol");// rPlayer.writeUTF("espanol");//idioma
             rPlayer.writeUTF("default/avatar.png");//avatar
             rPlayer.close();
@@ -538,7 +538,7 @@ public class PlayerManager implements Gestionable<Player>{
             stats[1]= String.valueOf(niveles);
             stats[2]= String.valueOf(mejorPuntaje);
             stats[3]= String.valueOf(puntajeGeneral);
-            stats[4]= String.valueOf(tiempoHoras);
+            stats[4]= String.format("%.2f",tiempoHoras);
             stats[5]= String.format("%.1f", tiempoPromedio);
             stats[6]= userNameAmigo;
         } catch (IOException e){

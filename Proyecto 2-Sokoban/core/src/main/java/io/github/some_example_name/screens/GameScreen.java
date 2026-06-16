@@ -205,12 +205,12 @@ public class GameScreen implements Screen {
         dibujarBarraHUD();
 
         //actualizar Labels cada frame
-        String nombreNivel = (numLevel == 0) ? "Tutorial" : "Nivel " + numLevel;
+        String nombreNivel = (numLevel == 0) ? "Tutorial" : traducir("Nivel ","Level ") + numLevel;
         int mins = (int) (tiempoSegundos / 60);
         int segs = (int) (tiempoSegundos % 60);
         String timerStr = String.format("%02d:%02d", mins, segs);
         lblInfo.setText(game.playerManager.getNombreJugador() + "   " + nombreNivel);
-        lblStats.setText("Movimientos: " + movimientos + "   " + timerStr + "   " + traducir("Fallos","Undos") + ": " + fallosDisponibles + "/10");
+        lblStats.setText(traducir("Pasos: ","Steps: ") + movimientos + "   " + timerStr + "   " + traducir("Fallos","Undos") + ": " + fallosDisponibles + "/10");
 
         stage.act(delta);
         stage.draw();
@@ -360,7 +360,7 @@ public class GameScreen implements Screen {
             }
         });
 
-        TextButton btnMenu = new TextButton(traducir("Menu","Menu"), skin, "default");
+        TextButton btnMenu = new TextButton("Menu", skin, "default");
         btnMenu.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {

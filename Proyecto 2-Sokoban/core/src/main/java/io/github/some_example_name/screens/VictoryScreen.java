@@ -38,13 +38,13 @@ public class VictoryScreen extends BaseScreen {
 
         Window panel = createWindow();
         
-        Label lblTitulo = new Label("NIVEL COMPLETADO!", skin, "titulo");
+        Label lblTitulo = new Label(traducir("NIVEL COMPLETADO!","LEVEL COMPLETED!"), skin, "titulo");
         panel.add(lblTitulo).colspan(2).center().padBottom(4).row();
         String strNivel;
         if(numLevel==0)
             strNivel= "Tutorial";
         else
-            strNivel= "Nivel " + (numLevel + 1);
+            strNivel= "Nivel " + (numLevel);
         Label lblNivel = new Label(strNivel, skin, "dato");
         panel.add(lblNivel).colspan(2).center().padBottom(18).row();
 
@@ -52,29 +52,29 @@ public class VictoryScreen extends BaseScreen {
         int segs = (int) (tiempoSegundos % 60);
         String strTiempo = String.format("%02d:%02d", mins, segs);
 
-        Label lblMovLabel = new Label("Movimientos:", skin, "dato");
+        Label lblMovLabel = new Label(traducir("Movimientos:","Steps:"), skin, "dato");
         Label lblMovValor = new Label(String.valueOf(movimientos), skin, "dato-valor");
         panel.add(lblMovLabel).left().padRight(20).padBottom(6);
         panel.add(lblMovValor).right().padBottom(6).row();
 
-        Label lblTiempoLabel = new Label("Tiempo:", skin, "dato");
+        Label lblTiempoLabel = new Label(traducir("Tiempo:","Time:"), skin, "dato");
         Label lblTiempoValor = new Label(strTiempo, skin, "dato-valor");
         panel.add(lblTiempoLabel).left().padRight(20).padBottom(6);
         panel.add(lblTiempoValor).right().padBottom(6).row();
 
-        Label lblPuntajeLabel = new Label("Puntaje:", skin, "dato");
+        Label lblPuntajeLabel = new Label(traducir("Puntaje: ","Score: "), skin, "dato");
         Label lblPuntajeValor = new Label(String.valueOf(puntaje) + " pts", skin, "dato-valor");
         panel.add(lblPuntajeLabel).left().padRight(20).padBottom(14);
         panel.add(lblPuntajeValor).right().padBottom(14).row();
 
         if (!hayNivelSiguiente) {
-            Label lblFinal = new Label("Completaste todos los niveles!", skin, "mensaje-final");
+            Label lblFinal = new Label(traducir("Completaste todos los niveles!","You finish all the levels!"), skin, "mensaje-final");
             panel.add(lblFinal).colspan(2).center().padBottom(14).row();
         }
 
         Table btnRow = new Table();
         if (hayNivelSiguiente) {
-            TextButton btnSiguiente = new TextButton("Siguiente", skin, "big");
+            TextButton btnSiguiente = new TextButton(traducir("Siguiente","Next"), skin, "big");
             btnSiguiente.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeListener.ChangeEvent event, Actor actor) {
@@ -86,7 +86,7 @@ public class VictoryScreen extends BaseScreen {
             btnRow.add(btnSiguiente).width(130).height(38).padRight(10);
         }
 
-        TextButton btnNiveles = new TextButton("Niveles", skin, "big");
+        TextButton btnNiveles = new TextButton(traducir("Niveles","Levels"), skin, "big");
         btnNiveles.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {

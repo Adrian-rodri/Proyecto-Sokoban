@@ -260,7 +260,7 @@ public class MenuScreen extends BaseScreen {
             String.valueOf(game.playerManager.getPlayerLogeado().getMejorPuntaje()),
             String.valueOf(game.playerManager.getPlayerLogeado().getPuntajeGeneral()),
             String.format("%.2f", game.playerManager.getPlayerLogeado().getTiempoJugadoHoras()),
-            String.format("%.2f", game.playerManager.getPlayerLogeado().getTiempoPromedioPorNivel())
+            String.format("%.1f", game.playerManager.getPlayerLogeado().getTiempoPromedioPorNivel())
         };
         String[] statsEl = game.playerManager.obtenerStatsAmigo(amigo);
         if (statsEl == null) return;
@@ -271,7 +271,7 @@ public class MenuScreen extends BaseScreen {
             {traducir("Mejor Puntaje","Best Score"),statsYo[2], statsEl[2]},
             {traducir("Puntaje total","Total Score"),statsYo[3], statsEl[3]},
             {traducir("Tiempo (h)","Time (h)"),statsYo[4], statsEl[4]},
-            {traducir("Tiempo prom.","Average Time"),statsYo[5], statsEl[5]}
+            {traducir("Tiempo prom. (s)","Average Time (s)"),statsYo[5], statsEl[5]}
         };
 
         Dialog dialogo= new Dialog(traducir("Comparar con ","Compare with ") + amigo, skin);
