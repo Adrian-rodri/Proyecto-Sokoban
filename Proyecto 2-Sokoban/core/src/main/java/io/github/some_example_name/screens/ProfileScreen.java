@@ -40,7 +40,7 @@ public class ProfileScreen extends BaseScreen {
                     new Color(0.75f, 0.75f, 0.95f, 1f));
             skin.add("dato-perfil", estiloDato, Label.LabelStyle.class);
 
-            perfilTable.add(new Label(traducir("Partidas:", "Games:  ")+ p.getPartidasJugadas(), skin, "dato-perfil")).left().padBottom(3).row();
+            perfilTable.add(new Label(traducir("Partidas: ", "Games:  ")+ p.getPartidasJugadas(), skin, "dato-perfil")).left().padBottom(3).row();
             perfilTable.add(new Label(traducir("Niveles completados: ","Completed Levels: ") + p.getNivelesCompletados(), skin, "dato-perfil")).left().padBottom(3).row();
             perfilTable.add(new Label(traducir("Mejor puntaje: ","Best puntutation: ") + p.getMejorPuntaje(), skin, "dato-perfil")).left().padBottom(3).row();
             perfilTable.add(new Label(traducir("Puntaje total: ","Total Points: ") + p.getPuntajeGeneral(), skin, "dato-perfil")).left().padBottom(3).row();

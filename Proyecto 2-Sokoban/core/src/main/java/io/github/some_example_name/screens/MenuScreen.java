@@ -74,7 +74,6 @@ public class MenuScreen extends BaseScreen {
         btnReporte.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent e, Actor a) {
-                System.out.println("Reportes");
                 game.setScreen(new ReportesScreen(game));
                 dispose();
             }
