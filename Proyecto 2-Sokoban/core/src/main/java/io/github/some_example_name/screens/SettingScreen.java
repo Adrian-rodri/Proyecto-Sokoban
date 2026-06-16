@@ -36,6 +36,10 @@ public class SettingScreen extends BaseScreen {
                 int valor= (int) sliderVolumen.getValue();
                 lblVolumenValor.setText(valor + "%");
                 game.playerManager.cambiarVolumen(valor);
+                
+                if (MenuScreen.menuMusic != null) {
+                    MenuScreen.menuMusic.setVolume(valor / 100f);
+                }
             }
         });
 

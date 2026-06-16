@@ -116,13 +116,17 @@ public class MenuScreen extends BaseScreen {
             }
         });
 
-        //musica del menu (static, solo se crea la primera vez)
+        //musica del menu (static, solo se crea una vez)
         if (menuMusic == null) {
             menuMusic = Gdx.audio.newMusic(Gdx.files.internal("ui/sonido/musica/menuMusic.mp3"));
             menuMusic.setLooping(true);
-            double vol = game.playerManager.getPlayerLogeado().getVolumen();
-            if (vol == 0) vol = Constantes.VOLUMEN_DEFAULT;
-            menuMusic.setVolume((float) vol);
+        }
+        //sincronizar volumen con la configuracion del jugador actual
+        double vol = game.playerManager.getPlayerLogeado().getVolumen();
+        if (vol == 0) vol = Constantes.VOLUMEN_DEFAULT;
+        menuMusic.setVolume((float) vol);
+        //reproducir si no lo esta (por si venia pausada de GameScreen)
+        if (!menuMusic.isPlaying()) {
             menuMusic.play();
         }
     }
