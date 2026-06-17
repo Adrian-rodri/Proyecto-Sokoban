@@ -19,7 +19,7 @@ public class LoginScreen extends BaseScreen {
     private Label lblError;
     private float errorTimer = 0f;
 
-    private boolean esEspanol = true;
+    private boolean esEspanol;
     private Label lblTitulo, lblSubtitulo, lblUsuario, lblContrasena;
     private TextButton btnIngresar, btnRegistro, btnIdioma, btnVerClave;
     private TextField campoUser, campoClave;
@@ -31,6 +31,7 @@ public class LoginScreen extends BaseScreen {
 
     @Override
     protected void buildUI() {
+        esEspanol = !"english".equals(game.idiomaGlobal);
         Label.LabelStyle errorStyle = new Label.LabelStyle(skin.getFont("font"),
                 new Color(1f, 0.37f, 0.37f, 1f));
         skin.add("error", errorStyle, Label.LabelStyle.class);
@@ -40,17 +41,17 @@ public class LoginScreen extends BaseScreen {
         panel.pad(28f, 32f, 24f, 32f);
 
         lblTitulo = new Label("SOKOBAN", skin, "title-white");
-        lblSubtitulo = new Label("Iniciar Sesion", skin, "medium-white");
-        lblUsuario = new Label("Usuario", skin, "small-white");
-        lblContrasena = new Label("Contrasena", skin, "small-white");
-
+        lblSubtitulo = new Label(esEspanol ? "Iniciar Sesion" : "Log In", skin, "medium-white");
+        lblUsuario = new Label(esEspanol ? "Usuario" : "Username", skin, "small-white");
+        lblContrasena = new Label(esEspanol ? "Contrasena" : "Password", skin, "small-white");
+        
         campoUser = new TextField("", skin);
         campoClave = new TextField("", skin);
         campoClave.setPasswordMode(true);
         campoClave.setPasswordCharacter('*');
 
-        btnIngresar = new TextButton("Ingresar", skin, "default");
-        btnRegistro = new TextButton("Registrarse", skin, "default");
+        btnIngresar = new TextButton(esEspanol ? "Ingresar" : "Log In", skin, "default");
+        btnRegistro = new TextButton(esEspanol ? "Registrarse" : "Sign Up", skin, "default");
         lblError = new Label("", skin, "error");
 
         panel.add(lblTitulo).colspan(2).center().padBottom(2).row();
@@ -59,7 +60,7 @@ public class LoginScreen extends BaseScreen {
         panel.add(campoUser).colspan(2).width(280).height(32).padBottom(14).row();
         panel.add(lblContrasena).colspan(2).left().padBottom(4).row();
 
-        btnVerClave = new TextButton("Ver", skin, "small");
+        btnVerClave = new TextButton(esEspanol ? "Ver" : "Show", skin, "small");
         Table claveRow = new Table();
         claveRow.add(campoClave).expandX().fillX().height(32);
         claveRow.add(btnVerClave).width(50).height(32).padLeft(6);
@@ -81,7 +82,7 @@ public class LoginScreen extends BaseScreen {
         panel.add(lblError).colspan(2).center().padTop(8).row();
         panel.pack();
 
-        btnIdioma = new TextButton("English", skin);
+        btnIdioma = new TextButton(esEspanol ? "English" : "Espanol", skin);
         Table topRight = new Table();
         topRight.setFillParent(true);
         topRight.top().right().pad(12);
@@ -136,6 +137,7 @@ public class LoginScreen extends BaseScreen {
 
     private void cambiarIdioma() {
         esEspanol = !esEspanol;
+        game.idiomaGlobal = esEspanol ? "espanol" : "english";
         lblSubtitulo.setText(esEspanol ? "Iniciar Sesion" : "Log In");
         lblUsuario.setText(esEspanol ? "Usuario" : "Username");
         lblContrasena.setText(esEspanol ? "Contrasena" : "Password");

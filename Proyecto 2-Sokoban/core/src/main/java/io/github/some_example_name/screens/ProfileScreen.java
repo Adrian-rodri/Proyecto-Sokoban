@@ -1,19 +1,23 @@
 package io.github.some_example_name.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.some_example_name.Main;
 import io.github.some_example_name.model.EntradaHistorial;
 import io.github.some_example_name.model.Player;
@@ -26,6 +30,7 @@ public class ProfileScreen extends BaseScreen {
     private Texture avatarTexture;
     private Label lblError;
     private float errorTimer = 0f;
+    private String seleccionado;
 
     public ProfileScreen(Main game) {
         super(game);
@@ -54,7 +59,7 @@ public class ProfileScreen extends BaseScreen {
             perfilTable.add(new Label(traducir("Mejor puntaje: ","Best puntutation: ") + p.getMejorPuntaje(), skin, "dato-perfil")).left().padBottom(3).row();
             perfilTable.add(new Label(traducir("Puntaje total: ","Total Points: ") + p.getPuntajeGeneral(), skin, "dato-perfil")).left().padBottom(3).row();
             perfilTable.add(new Label(traducir("Tiempo jugado: ","Played Time:  ") + String.format("%.2f", p.getTiempoJugadoHoras()) + " h", skin, "dato-perfil")).left().padBottom(3).row();
-            perfilTable.add(new Label(traducir("Promedio/nivel: ","Average/level") + String.format("%.0f", p.getTiempoPromedioPorNivel()) + " s", skin, "dato-perfil")).left().padBottom(3).row();
+            perfilTable.add(new Label(traducir("Promedio/nivel: ","Average/level: ") + String.format("%.0f", p.getTiempoPromedioPorNivel()) + " s", skin, "dato-perfil")).left().padBottom(3).row();
             perfilTable.add(new Label(traducir("Desbloqueados: ","Unlocked: ") + (p.getNivelesDesbloqueados() + 1), skin, "dato-perfil")).left().padBottom(10).row();
 
             ArrayList<EntradaHistorial> hist = p.getHistorial();
@@ -112,16 +117,16 @@ public class ProfileScreen extends BaseScreen {
 
         editTable.add(avatarImage).center().size(128, 128).padBottom(8).row();
 
-        TextButton btnCambiarAvatar = new TextButton("Cambiar avatar", skin, "small");
+        TextButton btnCambiarAvatar = new TextButton(traducir("Cambiar avatar","Change Avatar"), skin, "small");
         editTable.add(btnCambiarAvatar).center().padBottom(20).row();
         btnCambiarAvatar.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-                //mostrarSelectorAvatar(avatarImage);
+                mostrarSelectorAvatar(avatarImage);
             }
         });
 
-        TextButton btnEditarPerfil= new TextButton("Editar perfil", skin, "default");
+        TextButton btnEditarPerfil= new TextButton(traducir("Editar perfil","Edit Profile"), skin, "default");
         editTable.add(btnEditarPerfil).center().width(anchoBoton).height(32).padBottom(10).row();
         btnEditarPerfil.addListener(new ChangeListener() {
             @Override
@@ -133,7 +138,7 @@ public class ProfileScreen extends BaseScreen {
         lblError= new Label("", skin, "error");
         editTable.add(lblError).width(anchoBoton).padBottom(8).row();
 
-        btnVolver= new TextButton("Volver", skin, "default");
+        btnVolver= new TextButton(traducir("Volver","Back"), skin, "default");
 
         btnVolver.addListener(new ChangeListener() {
             @Override
@@ -147,7 +152,7 @@ public class ProfileScreen extends BaseScreen {
         btnRow.add(btnVolver).width(155).height(32);
 
         Window panel = createWindow();
-        panel.add(new Label("Mi Perfil", skin, "title-white")).colspan(2).center().padBottom(16).row();
+        panel.add(new Label(traducir("Mi Perfil","My Profile"), skin, "title-white")).colspan(2).center().padBottom(16).row();
         panel.add(perfilTable).left().width(260).padRight(20).expandY();
         panel.add(editTable).left().width(anchoBoton).expandY().row();
         panel.add(btnRow).colspan(2).center().padTop(10);
@@ -201,6 +206,12 @@ public class ProfileScreen extends BaseScreen {
 
         TextButton btnEliminar= new TextButton(traducir("Eliminar cuenta","Delete account"), skin, "small");
         btnEliminar.setColor(0.9f, 0.3f, 0.3f, 1f);
+        btnEliminar.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                mostrarDialogoConfirmarEliminar(dialog);
+            }
+        });
         dialog.getContentTable().add(btnEliminar).left().padBottom(18).row();
         
         dialog.getContentTable().add(lblErrorEdit).width(anchoCampo).padBottom(8).row();
@@ -372,6 +383,184 @@ public class ProfileScreen extends BaseScreen {
         dialog.button(traducir("Cancelar","Cancel"), false);
         dialog.pack();
         dialog.show(stage);
+    }
+    
+    private void mostrarSelectorAvatar(Image avatarImage) {
+        FileHandle dir= Gdx.files.internal("texturas/avatares/");
+        FileHandle[] archivos= dir.list(".png");
+        if (archivos.length == 0) 
+            return;
+
+        ArrayList<Texture> thumbsTextures= new ArrayList<>();
+
+        seleccionado= game.playerManager.getPlayerLogeado().getAvatarFile();
+        ArrayList<Label> selLabels= new ArrayList<>();
+        ArrayList<Table> cards= new ArrayList<>();
+
+        Dialog dialogo= new Dialog(traducir("Seleccionar avatar","Select Avatar"), skin, "tool") {
+            @Override
+            protected void result(Object object){
+                for(Texture t:thumbsTextures) 
+                    t.dispose();
+                remove();
+            }
+        };
+        dialogo.setModal(true);
+        dialogo.setMovable(false);
+
+        Table grid= new Table();
+
+        for(FileHandle archivo :archivos){
+            Texture thumbTex= new Texture(archivo.path());
+            thumbsTextures.add(thumbTex);
+            TextureRegion region= new TextureRegion(thumbTex, 0, 0, 32, 32);
+            Image thumb= new Image(region);
+
+            Table card= new Table();
+            card.add(thumb).size(96, 96).pad(4).row();
+
+            Label lblNombre= new Label(archivo.nameWithoutExtension(), skin, "small-white");
+            card.add(lblNombre).padBottom(4).row();
+
+            Label selLabel= new Label("", skin, "small-white");
+            selLabel.setColor(0.2f, 0.9f, 0.2f, 1f);
+            card.add(selLabel);
+
+            //resaltar la seleccionada
+            if(archivo.name().equals(seleccionado)){
+                lblNombre.setColor(0.2f, 0.9f, 0.2f, 1f);
+                selLabel.setText(traducir("SELECCIONADO","SELECTED"));
+            }else{
+                lblNombre.setColor(0.7f, 0.7f, 0.8f, 1f);
+            }
+
+            String nombreArchivo= archivo.name();
+            final Label selLabelRef= selLabel;
+            final Label lblNombreRef= lblNombre;
+
+            card.addListener(new ClickListener(){
+                @Override
+                public void clicked(InputEvent event, float x, float y){
+                    seleccionado= nombreArchivo;
+                    for(Label s:selLabels) 
+                        s.setText("");
+                    
+                    selLabelRef.setText(traducir("SELECCIONADO","SELECTED"));
+                    for(Table c:cards){
+                        Label lbl= (Label) c.getChildren().get(1);
+                        lbl.setColor(0.7f, 0.7f, 0.8f, 1f);
+                    }
+                    lblNombreRef.setColor(0.2f, 0.9f, 0.2f, 1f);
+                }
+            });
+
+            cards.add(card);
+            selLabels.add(selLabel);
+            grid.add(card).pad(10);
+            if(grid.getColumns() >=4) 
+                grid.row();
+        }
+
+        ScrollPane scroll= new ScrollPane(grid, skin);
+        scroll.setFadeScrollBars(false);
+        
+        TextButton btnGuardar= new TextButton(traducir("Guardar","Save"), skin, "default");
+        btnGuardar.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                String archivoElegido= seleccionado;
+                if(archivoElegido==null) 
+                    return;
+                game.playerManager.cambiarAvatar(archivoElegido);
+                if(avatarTexture!=null) 
+                    avatarTexture.dispose();
+                try{
+                    avatarTexture= new Texture("texturas/avatares/" + archivoElegido);
+                }catch(Exception e){
+                    avatarTexture= new Texture("texturas/avatares/1-default.png");
+                }
+                TextureRegion newRegion= new TextureRegion(avatarTexture, 0, 0, 32, 32);
+                avatarImage.setDrawable(new Image(newRegion).getDrawable());
+                dialogo.hide();
+            }
+        });
+
+        TextButton btnCancelar= new TextButton(traducir("Cancelar","Cancel"), skin, "default");
+        btnCancelar.addListener(new ChangeListener(){
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                dialogo.hide();
+            }
+        });
+
+        Table bottomRow= new Table();
+        bottomRow.add(btnGuardar).width(130).height(36).padRight(12);
+        bottomRow.add(btnCancelar).width(130).height(36);
+
+    
+        Table content= new Table();
+        content.add(scroll).width(520).height(300).pad(10).row();
+        content.add(bottomRow).padTop(8);
+
+        dialogo.add(content);
+        dialogo.show(stage);
+    }
+    private void mostrarDialogoConfirmarEliminar(Dialog dialogPadre){
+        Dialog confirm= new Dialog("", skin, "tool");
+        confirm.setModal(true);
+        confirm.setMovable(false);
+        confirm.pad(24, 32, 20, 32);
+
+        Label lblTitulo= new Label(traducir("Eliminar cuenta", "Delete account"), skin, "medium-white");
+        lblTitulo.setColor(1f, 0.35f, 0.35f, 1f);
+        Label lblAviso= new Label(traducir("Esta accion no se puede deshacer.", "This action cannot be undone."), skin, "small-white");
+
+        TextField campoPass= new TextField("", skin);
+        campoPass.setPasswordMode(true);
+        campoPass.setPasswordCharacter('*');
+        campoPass.setMessageText(traducir("Confirma tu contrasena", "Confirm your password"));
+
+        Label lblErr= new Label("", skin, "error");
+
+        TextButton btnConfirmar= new TextButton(traducir("Eliminar", "Delete"), skin, "default");
+        btnConfirmar.setColor(0.9f, 0.3f, 0.3f, 1f);
+        TextButton btnCancelar= new TextButton(traducir("Cancelar", "Cancel"), skin, "default");
+
+        btnConfirmar.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                String pass= campoPass.getText();
+                Player p= game.playerManager.getPlayerLogeado();
+                if(!p.getPassword().equals(pass)){
+                    lblErr.setText(traducir("Contrasena incorrecta", "Wrong password"));
+                    return;
+                }
+                game.playerManager.eliminarCuenta();
+                confirm.hide();
+                dialogPadre.hide();
+                game.setScreen(new LoginScreen(game));
+                dispose();
+            }
+        });
+
+        btnCancelar.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                confirm.hide();
+            }
+        });
+
+        Table btnRow= new Table();
+        btnRow.add(btnConfirmar).width(120).height(32).padRight(10);
+        btnRow.add(btnCancelar).width(120).height(32);
+
+        confirm.getContentTable().add(lblTitulo).center().padBottom(8).row();
+        confirm.getContentTable().add(lblAviso).center().padBottom(16).row();
+        confirm.getContentTable().add(campoPass).width(280).height(34).padBottom(6).row();
+        confirm.getContentTable().add(lblErr).padBottom(8).row();
+        confirm.getContentTable().add(btnRow).center();
+        confirm.pack();
+        confirm.show(stage);
     }
     private void setReqStyle(Label lbl, boolean ok){
         if(ok){

@@ -28,10 +28,6 @@ public class RegisterScreen extends BaseScreen {
 
     @Override
     protected void buildUI() {
-        stage = new Stage(new ScreenViewport());
-        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/skin/ui/sgx-ui.atlas"));
-        skin = new Skin(Gdx.files.internal("ui/skin/ui/sgx-ui.json"), atlas);
-
         Label.LabelStyle lsError = new Label.LabelStyle(skin.getFont("small"),
                 new Color(1f, 0.3f, 0.3f, 1f));
         Label.LabelStyle lsOk = new Label.LabelStyle(skin.getFont("small"),
@@ -47,10 +43,10 @@ public class RegisterScreen extends BaseScreen {
         campoClave = new TextField("", skin);
         campoConfirm = new TextField("", skin);
 
-        campoNombre.setMessageText("Nombre completo");
-        campoUser.setMessageText("Usuario");
-        campoClave.setMessageText("Contrasena");
-        campoConfirm.setMessageText("Confirmar contrasena");
+        campoNombre.setMessageText(traducir("Nombre completo","Complete Number"));
+        campoUser.setMessageText(traducir("Usuario","User"));
+        campoClave.setMessageText(traducir("Contrasena","Password"));
+        campoConfirm.setMessageText(traducir("Confirmar contrasena","Confirm Password"));
         campoClave.setPasswordMode(true);
         campoClave.setPasswordCharacter('*');
         campoConfirm.setPasswordMode(true);
@@ -58,10 +54,10 @@ public class RegisterScreen extends BaseScreen {
 
         lblError = new Label("", skin, "error");
 
-        lblReqLen = new Label("Min 8 caracteres", skin, "req-nok");
-        lblReqMay = new Label("Una mayuscula", skin, "req-nok");
-        lblReqNum = new Label("Un numero", skin, "req-nok");
-        lblReqSim = new Label("Un simbolo", skin, "req-nok");
+        lblReqLen = new Label(traducir("Min 8 caracteres","Min 8 characters"), skin, "req-nok");
+        lblReqMay = new Label(traducir("Una mayuscula","Upper Case"), skin, "req-nok");
+        lblReqNum = new Label(traducir("Un numero","A  number"), skin, "req-nok");
+        lblReqSim = new Label(traducir("Un simbolo","A symbol"), skin, "req-nok");
 
         tablaRequisitos = new Table();
         tablaRequisitos.add(lblReqLen).left().padRight(16);
@@ -76,8 +72,8 @@ public class RegisterScreen extends BaseScreen {
             }
         });
 
-        TextButton btnRegistrar = new TextButton("Registrarse", skin, "default");
-        TextButton btnVolver = new TextButton("Volver", skin, "small");
+        TextButton btnRegistrar = new TextButton(traducir("Registrarse","Sign Up"), skin, "default");
+        TextButton btnVolver = new TextButton(traducir("Volver","Back"), skin, "small");
 
         btnRegistrar.addListener(new ChangeListener() {
             @Override
@@ -96,7 +92,7 @@ public class RegisterScreen extends BaseScreen {
         float fw = 290, fh = 30, bw = 130, bh = 32;
 
         Label lblTitulo = new Label("SOKOBAN", skin, "title-white");
-        Label lblSubtitulo = new Label("Crear cuenta", skin, "medium-white");
+        Label lblSubtitulo = new Label(traducir("Crear cuenta","Create Account"), skin, "medium-white");
 
         Window panel = new Window("", skin);
         panel.setMovable(false);
@@ -122,7 +118,7 @@ public class RegisterScreen extends BaseScreen {
                 boolean oculto = campoClave.isPasswordMode();
                 campoClave.setPasswordMode(!oculto);
                 campoConfirm.setPasswordMode(!oculto);
-                btnVerPass.setText(oculto ? "Ocultar" : "Ver");
+                btnVerPass.setText(oculto ?traducir("Ocultar" ,"Hide"): traducir("Ver","Show"));
             }
         });
 
@@ -161,10 +157,10 @@ public class RegisterScreen extends BaseScreen {
                 sim = true;
             }
         }
-        setRequisito(lblReqLen, len, "Min 8 caracteres", "Min 8 caracteres");
-        setRequisito(lblReqMay, may, "Una mayuscula", "Una mayuscula");
-        setRequisito(lblReqNum, num, "Un numero", "Un numero");
-        setRequisito(lblReqSim, sim, "Un simbolo", "Un simbolo");
+        setRequisito(lblReqLen, len, traducir("Min 8 caracteres","Min 8 characters"), traducir("Min 8 caracteres","Min 8 characters"));
+        setRequisito(lblReqMay, may, traducir("Una mayuscula","Upper Case"), traducir("Una mayuscula","Upper Case"));
+        setRequisito(lblReqNum, num, traducir("Un numero","A  number"), traducir("Un numero","A  number"));
+        setRequisito(lblReqSim, sim, traducir("Un simbolo","A symbol"), traducir("Un simbolo","A symbol"));
     }
 
     private void setRequisito(Label lbl, boolean ok, String txtOk, String txtNok) {
@@ -179,19 +175,21 @@ public class RegisterScreen extends BaseScreen {
         String conf = campoConfirm.getText();
 
         if (nombre.isEmpty() || user.isEmpty() || clave.isEmpty() || conf.isEmpty()) {
-            lblError.setText("Completa todos los campos");
+            String txt=traducir("Completa todos los campos","Fill all the fields");
+            lblError.setText(txt);
             return;
         }
         if (user.length() < 3) {
-            lblError.setText("Usuario muy corto (min 3)");
+            String txt=traducir("Usuario muy corto (min 3)","Username too short (min 3)");
+            lblError.setText(txt);
             return;
         }
         if (!clave.equals(conf)) {
-            lblError.setText("Las contrasenas no coinciden");
+            lblError.setText(traducir("Las contrasenas no coinciden","Passwords do not match"));
             return;
         }
         if (!claveValida(clave)) {
-            lblError.setText("La contrasena no cumple requisitos");
+            lblError.setText(traducir("No cumple los requisitos","Does not meet requirements"));
             return;
         }
 
@@ -200,7 +198,7 @@ public class RegisterScreen extends BaseScreen {
             game.setScreen(new MenuScreen(game));
             dispose();
         } else {
-            lblError.setText("El usuario ya existe");
+            lblError.setText(traducir("El usuario ya existe","Username taken"));
         }
     }
 
@@ -221,5 +219,5 @@ public class RegisterScreen extends BaseScreen {
             }
         }
         return u && d && s;
-    }
+    }   
 }

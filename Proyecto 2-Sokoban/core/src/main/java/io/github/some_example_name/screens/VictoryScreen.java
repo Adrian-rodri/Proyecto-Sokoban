@@ -15,14 +15,18 @@ public class VictoryScreen extends BaseScreen {
     private final int numLevel, movimientos, puntaje;
     private final double tiempoSegundos;
     private final boolean hayNivelSiguiente;
+    private final String retoRetador;
+    private final int retoNivel;
 
-    public VictoryScreen(Main game, int numLevel, int movimientos, double tiempoSegundos, int puntaje) {
+    public VictoryScreen(Main game, int numLevel, int movimientos, double tiempoSegundos, int puntaje,String retoRetador, int retoNivel) {
         super(game);
         this.numLevel = numLevel;
         this.movimientos = movimientos;
         this.tiempoSegundos = tiempoSegundos;
         this.puntaje = puntaje;
         this.hayNivelSiguiente = numLevel + 1 < game.nivelManager.getCantidad();
+        this.retoRetador = retoRetador;
+        this.retoNivel = retoNivel;
     }
 
     @Override
@@ -66,7 +70,30 @@ public class VictoryScreen extends BaseScreen {
         Label lblPuntajeValor = new Label(String.valueOf(puntaje) + " pts", skin, "dato-valor");
         panel.add(lblPuntajeLabel).left().padRight(20).padBottom(14);
         panel.add(lblPuntajeValor).right().padBottom(14).row();
+        
+        if(retoRetador!=null){
+            int suPuntaje= game.playerManager.getMejorPuntajeEnNivel(retoRetador, retoNivel);
+            
+            String msgReto;
+            Color colorReto;
+            if(suPuntaje<0){
+                msgReto= traducir("¡Tu rival aun no jugo este nivel!", "Your rival hasn't played this level!");
+                colorReto= new Color(0.8f, 0.8f, 0.3f, 1f);
+            }else if(puntaje>suPuntaje){
+                msgReto= traducir("Ganaste el reto! ", "You won the challenge! ") + puntaje + " vs " + suPuntaje;
+                colorReto= new Color(0.3f, 1f, 0.4f, 1f);
+            }else if(puntaje ==suPuntaje){
+                msgReto= traducir("Empate! ", "Tie! ") + puntaje + " vs " + suPuntaje;
+                colorReto= new Color(1f, 0.85f, 0.25f, 1f); 
+            }else{
+                msgReto= traducir("Perdiste el reto. ", "You lost. ") + puntaje + " vs " + suPuntaje;
+                colorReto= new Color(1f, 0.35f, 0.35f, 1f);
+            }
 
+            skin.add("reto-resultado", new Label.LabelStyle(skin.getFont("font"), colorReto), Label.LabelStyle.class);
+            Label lblReto= new Label(msgReto, skin, "reto-resultado");
+            panel.add(lblReto).colspan(2).center().padBottom(10).row();
+        }
         if (!hayNivelSiguiente) {
             Label lblFinal = new Label(traducir("Completaste todos los niveles!","You finish all the levels!"), skin, "mensaje-final");
             panel.add(lblFinal).colspan(2).center().padBottom(14).row();

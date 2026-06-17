@@ -407,9 +407,15 @@ public class PlayerManager implements Gestionable<Player>{
    
     //-----------JJ
     
-    public void actualizarTrasPartida(int nivel, int movimientos, double tiempoSeg, int puntaje) {
+    public void actualizarTrasPartida(int nivel, int movimientos, double tiempoSeg, int puntaje, boolean esReto) {
         if(playerLogeado==null)
             return;
+        if(!esReto){
+            int siguiente= nivel + 1;
+            if(siguiente>playerLogeado.getNivelesDesbloqueados())
+                playerLogeado.setNivelesDesbloqueados(siguiente);
+        }
+        
         boolean yaCompletado=false;
         int mejorPuntajeAnterior=0;
         for(EntradaHistorial entrada: playerLogeado.getHistorial()){
@@ -444,9 +450,6 @@ public class PlayerManager implements Gestionable<Player>{
             playerLogeado.getHistorial().add(entrada);
         appendHistorial(entrada);
         
-        int siguiente = nivel + 1;
-        if(siguiente> playerLogeado.getNivelesDesbloqueados())
-            playerLogeado.setNivelesDesbloqueados(siguiente);
         guardar();
     }
     public void cambiarAvatar(String avatarFile) {
@@ -662,6 +665,24 @@ public class PlayerManager implements Gestionable<Player>{
             newDir.renameTo(oldDir);
             return false;
         }
+        for (String amigo:playerLogeado.getAmigos()){
+            File amigoFile= new File("users/" + amigo + "/amigos.skb");
+            if (!amigoFile.exists()) 
+                continue;    
+            ArrayList<String> lista= new ArrayList<>();
+            
+            try (RandomAccessFile rAmigos= new RandomAccessFile(amigoFile, "rw")) {
+                while(rAmigos.getFilePointer()<rAmigos.length()){
+                    String a= rAmigos.readUTF();
+                    lista.add(a.equals(viejoUserName) ? nuevoUserName : a);
+                }
+                rAmigos.setLength(0);
+                for(String a:lista) 
+                    rAmigos.writeUTF(a);
+            }catch(IOException e){
+                System.err.println("Error actualizando amigo " + amigo + ": " + e.getMessage());
+            }
+        }
         
         arrayUsernames.remove(viejoUserName);
         arrayUsernames.add(nuevoUserName);
@@ -669,6 +690,182 @@ public class PlayerManager implements Gestionable<Player>{
         playerLogeado.setUserName(nuevoUserName);
         
         return true;
+    }
+    //logica Retos
+    public boolean enviarReto(String receptor,int nivel){
+        if(!existeUsuario(receptor)) 
+            return false;
+        if(receptor.equals(playerLogeado.getUserName())) 
+            return false;
+        if(retoYaEnviado(receptor, nivel)) 
+            return false;
+
+        try(RandomAccessFile rf= new RandomAccessFile("users/" + receptor + "/retos.skb", "rw")){
+            rf.seek(rf.length());
+            rf.writeUTF(playerLogeado.getUserName());
+            rf.writeInt(nivel);
+        }catch(IOException e){
+            System.err.println("Error: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
+    
+    public boolean retoYaEnviado(String receptor, int nivel){
+        if(!existeUsuario(receptor)) 
+            return false;
+        try{
+            File file= new File("users/" + receptor + "/retos.skb");
+            if(!file.exists()) 
+                return false;
+            try(RandomAccessFile rf= new RandomAccessFile(file, "r")){
+                while(rf.getFilePointer()<rf.length()){
+                    String recep= rf.readUTF();
+                    int numLevel= rf.readInt();
+                    if (recep.equals(playerLogeado.getUserName()) && numLevel==nivel) 
+                        return true;
+                }
+            }
+        }catch(IOException e){
+            System.err.println("Error: " + e.getMessage());
+        }
+        return false;
+    }
+    public ArrayList<String[]> getRetos(){
+        ArrayList<String[]> retos= new ArrayList<>();
+        if(playerLogeado==null) 
+            return retos;
+        try{
+            File file= new File("users/" + playerLogeado.getUserName() + "/retos.skb");
+            if(!file.exists()) 
+                return retos;
+            try(RandomAccessFile rf= new RandomAccessFile(file, "r")){
+                while (rf.getFilePointer() <rf.length()){
+                    String retador= rf.readUTF();
+                    int nivel= rf.readInt();
+                    retos.add(new String[]{ retador, String.valueOf(nivel)});
+                }
+            }
+        }catch(IOException e){
+            System.err.println("Error: "+e.getMessage());
+        }
+        return retos;
+    }
+    public int getCantRetos(){
+        return getRetos().size();
+    }
+    public void removerReto(String retador, int nivel) {
+        if (playerLogeado==null) 
+            return;
+        File file= new File("users/" + playerLogeado.getUserName() + "/retos.skb");
+        if(!file.exists())
+            return;
+        ArrayList<String[]> restantes= new ArrayList<>();
+        boolean removido= false;
+        try(RandomAccessFile rRetos= new RandomAccessFile(file, "rw")){
+            while (rRetos.getFilePointer() < rRetos.length()) {
+                String recep= rRetos.readUTF();
+                int numLevel= rRetos.readInt();
+                if(!removido && recep.equals(retador) && numLevel==nivel){
+                    removido= true;
+                }else{
+                    restantes.add(new String[]{ recep, String.valueOf(numLevel) });
+                }
+            }
+            rRetos.setLength(0);
+            for(String[] entry: restantes){
+                rRetos.writeUTF(entry[0]);
+                rRetos.writeInt(Integer.parseInt(entry[1]));
+            }
+        }catch(IOException e){
+            System.err.println("Error: "+e.getMessage());
+        }
+    }
+    
+    public int getMejorPuntajeEnNivel(String userName, int nivel){
+        int mejor= -1;
+        try(RandomAccessFile rf= new RandomAccessFile("users/" + userName + "/historial.skb", "r")){
+            while(rf.getFilePointer()<rf.length()){
+                rf.readInt();//numIntento
+                int numLevel= rf.readInt();
+                int puntaje= rf.readInt();
+                rf.readInt();//movimientos
+                rf.readDouble();//tiempo
+                rf.readLong();//fecha
+                if(numLevel==nivel &&puntaje>mejor) 
+                    mejor= puntaje;
+            }
+        } catch (IOException e) {
+            System.err.println("Error:"+ e.getMessage());
+        }
+        return mejor;
+    }
+    
+    public void eliminarCuenta(){
+        if (playerLogeado==null) 
+            return;
+        String userName= playerLogeado.getUserName();
+        
+        borrarDirectorio(new File("users/" + userName));
+        
+        try(RandomAccessFile rUser= new RandomAccessFile(usersFile, "rw")){
+            ArrayList<String> users= new ArrayList<>();
+            ArrayList<String> passwords= new ArrayList<>();
+            ArrayList<Integer> puntos= new ArrayList<>();
+
+            while(rUser.getFilePointer()< rUser.length()){
+                users.add(rUser.readUTF());
+                passwords.add(rUser.readUTF());
+                puntos.add(rUser.readInt());
+            }
+
+            rUser.setLength(0);
+            for(int i=0; i<users.size(); i++){
+                if(!users.get(i).equals(userName)){
+                    rUser.writeUTF(users.get(i));
+                    rUser.writeUTF(passwords.get(i));
+                    rUser.writeInt(puntos.get(i));
+                }
+            }
+        }catch(IOException e){
+            System.err.println("Error: " + e.getMessage());
+        }
+        for(String amigo :playerLogeado.getAmigos()){
+            try{
+                File amigoFile= new File("users/" + amigo + "/amigos.skb");
+                if (!amigoFile.exists()) 
+                    continue;
+                ArrayList<String> lista= new ArrayList<>();
+                try (RandomAccessFile rAmigos= new RandomAccessFile(amigoFile, "rw")) {
+                    while(rAmigos.getFilePointer()< rAmigos.length()){
+                        String userAmigo= rAmigos.readUTF();
+                        if (!userAmigo.equals(userName)) 
+                            lista.add(userAmigo);
+                    }
+                    rAmigos.setLength(0);
+                    for(String userAmigo :lista) 
+                        rAmigos.writeUTF(userAmigo);
+                }
+            }catch(IOException e){
+                System.err.println("Error:"+e.getMessage());
+            }
+        }
+        arrayUsernames.remove(userName);
+        playerLogeado= null;
+    }
+    
+    private void borrarDirectorio(File dir){
+        if(!dir.exists()) 
+            return;
+        File[] archivos= dir.listFiles();
+        if(archivos!=null){
+            for(File f :archivos){
+                if(f.isDirectory()) 
+                    borrarDirectorio(f);
+                else f.delete();
+            }
+        }
+        dir.delete();
     }
     
     public Player getPlayerLogeado() { 

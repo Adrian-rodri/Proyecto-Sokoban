@@ -54,7 +54,7 @@ public abstract class BaseScreen implements Screen {
     }
 
     protected String traducir(String es, String en) {
-        String lang = null;
+        String lang = game.idiomaGlobal;
         if (game.playerManager != null) {
             Player p = game.playerManager.getPlayerLogeado();
             if (p != null) lang = p.getIdioma();

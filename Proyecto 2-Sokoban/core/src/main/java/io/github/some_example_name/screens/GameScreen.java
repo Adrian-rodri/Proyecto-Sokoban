@@ -63,6 +63,8 @@ public class GameScreen implements Screen {
     private Sound ganarSound;
 
     private static final int HUD_H = 36;
+    public static String retoRetador = null;
+    public static int retoNivel = -1;
     
     private int offsetX, offsetY;
     private int boardW, boardH;
@@ -303,8 +305,11 @@ public class GameScreen implements Screen {
                 ganarSound.play((float) game.playerManager.getPlayerLogeado().getVolumen());
             }
             int puntaje = calcularPuntaje();
-            game.playerManager.actualizarTrasPartida(numLevel, movimientos, tiempoSegundos, puntaje);
-            game.setScreen(new VictoryScreen(game, numLevel, movimientos, tiempoSegundos, puntaje));
+            boolean esReto= (retoRetador!=null);
+            game.playerManager.actualizarTrasPartida(numLevel, movimientos, tiempoSegundos, puntaje,esReto);
+            game.setScreen(new VictoryScreen(game, numLevel, movimientos, tiempoSegundos, puntaje,retoRetador, retoNivel));
+            retoRetador= null;
+            retoNivel= -1;
             dispose();
         }
     }
