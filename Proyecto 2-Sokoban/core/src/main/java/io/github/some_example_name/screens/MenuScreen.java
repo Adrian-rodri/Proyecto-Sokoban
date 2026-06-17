@@ -123,7 +123,6 @@ public class MenuScreen extends BaseScreen {
         }
         //sincronizar volumen con la configuracion del jugador actual
         double vol = game.playerManager.getPlayerLogeado().getVolumen();
-        if (vol == 0) vol = Constantes.VOLUMEN_DEFAULT;
         menuMusic.setVolume((float) vol);
         //reproducir si no lo esta (por si venia pausada de GameScreen)
         if (!menuMusic.isPlaying()) {
