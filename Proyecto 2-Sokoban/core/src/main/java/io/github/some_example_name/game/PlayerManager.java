@@ -452,7 +452,7 @@ public class PlayerManager implements Gestionable<Player>{
         
         if (playerLogeado.getHistorial()!= null) 
             playerLogeado.getHistorial().add(entrada);
-        appendHistorial(entrada);
+        guardarHistorial();
         
         guardar();
     }
@@ -477,14 +477,14 @@ public class PlayerManager implements Gestionable<Player>{
         guardar();
     }
 
-    private void appendHistorial(EntradaHistorial e) {
-        if (playerLogeado == null) return;
+    private void guardarHistorial(){
+        if (playerLogeado==null) 
+            return;
         ArrayList<EntradaHistorial> historial= playerLogeado.getHistorial();
-        try (ObjectOutputStream oos= new ObjectOutputStream(
-                new FileOutputStream("users/" + playerLogeado.getUserName() + "/historial.skb"))) {
+        try (ObjectOutputStream oos= new ObjectOutputStream(new FileOutputStream("users/" + playerLogeado.getUserName() + "/historial.skb"))) {
             oos.writeObject(historial);
-        } catch (IOException ex) {
-            System.err.println("Error historial: " + ex.getMessage());
+        }catch(IOException e){
+            System.err.println("Error historial: " + e.getMessage());
         }
     }
     

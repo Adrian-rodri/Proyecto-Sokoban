@@ -413,7 +413,7 @@ public class ProfileScreen extends BaseScreen {
         for(FileHandle archivo :archivos){
             Texture thumbTex= new Texture(archivo.path());
             thumbsTextures.add(thumbTex);
-            TextureRegion region= new TextureRegion(thumbTex, 0, 0, 32, 32);
+            TextureRegion region= new TextureRegion(thumbTex, 32, 0, 32, 32);
             Image thumb= new Image(region);
 
             Table card= new Table();
