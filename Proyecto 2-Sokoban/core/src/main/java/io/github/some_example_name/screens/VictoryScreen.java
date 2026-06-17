@@ -104,7 +104,7 @@ public class VictoryScreen extends BaseScreen {
             TextButton btnSiguiente = new TextButton(traducir("Siguiente","Next"), skin, "big");
             btnSiguiente.addListener(new ChangeListener() {
                 @Override
-                public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                public void changed(ChangeEvent event, Actor actor) {
                     GameScreen.initPlayer = false;
                     game.setScreen(new GameScreen(game, numLevel + 1));
                     dispose();
@@ -116,7 +116,7 @@ public class VictoryScreen extends BaseScreen {
         TextButton btnNiveles = new TextButton(traducir("Niveles","Levels"), skin, "big");
         btnNiveles.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new LevelSelectScreen(game));
                 dispose();
             }
@@ -126,7 +126,7 @@ public class VictoryScreen extends BaseScreen {
         TextButton btnMenu = new TextButton("Menu", skin, "default");
         btnMenu.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new MenuScreen(game));
                 dispose();
             }

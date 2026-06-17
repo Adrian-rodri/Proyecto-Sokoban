@@ -2,11 +2,8 @@ package io.github.some_example_name.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -68,7 +65,7 @@ public class LoginScreen extends BaseScreen {
 
         btnVerClave.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 boolean oculto = campoClave.isPasswordMode();
                 campoClave.setPasswordMode(!oculto);
                 btnVerClave.setText(oculto
@@ -98,19 +95,19 @@ public class LoginScreen extends BaseScreen {
 
         btnIngresar.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
+            public void changed(ChangeEvent e, Actor a) {
                 onIngresar();
             }
         });
         btnRegistro.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
+            public void changed(ChangeEvent e, Actor a) {
                 onRegistro();
             }
         });
         btnIdioma.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
+            public void changed(ChangeEvent e, Actor a) {
                 cambiarIdioma();
             }
         });

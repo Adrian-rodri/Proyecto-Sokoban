@@ -64,7 +64,7 @@ public class ReportesScreen extends BaseScreen {
             final int index= i;
             btnNivel.addListener(new ChangeListener() {
                 @Override
-                public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                public void changed(ChangeEvent event, Actor actor) {
                     mostrarDialogoNivel(index,nombre);
                 }
             });
@@ -116,7 +116,7 @@ public class ReportesScreen extends BaseScreen {
         btnVolver= new TextButton("Volver", skin, "default");
         btnVolver.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new MenuScreen(game));
                 dispose();
             }

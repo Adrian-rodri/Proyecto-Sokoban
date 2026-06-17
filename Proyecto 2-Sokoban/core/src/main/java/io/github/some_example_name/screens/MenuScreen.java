@@ -62,35 +62,35 @@ public class MenuScreen extends BaseScreen {
 
         btnJugar.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
+            public void changed(ChangeEvent e, Actor a) {
                 game.setScreen(new LevelSelectScreen(game));
                 dispose();
             }
         });
         btnPerfil.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
+            public void changed(ChangeEvent e, Actor a) {
                 game.setScreen(new ProfileScreen(game));
                 dispose();
             }
         });
         btnReporte.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
+            public void changed(ChangeEvent e, Actor a) {
                 game.setScreen(new ReportesScreen(game));
                 dispose();
             }
         });
         btnSalir.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
+            public void changed(ChangeEvent e, Actor a) {
                 Gdx.app.exit();
             }
         });
         
         btnConfig.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
+            public void changed(ChangeEvent e, Actor a) {
                 game.setScreen(new SettingScreen(game));
                 dispose();
             }
@@ -98,7 +98,7 @@ public class MenuScreen extends BaseScreen {
         
         btnAmigos.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
+            public void changed(ChangeEvent e, Actor a) {
                 mostrarDialogoAmigos();
             }
         });
@@ -111,8 +111,8 @@ public class MenuScreen extends BaseScreen {
         });
         btnAyuda.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent e, Actor a) {
-                System.out.println("[Menu] Ayuda");
+            public void changed(ChangeEvent e, Actor a) {
+                mostrarDialogoAyuda();
             }
         });
 
@@ -155,7 +155,7 @@ public class MenuScreen extends BaseScreen {
 
         btnAgregar.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent ev, Actor a) {
+            public void changed(ChangeEvent ev, Actor a) {
                 String nombre = txtAmigo.getText().trim();
                 if (nombre.isEmpty())
                     return;
@@ -202,7 +202,7 @@ public class MenuScreen extends BaseScreen {
                 TextButton btnAceptar= new TextButton(traducir("Aceptar", "Accept"), skin, "small");
                 btnAceptar.addListener(new ChangeListener() {
                     @Override
-                    public void changed(ChangeListener.ChangeEvent ev, Actor a) {
+                    public void changed(ChangeEvent ev, Actor a) {
                         game.playerManager.aceptarSolicitud(sol);
                         actualizarBotonNotificaciones();
                         refrescarDialogo(scrollContent, ventana, txtAmigo, btnAgregar, lblMsg, scroll);
@@ -213,7 +213,7 @@ public class MenuScreen extends BaseScreen {
                 TextButton btnRechazar= new TextButton(traducir("Rechazar", "Reject"), skin, "small");
                 btnRechazar.addListener(new ChangeListener() {
                     @Override
-                    public void changed(ChangeListener.ChangeEvent ev, Actor a) {
+                    public void changed(ChangeEvent ev, Actor a) {
                         game.playerManager.rechazarSolicitud(sol);
                         actualizarBotonNotificaciones();
                         refrescarDialogo(scrollContent, ventana, txtAmigo, btnAgregar, lblMsg, scroll);
@@ -383,9 +383,74 @@ public class MenuScreen extends BaseScreen {
         dialogo.button(traducir("Cerrar", "Close"), null);
         dialogo.show(stage);
     }
-    
-    
+    public void mostrarDialogoAyuda() {
+        Dialog dialogo= new Dialog(traducir("Ayuda", "Help"), skin, "default");
+        dialogo.setModal(true);
+        dialogo.setMovable(false);
 
+        Table contenido= new Table();
+        contenido.top().left().pad(8);
+        ScrollPane scroll= new ScrollPane(contenido, skin);
+        
+        //mostrar reglas
+        Label lblTituloReglas= new Label(traducir("Reglas del juego", "Game Rules"), skin, "medium-white");
+        contenido.add(lblTituloReglas).left().padBottom(6).row();
+
+        String[] reglas= {
+            traducir("• Empuja todas las cajas hacia las metas (casillas marcadas).","• Push all boxes onto the goal tiles."),
+            traducir("• Solo puedes empujar cajas, no jalarlas.","• You can only push boxes, not pull them."),
+            traducir("• No puedes empujar dos cajas a la vez.","• You cannot push two boxes at the same time."),
+            traducir("• El nivel se completa cuando todas las cajas estan en una meta.","• The level is complete when all boxes are on goal tiles."),
+            traducir("• Usa Deshacer para revertir tu ultimo movimiento.","• Use Undo to revert your last move.")
+        };
+
+        for(String regla:reglas){
+            contenido.add(new Label(regla, skin, "small-white")).left().padBottom(3).row();
+        }
+
+        Label lblSep= new Label(" ", skin, "small-white");
+        contenido.add(lblSep).left().padTop(8).padBottom(6).row();
+        
+        //mostrar controles
+        Label lblTituloControles= new Label(traducir("Controles", "Controls"), skin, "medium-white");
+        contenido.add(lblTituloControles).left().padBottom(6).row();
+
+        boolean flechas= game.playerManager.getPlayerLogeado().isUsarFlechas();
+
+        String[][] controles={
+            {flechas ?traducir("ARRIBA","UP"):"W",traducir("Mover arriba","Move up")},
+            {flechas? traducir("ABAJO","DOWN"): "S",traducir("Mover abajo","Move down")},
+            {flechas?traducir("IZQUIERDA","LEFT"):"A",traducir("Mover izquierda","Move left")},
+            {flechas ?traducir("DERECHA","RIGHT"): "D", traducir("Mover derecha","Move right")},
+            {"U",traducir("Deshacer movimiento","Undo move")},
+            {"R",traducir("Reinicar Nivel","Restart Level")}
+        };
+
+        Table tablaControles= new Table();
+        
+        for(String[] fila:controles){
+            Label lblTecla= new Label("[" + fila[0] + "]", skin, "small-white");
+            lblTecla.setColor(0.9f, 0.8f, 0.3f, 1f);
+            tablaControles.add(lblTecla).width(110).left().padRight(10).padBottom(4);
+            tablaControles.add(new Label(fila[1], skin, "small-white")).left().padBottom(4);
+            tablaControles.row();
+        }
+        contenido.add(tablaControles).left().padBottom(8).row();
+        
+        String notaControl= flechas?
+                traducir("Modo actual: Teclas de flecha", "Current mode: Arrow keys"): 
+                traducir("Modo actual: WASD", "Current mode: WASD");
+        
+        Label lblNota= new Label(notaControl, skin, "small-white");
+        lblNota.setColor(0.5f, 0.8f, 0.5f, 1f);
+        contenido.add(lblNota).left().padBottom(6).row();
+
+        dialogo.getContentTable().pad(10, 16, 10, 16);
+        dialogo.getContentTable().add(scroll).width(500).height(300).padBottom(8).row();
+        dialogo.button(traducir("Cerrar", "Close"), null);
+        dialogo.show(stage);
+    }
+    
     @Override
     public void resize(int w, int h) {
         stage.getViewport().update(w, h, true);

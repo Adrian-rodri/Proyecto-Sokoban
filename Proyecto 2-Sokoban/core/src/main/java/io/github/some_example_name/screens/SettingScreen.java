@@ -33,7 +33,7 @@ public class SettingScreen extends BaseScreen {
         sliderVolumen.setValue((float)(vol * 100));
         sliderVolumen.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 int valor= (int) sliderVolumen.getValue();
                 lblVolumenValor.setText(valor + "%");
                 game.playerManager.cambiarVolumen(valor);
@@ -58,7 +58,7 @@ public class SettingScreen extends BaseScreen {
 
         btnEspanol.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.playerManager.cambiarIdioma("espanol");
                 lblIdiomaValor.setText("Espanol");
                 actualizarBotonIdioma(btnEspanol, btnEnglish, "espanol");
@@ -68,7 +68,7 @@ public class SettingScreen extends BaseScreen {
         });
         btnEnglish.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.playerManager.cambiarIdioma("english");
                 lblIdiomaValor.setText("English");
                 actualizarBotonIdioma(btnEspanol, btnEnglish, "english");
@@ -93,14 +93,14 @@ public class SettingScreen extends BaseScreen {
 
         btnWasd.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.playerManager.cambiarControl(false);
                 actualizarBotonControl(btnWasd, btnFlechas, false);
             }
         });
         btnFlechas.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.playerManager.cambiarControl(true);
                 actualizarBotonControl(btnWasd, btnFlechas, true);
             }
@@ -115,7 +115,7 @@ public class SettingScreen extends BaseScreen {
         TextButton btnVolver = new TextButton(traducir("Volver","Back"), skin, "default");
         btnVolver.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new MenuScreen(game));
                 dispose();
             }
@@ -124,7 +124,7 @@ public class SettingScreen extends BaseScreen {
         TextButton btnLogout = new TextButton(traducir("Cerrar sesion","Log Out"), skin, "default");
         btnLogout.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.playerManager.cerrarSesion();
                 game.setScreen(new LoginScreen(game));
                 dispose();

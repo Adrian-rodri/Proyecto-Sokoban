@@ -147,7 +147,7 @@ public class GameScreen implements Screen {
 
         btnReiniciar.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 nivelActual.reiniciar();
                 movimientos = 0;
                 tiempoSegundos = 0;
@@ -160,7 +160,7 @@ public class GameScreen implements Screen {
 
         btnSalir.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 detenerTimer();
                 game.setScreen(new MenuScreen(game));
                 dispose();
@@ -261,8 +261,7 @@ public class GameScreen implements Screen {
                         }
                         break;
                 }
-                batch.draw(tiposTiles.getTexture(), drawX, drawY,
-                        Constantes.TILE_SIZE, Constantes.TILE_SIZE);
+                batch.draw(tiposTiles.getTexture(), drawX, drawY,Constantes.TILE_SIZE, Constantes.TILE_SIZE);
             }
         }
         player.dibujarPlayer(batch, offsetX, offsetY);
@@ -347,7 +346,7 @@ public class GameScreen implements Screen {
         dialogo.setModal(true);
         dialogo.pad(24);
 
-        Label lblTitulo = new Label(traducir("¡Has perdido!","Game Over"), skin, "small-white");
+        Label lblTitulo = new Label(traducir("Has perdido!","Game Over"), skin, "small-white");
         lblTitulo.setFontScale(1.8f);
         Label lblMensaje = new Label(traducir("Te quedaste sin Fallos.","You ran out of undos."), skin, "small-white");
 

@@ -77,9 +77,6 @@ public class LevelSelectScreen extends BaseScreen {
                 public void changed(ChangeEvent event, Actor actor) {
                     if (idx < nivelesDisponibles) {
                       mostrarJugarDialogo(idx);
-                        //GameScreen.initPlayer = false;
-                        //game.setScreen(new GameScreen(game, idx));
-   
                     }
                 }
             });

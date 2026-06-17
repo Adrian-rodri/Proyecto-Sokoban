@@ -78,22 +78,11 @@ public class ProfileScreen extends BaseScreen {
                 }
             }
         }
-
-        Table avatarTable = new Table();
-        avatarTable.top().center();
-
-        Label lblAvatarTitle = new Label(traducir("Personalizar avatar","Change Avatar"), skin, "medium-white");
-        avatarTable.add(lblAvatarTitle).center().padBottom(16).row();
-
-        Label lblPlaceholder = new Label("[ proximamente ]", skin, "small-white");
-        lblPlaceholder.setColor(0.5f, 0.5f, 0.6f, 1f);
-        avatarTable.add(lblPlaceholder).center().row();
-        
         btnVolver = new TextButton(traducir("Volver","Back"), skin, "default");
 
         btnVolver.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new MenuScreen(game));
                 dispose();
             }
@@ -110,16 +99,16 @@ public class ProfileScreen extends BaseScreen {
             avatarTexture= new Texture("texturas/avatares/1-default.png");
             p.setAvatarFile("1-default.png");
         }
-        TextureRegion avatarRegion= new TextureRegion(avatarTexture, 0, 0, 32, 32);
+        TextureRegion avatarRegion= new TextureRegion(avatarTexture, 2*32, 2*32, 32, 24);
         Image avatarImage= new Image(avatarRegion);
 
-        editTable.add(avatarImage).center().size(128, 128).padBottom(8).row();
+        editTable.add(avatarImage).center().size(128,96).padBottom(8).row();
 
         TextButton btnCambiarAvatar = new TextButton(traducir("Cambiar avatar","Change Avatar"), skin, "small");
         editTable.add(btnCambiarAvatar).center().padBottom(20).row();
         btnCambiarAvatar.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 mostrarSelectorAvatar(avatarImage);
             }
         });
@@ -128,7 +117,7 @@ public class ProfileScreen extends BaseScreen {
         editTable.add(btnEditarPerfil).center().width(anchoBoton).height(32).padBottom(10).row();
         btnEditarPerfil.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 mostrarDialogoEditarPerfil();
             }
         });
@@ -140,7 +129,7 @@ public class ProfileScreen extends BaseScreen {
 
         btnVolver.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new MenuScreen(game));
                 dispose();
             }
@@ -197,7 +186,7 @@ public class ProfileScreen extends BaseScreen {
         
         btnCambiarPass.addListener(new ChangeListener(){
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 mostrarDialogoPassword();
             }
         });
@@ -206,7 +195,7 @@ public class ProfileScreen extends BaseScreen {
         btnEliminar.setColor(0.9f, 0.3f, 0.3f, 1f);
         btnEliminar.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 mostrarDialogoConfirmarEliminar(dialog);
             }
         });
@@ -307,7 +296,7 @@ public class ProfileScreen extends BaseScreen {
         TextButton btnVer= new TextButton(traducir("Ver contrasenas","Show passwords"), skin, "small");
         btnVer.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 boolean oculto= campoActual.isPasswordMode();
                 campoActual.setPasswordMode(!oculto);
                 campoNueva.setPasswordMode(!oculto);
@@ -347,7 +336,7 @@ public class ProfileScreen extends BaseScreen {
         TextButton btnGuardarPass= new TextButton(traducir("Guardar contrasena","Save password"), skin, "default");
         btnGuardarPass.addListener(new ChangeListener(){
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor){
+            public void changed(ChangeEvent event, Actor actor){
                 String actual= campoActual.getText();
                 String nueva= campoNueva.getText();
                 String conf= campoConfirm.getText();
@@ -465,7 +454,7 @@ public class ProfileScreen extends BaseScreen {
         TextButton btnGuardar= new TextButton(traducir("Guardar","Save"), skin, "default");
         btnGuardar.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 String archivoElegido= seleccionado;
                 if(archivoElegido==null) 
                     return;
@@ -477,8 +466,7 @@ public class ProfileScreen extends BaseScreen {
                 }catch(Exception e){
                     avatarTexture= new Texture("texturas/avatares/1-default.png");
                 }
-                TextureRegion newRegion= new TextureRegion(avatarTexture, 0, 0, 32, 32);
-                avatarImage.setDrawable(new Image(newRegion).getDrawable());
+                buildUI();
                 dialogo.hide();
             }
         });
@@ -486,7 +474,7 @@ public class ProfileScreen extends BaseScreen {
         TextButton btnCancelar= new TextButton(traducir("Cancelar","Cancel"), skin, "default");
         btnCancelar.addListener(new ChangeListener(){
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 dialogo.hide();
             }
         });
@@ -526,7 +514,7 @@ public class ProfileScreen extends BaseScreen {
 
         btnConfirmar.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 String pass= campoPass.getText();
                 Player p= game.playerManager.getPlayerLogeado();
                 if(!p.getPassword().equals(pass)){
@@ -543,7 +531,7 @@ public class ProfileScreen extends BaseScreen {
 
         btnCancelar.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 confirm.hide();
             }
         });
