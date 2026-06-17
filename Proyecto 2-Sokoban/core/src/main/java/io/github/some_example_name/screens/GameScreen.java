@@ -305,8 +305,8 @@ public class GameScreen implements Screen {
                 ganarSound.play((float) game.playerManager.getPlayerLogeado().getVolumen());
             }
             int puntaje = calcularPuntaje();
-            game.playerManager.actualizarTrasPartida(numLevel, movimientos, tiempoSegundos, puntaje);
-            game.playerManager.actualizarTrasPartida(numLevel, movimientos, tiempoSegundos, puntaje);
+            boolean esReto= (retoRetador!=null);
+            game.playerManager.actualizarTrasPartida(numLevel, movimientos, tiempoSegundos, puntaje,esReto);
             game.setScreen(new VictoryScreen(game, numLevel, movimientos, tiempoSegundos, puntaje,retoRetador, retoNivel));
             retoRetador= null;
             retoNivel= -1;

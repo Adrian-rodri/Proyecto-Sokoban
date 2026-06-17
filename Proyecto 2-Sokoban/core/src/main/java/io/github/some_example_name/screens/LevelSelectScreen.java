@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -14,6 +15,7 @@ import io.github.some_example_name.Main;
 import io.github.some_example_name.game.Nivel;
 import io.github.some_example_name.model.EntradaHistorial;
 import io.github.some_example_name.model.Player;
+import java.util.ArrayList;
 
 public class LevelSelectScreen extends BaseScreen {
 
@@ -166,7 +168,8 @@ public class LevelSelectScreen extends BaseScreen {
 
         btnAmigo.addListener(new ChangeListener() {
             @Override public void changed(ChangeEvent e, Actor a) {
-                //retar amigo
+                dialogo.hide();
+                mostrarDialogoRetar(idx);
             }
         });
 
@@ -224,10 +227,55 @@ public class LevelSelectScreen extends BaseScreen {
         dialogo.show(stage);
     }
     private String getDificultad(int idx){
-    if(idx <=2) 
-        return traducir("Facil", "Easy");
-    if(idx<=5) 
-        return traducir("Medio", "Medium");
-    return traducir("Dificil", "Hard");
-}
+        if(idx <=2) 
+            return traducir("Facil", "Easy");
+        if(idx<=5) 
+            return traducir("Medio", "Medium");
+        return traducir("Dificil", "Hard");
+    }
+    private void mostrarDialogoRetar(int idx) {
+        String nombreNivel = (idx == 0) ? "Tutorial" : traducir("Nivel ", "Level ") + idx;
+
+        Dialog dialogoRetar = new Dialog(traducir("Retar en ", "Challenge at ") + nombreNivel, skin, "tool");
+        dialogoRetar.setMovable(false);
+        dialogoRetar.setModal(true);
+        dialogoRetar.pad(20);
+
+        Table contenido = new Table();
+        contenido.top().left();
+        ScrollPane scroll = new ScrollPane(contenido, skin);
+
+        Label lblMsg = new Label("", skin, "small-white");
+
+        ArrayList<String> amigos = game.playerManager.getPlayerLogeado().getAmigos();
+        if (amigos == null || amigos.isEmpty()) {
+            contenido.add(new Label(traducir("No tienes amigos aun.", "No friends yet."), skin, "small-white"))
+                     .left().row();
+        } else {
+            for (String amigo : amigos) {
+                Table fila = new Table();
+                fila.add(new Label(amigo, skin, "small-white")).left().expandX();
+                TextButton btnRetar = new TextButton(traducir("Retar", "Challenge"), skin, "small");
+                btnRetar.addListener(new ChangeListener() {
+                    @Override public void changed(ChangeEvent e, Actor a) {
+                        boolean ok = game.playerManager.enviarReto(amigo, idx);
+                        if (ok) {
+                            lblMsg.setText(traducir("Reto enviado a ", "Challenge sent to ") + amigo + "!");
+                            lblMsg.setColor(0.4f, 1f, 0.5f, 1f);
+                        } else {
+                            lblMsg.setText(traducir("Ya retaste a ", "Already challenged ") + amigo);
+                            lblMsg.setColor(1f, 0.5f, 0.5f, 1f);
+                        }
+                    }
+                });
+                fila.add(btnRetar).width(80).height(26);
+                contenido.add(fila).expandX().fillX().padBottom(4).row();
+            }
+        }
+
+        dialogoRetar.getContentTable().add(scroll).width(280).height(180).padBottom(6).row();
+        dialogoRetar.getContentTable().add(lblMsg).center().padBottom(4).row();
+        dialogoRetar.button(traducir("Cerrar", "Close"), null);
+        dialogoRetar.show(stage);
+    }
 }

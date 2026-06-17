@@ -77,13 +77,13 @@ public class VictoryScreen extends BaseScreen {
             String msgReto;
             Color colorReto;
             if(suPuntaje<0){
-                msgReto= traducir("¡Tu rival aún no jugó este nivel!", "Your rival hasn't played this level!");
+                msgReto= traducir("¡Tu rival aun no jugo este nivel!", "Your rival hasn't played this level!");
                 colorReto= new Color(0.8f, 0.8f, 0.3f, 1f);
             }else if(puntaje>suPuntaje){
-                msgReto= traducir("¡Ganaste el reto! ", "You won the challenge! ") + puntaje + " vs " + suPuntaje;
+                msgReto= traducir("Ganaste el reto! ", "You won the challenge! ") + puntaje + " vs " + suPuntaje;
                 colorReto= new Color(0.3f, 1f, 0.4f, 1f);
             }else if(puntaje ==suPuntaje){
-                msgReto= traducir("¡Empate! ", "Tie! ") + puntaje + " vs " + suPuntaje;
+                msgReto= traducir("Empate! ", "Tie! ") + puntaje + " vs " + suPuntaje;
                 colorReto= new Color(1f, 0.85f, 0.25f, 1f); 
             }else{
                 msgReto= traducir("Perdiste el reto. ", "You lost. ") + puntaje + " vs " + suPuntaje;

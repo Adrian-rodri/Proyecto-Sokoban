@@ -407,7 +407,12 @@ public class PlayerManager implements Gestionable<Player>{
    
     //-----------JJ
     
-    public void actualizarTrasPartida(int nivel, int movimientos, double tiempoSeg, int puntaje) {
+    public void actualizarTrasPartida(int nivel, int movimientos, double tiempoSeg, int puntaje, boolean esReto) {
+        if(!esReto){
+            int siguiente= nivel + 1;
+            if(siguiente>playerLogeado.getNivelesDesbloqueados())
+                playerLogeado.setNivelesDesbloqueados(siguiente);
+        }
         if(playerLogeado==null)
             return;
         boolean yaCompletado=false;
@@ -779,6 +784,55 @@ public class PlayerManager implements Gestionable<Player>{
         }
         return mejor;
     }
+    
+    public void eliminarCuenta(){
+        if (playerLogeado==null) 
+            return;
+        String userName= playerLogeado.getUserName();
+        
+        borrarDirectorio(new File("users/" + userName));
+        
+        try(RandomAccessFile rUser= new RandomAccessFile(usersFile, "rw")){
+            ArrayList<String> users= new ArrayList<>();
+            ArrayList<String> passwords= new ArrayList<>();
+            ArrayList<Integer> puntos= new ArrayList<>();
+
+            while(rUser.getFilePointer()< rUser.length()){
+                users.add(rUser.readUTF());
+                passwords.add(rUser.readUTF());
+                puntos.add(rUser.readInt());
+            }
+
+            rUser.setLength(0);
+            for(int i=0; i<users.size(); i++){
+                if(!users.get(i).equals(userName)){
+                    rUser.writeUTF(users.get(i));
+                    rUser.writeUTF(passwords.get(i));
+                    rUser.writeInt(puntos.get(i));
+                }
+            }
+        }catch(IOException e){
+            System.err.println("Error: " + e.getMessage());
+        }
+
+        arrayUsernames.remove(userName);
+        playerLogeado= null;
+    }
+    
+    private void borrarDirectorio(File dir){
+        if(!dir.exists()) 
+            return;
+        File[] archivos= dir.listFiles();
+        if(archivos!=null){
+            for(File f :archivos){
+                if(f.isDirectory()) 
+                    borrarDirectorio(f);
+                else f.delete();
+            }
+        }
+        dir.delete();
+    }
+    
     public Player getPlayerLogeado() { 
         return playerLogeado; 
     }
