@@ -8,7 +8,7 @@ import com.badlogic.gdx.Game;
 public class Main extends Game {
     public PlayerManager playerManager;
     public NivelManager nivelManager;
-
+    public String idiomaGlobal= "espanol";
     @Override
     public void create() {
         playerManager = new PlayerManager();

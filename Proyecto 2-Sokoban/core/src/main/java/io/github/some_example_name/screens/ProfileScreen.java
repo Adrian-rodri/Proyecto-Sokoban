@@ -59,7 +59,7 @@ public class ProfileScreen extends BaseScreen {
             perfilTable.add(new Label(traducir("Mejor puntaje: ","Best puntutation: ") + p.getMejorPuntaje(), skin, "dato-perfil")).left().padBottom(3).row();
             perfilTable.add(new Label(traducir("Puntaje total: ","Total Points: ") + p.getPuntajeGeneral(), skin, "dato-perfil")).left().padBottom(3).row();
             perfilTable.add(new Label(traducir("Tiempo jugado: ","Played Time:  ") + String.format("%.2f", p.getTiempoJugadoHoras()) + " h", skin, "dato-perfil")).left().padBottom(3).row();
-            perfilTable.add(new Label(traducir("Promedio/nivel: ","Average/level") + String.format("%.0f", p.getTiempoPromedioPorNivel()) + " s", skin, "dato-perfil")).left().padBottom(3).row();
+            perfilTable.add(new Label(traducir("Promedio/nivel: ","Average/level: ") + String.format("%.0f", p.getTiempoPromedioPorNivel()) + " s", skin, "dato-perfil")).left().padBottom(3).row();
             perfilTable.add(new Label(traducir("Desbloqueados: ","Unlocked: ") + (p.getNivelesDesbloqueados() + 1), skin, "dato-perfil")).left().padBottom(10).row();
 
             ArrayList<EntradaHistorial> hist = p.getHistorial();
@@ -117,7 +117,7 @@ public class ProfileScreen extends BaseScreen {
 
         editTable.add(avatarImage).center().size(128, 128).padBottom(8).row();
 
-        TextButton btnCambiarAvatar = new TextButton("Cambiar avatar", skin, "small");
+        TextButton btnCambiarAvatar = new TextButton(traducir("Cambiar avatar","Change Avatar"), skin, "small");
         editTable.add(btnCambiarAvatar).center().padBottom(20).row();
         btnCambiarAvatar.addListener(new ChangeListener() {
             @Override
@@ -126,7 +126,7 @@ public class ProfileScreen extends BaseScreen {
             }
         });
 
-        TextButton btnEditarPerfil= new TextButton("Editar perfil", skin, "default");
+        TextButton btnEditarPerfil= new TextButton(traducir("Editar perfil","Edit Profile"), skin, "default");
         editTable.add(btnEditarPerfil).center().width(anchoBoton).height(32).padBottom(10).row();
         btnEditarPerfil.addListener(new ChangeListener() {
             @Override
@@ -138,7 +138,7 @@ public class ProfileScreen extends BaseScreen {
         lblError= new Label("", skin, "error");
         editTable.add(lblError).width(anchoBoton).padBottom(8).row();
 
-        btnVolver= new TextButton("Volver", skin, "default");
+        btnVolver= new TextButton(traducir("Volver","Back"), skin, "default");
 
         btnVolver.addListener(new ChangeListener() {
             @Override
@@ -152,7 +152,7 @@ public class ProfileScreen extends BaseScreen {
         btnRow.add(btnVolver).width(155).height(32);
 
         Window panel = createWindow();
-        panel.add(new Label("Mi Perfil", skin, "title-white")).colspan(2).center().padBottom(16).row();
+        panel.add(new Label(traducir("Mi Perfil","My Profile"), skin, "title-white")).colspan(2).center().padBottom(16).row();
         panel.add(perfilTable).left().width(260).padRight(20).expandY();
         panel.add(editTable).left().width(anchoBoton).expandY().row();
         panel.add(btnRow).colspan(2).center().padTop(10);
