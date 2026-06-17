@@ -3,10 +3,14 @@ package io.github.some_example_name.game;
 import io.github.some_example_name.model.EntradaHistorial;
 import io.github.some_example_name.model.Player;
 import io.github.some_example_name.game.Gestionable;
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -114,20 +118,20 @@ public class PlayerManager implements Gestionable<Player>{
             }
             rUser.close();
             
-            //leer historial.skb
-            rUser= new RandomAccessFile("users/"+userName+"/historial.skb","r");
+            //leer historial.skb (serializacion con ObjectInputStream)
+            File histFile= new File("users/"+userName+"/historial.skb");
             ArrayList<EntradaHistorial> historial= new ArrayList<>();
-            while(rUser.getFilePointer()<rUser.length()){
-                int numIntento= rUser.readInt();
-                int nivel= rUser.readInt();
-                int puntaje= rUser.readInt();
-                int movimientos= rUser.readInt();
-                double tiempo= rUser.readDouble();
-                long fecha= rUser.readLong();
-                EntradaHistorial entrada= new EntradaHistorial(numIntento,nivel,puntaje,movimientos,tiempo,fecha);
-                historial.add(entrada);
+            if(histFile.exists() && histFile.length()>0){
+                try(ObjectInputStream ois= new ObjectInputStream(new FileInputStream(histFile))){
+                    @SuppressWarnings("unchecked")
+                    ArrayList<EntradaHistorial> temp= (ArrayList<EntradaHistorial>) ois.readObject();
+                    if(temp!=null) historial= temp;
+                }catch(EOFException e){
+                    //archivo vacio o corrupto, se deja la lista vacia
+                }catch(ClassNotFoundException e){
+                    System.err.println("Error formato historial: "+e.getMessage());
+                }
             }
-            rUser.close();
             
             playerLogeado= new Player(userName,password,puntos,nombreCompleto,rutaAvatar,fechaRegistro,
                                         ultimaSesion,volumen,idioma,amigos,partidasJugadas,nivelesCompletados,
@@ -472,17 +476,13 @@ public class PlayerManager implements Gestionable<Player>{
         playerLogeado.setIdioma(idioma);
         guardar();
     }
-    
-        private void appendHistorial(EntradaHistorial e) {
+
+    private void appendHistorial(EntradaHistorial e) {
         if (playerLogeado == null) return;
-        try (RandomAccessFile rf = new RandomAccessFile("users/" + playerLogeado.getUserName() + "/historial.skb", "rw")) {
-            rf.seek(rf.length());
-            rf.writeInt(e.getNumIntento());
-            rf.writeInt(e.getNivel());
-            rf.writeInt(e.getPuntaje());
-            rf.writeInt(e.getMovimientos());
-            rf.writeDouble(e.getTiempo());
-            rf.writeLong(e.getFecha());
+        ArrayList<EntradaHistorial> historial= playerLogeado.getHistorial();
+        try (ObjectOutputStream oos= new ObjectOutputStream(
+                new FileOutputStream("users/" + playerLogeado.getUserName() + "/historial.skb"))) {
+            oos.writeObject(historial);
         } catch (IOException ex) {
             System.err.println("Error historial: " + ex.getMessage());
         }
@@ -784,18 +784,16 @@ public class PlayerManager implements Gestionable<Player>{
     
     public int getMejorPuntajeEnNivel(String userName, int nivel){
         int mejor= -1;
-        try(RandomAccessFile rf= new RandomAccessFile("users/" + userName + "/historial.skb", "r")){
-            while(rf.getFilePointer()<rf.length()){
-                rf.readInt();//numIntento
-                int numLevel= rf.readInt();
-                int puntaje= rf.readInt();
-                rf.readInt();//movimientos
-                rf.readDouble();//tiempo
-                rf.readLong();//fecha
-                if(numLevel==nivel &&puntaje>mejor) 
-                    mejor= puntaje;
+        File histFile= new File("users/" + userName + "/historial.skb");
+        if(!histFile.exists() || histFile.length()==0) return mejor;
+        try(ObjectInputStream ois= new ObjectInputStream(new FileInputStream(histFile))){
+            @SuppressWarnings("unchecked")
+            ArrayList<EntradaHistorial> historial= (ArrayList<EntradaHistorial>) ois.readObject();
+            for(EntradaHistorial e: historial){
+                if(e.getNivel()==nivel && e.getPuntaje()>mejor)
+                    mejor= e.getPuntaje();
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             System.err.println("Error:"+ e.getMessage());
         }
         return mejor;

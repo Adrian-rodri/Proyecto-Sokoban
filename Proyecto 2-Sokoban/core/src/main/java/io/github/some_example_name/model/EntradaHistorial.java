@@ -1,6 +1,9 @@
 package io.github.some_example_name.model;
+import java.io.Serializable;
 
-public class EntradaHistorial {
+public class EntradaHistorial implements Serializable{
+    private static final long serialVersionUID = 1L;
+    
     private final int numIntento,nivel,puntaje,movimientos;
     private final double tiempo;
     private final long fecha;

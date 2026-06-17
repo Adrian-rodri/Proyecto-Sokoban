@@ -10,6 +10,7 @@ public class Main extends Juego {
     public NivelManager nivelManager;
     public AutoSaver autoSaver;
     public String idiomaGlobal= "espanol";
+    
     @Override
     public void create() {
         playerManager = new PlayerManager();
