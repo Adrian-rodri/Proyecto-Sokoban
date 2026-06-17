@@ -152,6 +152,7 @@ public class GameScreen implements Screen {
                 tiempoSegundos = 0;
                 GameScreen.initPlayer = false;
                 player.copias.clear();
+                player.resetPushOffset();
                 fallosDisponibles = 10;
             }
         });
@@ -187,7 +188,6 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
         shape.setProjectionMatrix(camera.combined);
 
-        // ── Panel de fondo del tablero ──
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.setColor(0.08f, 0.09f, 0.14f, 1f);
         shape.rect(offsetX - PANEL_PAD, offsetY - PANEL_PAD,
@@ -276,6 +276,7 @@ public class GameScreen implements Screen {
             tiempoSegundos = 0;
             GameScreen.initPlayer = false;
             player.copias.clear();
+            player.resetPushOffset();
             fallosDisponibles = 10;
         }
 
@@ -360,6 +361,7 @@ public class GameScreen implements Screen {
                 tiempoSegundos = 0;
                 GameScreen.initPlayer = false;
                 player.copias.clear();
+                player.resetPushOffset();
                 iniciarTimer();
                 dialogo.hide();
             }
