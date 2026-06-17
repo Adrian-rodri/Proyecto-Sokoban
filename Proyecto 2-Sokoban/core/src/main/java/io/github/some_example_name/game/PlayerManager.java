@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -35,7 +38,7 @@ public class PlayerManager implements Gestionable<Player>{
         try(RandomAccessFile rUsers= new RandomAccessFile(usersFile,"rw")){
             rUsers.seek(rUsers.length());
             rUsers.writeUTF(userName);
-            rUsers.writeUTF(password);
+            rUsers.writeUTF(hashPassword(password));
             rUsers.writeInt(0); //puntos
             crearArchivosNuevos(userName,nombreCompleto);
             arrayUsernames.add(userName);
@@ -51,8 +54,8 @@ public class PlayerManager implements Gestionable<Player>{
                 while(rPlayer.getFilePointer()<rPlayer.length()){
                     String user=rPlayer.readUTF();
                     if(user.equals(userName)){
-                        String passCorrecta= rPlayer.readUTF();
-                        if(!password.equals(passCorrecta))
+                        String hashCorrecto= rPlayer.readUTF();
+                        if(!hashPassword(password).equals(hashCorrecto))
                             return false;
                         int puntos= rPlayer.readInt();
                         cargarUser(userName, password, puntos);
@@ -61,7 +64,6 @@ public class PlayerManager implements Gestionable<Player>{
                         rPlayer.readUTF();
                         rPlayer.readInt();
                     }
-                    
                 }
             }catch (IOException e){
                 System.out.println("Error: "+e.getMessage());
@@ -69,8 +71,6 @@ public class PlayerManager implements Gestionable<Player>{
         }
         return false;    
     }
-    
-    
     
     private void cargarUser(String userName, String password, int puntos){
         try{
@@ -188,6 +188,20 @@ public class PlayerManager implements Gestionable<Player>{
             
         } catch (IOException e){
             System.err.println("Error: "+e.getMessage());
+        }
+    }
+    private String hashPassword(String password){
+        try{
+            MessageDigest md= MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes= md.digest(password.getBytes("UTF-8"));
+            StringBuilder sb= new StringBuilder();
+            for(byte b:hashBytes){
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        }catch(UnsupportedEncodingException | NoSuchAlgorithmException e){
+            System.err.println("Error: "+e.getMessage());
+            return null;
         }
     }
 
@@ -600,7 +614,7 @@ public class PlayerManager implements Gestionable<Player>{
 
             for(int i=0; i<users.size(); i++){
                 if(users.get(i).equals(playerLogeado.getUserName())){
-                    passwords.set(i, nueva);
+                    passwords.set(i, hashPassword(nueva));
                     break;
                 }
             }

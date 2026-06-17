@@ -10,21 +10,31 @@ public class Main extends Juego {
     public NivelManager nivelManager;
     public AutoSaver autoSaver;
     public String idiomaGlobal= "espanol";
-    
-    @Override
-    public void create() {
-        playerManager = new PlayerManager();
-        nivelManager = new NivelManager();
-        nivelManager.cargar();
-        autoSaver = new AutoSaver(playerManager);
-        autoSaver.start();
 
+    @Override
+    protected void inicializarRecursos(){
+        playerManager= new PlayerManager();
+        nivelManager= new NivelManager();
+        nivelManager.cargar();
+        autoSaver= new AutoSaver(playerManager);
+        autoSaver.start();
+    }
+
+    @Override
+    protected void mostrarPantallaInicial(){
         setScreen(new LoginScreen(this));
     }
-    @Override
-    public void dispose() {
 
-        if (autoSaver != null) {
+    @Override
+    protected void guardarEstadoAntesDeSalir() {
+        if (playerManager != null) {
+            playerManager.guardar();
+        }
+    }
+
+    @Override
+    public void dispose(){
+        if(autoSaver != null){
             autoSaver.stop();
         }
         super.dispose();
