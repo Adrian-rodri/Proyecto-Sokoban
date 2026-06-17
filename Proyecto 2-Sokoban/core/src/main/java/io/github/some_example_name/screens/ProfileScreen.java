@@ -206,6 +206,12 @@ public class ProfileScreen extends BaseScreen {
 
         TextButton btnEliminar= new TextButton(traducir("Eliminar cuenta","Delete account"), skin, "small");
         btnEliminar.setColor(0.9f, 0.3f, 0.3f, 1f);
+        btnEliminar.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                mostrarDialogoConfirmarEliminar(dialog);
+            }
+        });
         dialog.getContentTable().add(btnEliminar).left().padBottom(18).row();
         
         dialog.getContentTable().add(lblErrorEdit).width(anchoCampo).padBottom(8).row();
@@ -498,6 +504,63 @@ public class ProfileScreen extends BaseScreen {
 
         dialogo.add(content);
         dialogo.show(stage);
+    }
+    private void mostrarDialogoConfirmarEliminar(Dialog dialogPadre){
+        Dialog confirm= new Dialog("", skin, "tool");
+        confirm.setModal(true);
+        confirm.setMovable(false);
+        confirm.pad(24, 32, 20, 32);
+
+        Label lblTitulo= new Label(traducir("Eliminar cuenta", "Delete account"), skin, "medium-white");
+        lblTitulo.setColor(1f, 0.35f, 0.35f, 1f);
+        Label lblAviso= new Label(traducir("Esta accion no se puede deshacer.", "This action cannot be undone."), skin, "small-white");
+
+        TextField campoPass= new TextField("", skin);
+        campoPass.setPasswordMode(true);
+        campoPass.setPasswordCharacter('*');
+        campoPass.setMessageText(traducir("Confirma tu contrasena", "Confirm your password"));
+
+        Label lblErr= new Label("", skin, "error");
+
+        TextButton btnConfirmar= new TextButton(traducir("Eliminar", "Delete"), skin, "default");
+        btnConfirmar.setColor(0.9f, 0.3f, 0.3f, 1f);
+        TextButton btnCancelar= new TextButton(traducir("Cancelar", "Cancel"), skin, "default");
+
+        btnConfirmar.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                String pass= campoPass.getText();
+                Player p= game.playerManager.getPlayerLogeado();
+                if(!p.getPassword().equals(pass)){
+                    lblErr.setText(traducir("Contrasena incorrecta", "Wrong password"));
+                    return;
+                }
+                game.playerManager.eliminarCuenta();
+                confirm.hide();
+                dialogPadre.hide();
+                game.setScreen(new LoginScreen(game));
+                dispose();
+            }
+        });
+
+        btnCancelar.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                confirm.hide();
+            }
+        });
+
+        Table btnRow= new Table();
+        btnRow.add(btnConfirmar).width(120).height(32).padRight(10);
+        btnRow.add(btnCancelar).width(120).height(32);
+
+        confirm.getContentTable().add(lblTitulo).center().padBottom(8).row();
+        confirm.getContentTable().add(lblAviso).center().padBottom(16).row();
+        confirm.getContentTable().add(campoPass).width(280).height(34).padBottom(6).row();
+        confirm.getContentTable().add(lblErr).padBottom(8).row();
+        confirm.getContentTable().add(btnRow).center();
+        confirm.pack();
+        confirm.show(stage);
     }
     private void setReqStyle(Label lbl, boolean ok){
         if(ok){

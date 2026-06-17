@@ -408,13 +408,14 @@ public class PlayerManager implements Gestionable<Player>{
     //-----------JJ
     
     public void actualizarTrasPartida(int nivel, int movimientos, double tiempoSeg, int puntaje, boolean esReto) {
+        if(playerLogeado==null)
+            return;
         if(!esReto){
             int siguiente= nivel + 1;
             if(siguiente>playerLogeado.getNivelesDesbloqueados())
                 playerLogeado.setNivelesDesbloqueados(siguiente);
         }
-        if(playerLogeado==null)
-            return;
+        
         boolean yaCompletado=false;
         int mejorPuntajeAnterior=0;
         for(EntradaHistorial entrada: playerLogeado.getHistorial()){
@@ -449,9 +450,6 @@ public class PlayerManager implements Gestionable<Player>{
             playerLogeado.getHistorial().add(entrada);
         appendHistorial(entrada);
         
-        int siguiente = nivel + 1;
-        if(siguiente> playerLogeado.getNivelesDesbloqueados())
-            playerLogeado.setNivelesDesbloqueados(siguiente);
         guardar();
     }
     public void cambiarAvatar(String avatarFile) {
@@ -667,6 +665,24 @@ public class PlayerManager implements Gestionable<Player>{
             newDir.renameTo(oldDir);
             return false;
         }
+        for (String amigo:playerLogeado.getAmigos()){
+            File amigoFile= new File("users/" + amigo + "/amigos.skb");
+            if (!amigoFile.exists()) 
+                continue;    
+            ArrayList<String> lista= new ArrayList<>();
+            
+            try (RandomAccessFile rAmigos= new RandomAccessFile(amigoFile, "rw")) {
+                while(rAmigos.getFilePointer()<rAmigos.length()){
+                    String a= rAmigos.readUTF();
+                    lista.add(a.equals(viejoUserName) ? nuevoUserName : a);
+                }
+                rAmigos.setLength(0);
+                for(String a:lista) 
+                    rAmigos.writeUTF(a);
+            }catch(IOException e){
+                System.err.println("Error actualizando amigo " + amigo + ": " + e.getMessage());
+            }
+        }
         
         arrayUsernames.remove(viejoUserName);
         arrayUsernames.add(nuevoUserName);
@@ -814,7 +830,26 @@ public class PlayerManager implements Gestionable<Player>{
         }catch(IOException e){
             System.err.println("Error: " + e.getMessage());
         }
-
+        for(String amigo :playerLogeado.getAmigos()){
+            try{
+                File amigoFile= new File("users/" + amigo + "/amigos.skb");
+                if (!amigoFile.exists()) 
+                    continue;
+                ArrayList<String> lista= new ArrayList<>();
+                try (RandomAccessFile rAmigos= new RandomAccessFile(amigoFile, "rw")) {
+                    while(rAmigos.getFilePointer()< rAmigos.length()){
+                        String userAmigo= rAmigos.readUTF();
+                        if (!userAmigo.equals(userName)) 
+                            lista.add(userAmigo);
+                    }
+                    rAmigos.setLength(0);
+                    for(String userAmigo :lista) 
+                        rAmigos.writeUTF(userAmigo);
+                }
+            }catch(IOException e){
+                System.err.println("Error:"+e.getMessage());
+            }
+        }
         arrayUsernames.remove(userName);
         playerLogeado= null;
     }
