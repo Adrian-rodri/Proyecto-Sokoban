@@ -13,6 +13,7 @@ import io.github.some_example_name.Main;
 public class SettingScreen extends BaseScreen {
 
     private Label lblVolumenValor, lblIdiomaValor;
+    private TextButton btnWasd, btnFlechas;
     private Slider sliderVolumen;
 
     public SettingScreen(Main game) {
@@ -82,6 +83,35 @@ public class SettingScreen extends BaseScreen {
         idiomaRow.add(btnEnglish).width(100).height(28);
         idiomaRow.add().expandX();
         
+        boolean usarFlechas = true;
+
+        Label lblControlTitulo = new Label(traducir("Controles", "Controls"), skin, "medium-white");
+
+        btnWasd= new TextButton("WASD", skin, "small");
+        btnFlechas= new TextButton(traducir("Flechas", "Arrows"), skin, "small");
+        ///actualizarBotonControl(btnWasd, btnFlechas, usarFlechas);
+
+        btnWasd.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                //game.playerManager.cambiarControl(false);
+                //actualizarBotonControl(btnWasd, btnFlechas, false);
+            }
+        });
+        btnFlechas.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                //game.playerManager.cambiarControl(true);
+                //actualizarBotonControl(btnWasd, btnFlechas, true);
+            }
+        });
+
+        Table controlRow= new Table();
+        controlRow.add(lblControlTitulo).left().padRight(20);
+        controlRow.add(btnWasd).width(100).height(28).padRight(6);
+        controlRow.add(btnFlechas).width(100).height(28);
+        controlRow.add().expandX();
+        
         TextButton btnVolver = new TextButton(traducir("Volver","Back"), skin, "default");
         btnVolver.addListener(new ChangeListener() {
             @Override
@@ -109,6 +139,7 @@ public class SettingScreen extends BaseScreen {
         panel.add(new Label(traducir("Configuracion","Configuration"), skin, "title-white")).center().padBottom(24).row();
         panel.add(volumenRow).left().padBottom(20).row();
         panel.add(idiomaRow).left().padBottom(24).row();
+        panel.add(controlRow).left().padBottom(24).row();
         panel.add(btnRow).center();
         panel.pack();
         setRoot(panel);

@@ -24,8 +24,6 @@ import io.github.some_example_name.model.Player;
 import java.util.ArrayList;
 
 public class ProfileScreen extends BaseScreen {
-
-
     private TextButton btnVolver;
     private Texture avatarTexture;
     private Label lblError;
