@@ -108,6 +108,7 @@ public class GameScreen implements Screen {
         objetivo = new TextureRegion(sheetTiles, 3 * 80, 1 * 80, 80, 80);
         shape = new ShapeRenderer();
         player = new Player(0, 0);
+        player.setUsarFlechas(game.playerManager.getPlayerLogeado().isUsarFlechas());
         String avatarFile= game.playerManager.getPlayerLogeado().getAvatarFile();
         try {
             playerSheet= new Texture("texturas/avatares/" + avatarFile);

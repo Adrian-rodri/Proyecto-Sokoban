@@ -2,11 +2,9 @@ package io.github.some_example_name.game;
 
 import io.github.some_example_name.model.EntradaHistorial;
 import io.github.some_example_name.model.Player;
-import io.github.some_example_name.game.Gestionable;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -82,6 +80,12 @@ public class PlayerManager implements Gestionable<Player>{
             double volumen= rUser.readDouble();
             String idioma= rUser.readUTF();
             String rutaAvatar= rUser.readUTF();
+            boolean usarFlechas= false;
+            try{
+                usarFlechas= rUser.readBoolean();
+            }catch(EOFException e){
+                usarFlechas=false;
+            }
             rUser.close();
             
             //leer stats.skb
@@ -136,7 +140,7 @@ public class PlayerManager implements Gestionable<Player>{
             playerLogeado= new Player(userName,password,puntos,nombreCompleto,rutaAvatar,fechaRegistro,
                                         ultimaSesion,volumen,idioma,amigos,partidasJugadas,nivelesCompletados,
                                         mejorPuntaje,puntajeGeneral,tiempoJugadoHoras,tiempoPromedioPorNivel,
-                                        nivelesDesbloqueados,avatarRuta,historial);
+                                        nivelesDesbloqueados,avatarRuta,historial,usarFlechas);
         }catch(IOException e){
             System.out.println("Error: "+e.getMessage());
         }
@@ -165,6 +169,7 @@ public class PlayerManager implements Gestionable<Player>{
             rPlayer.writeDouble(0.4);//volumen
             rPlayer.writeUTF("espanol");// rPlayer.writeUTF("espanol");//idioma
             rPlayer.writeUTF("default/avatar.png");//avatar
+            rPlayer.writeBoolean(true);//controles
             rPlayer.close();
             
             rPlayer= new RandomAccessFile("users/"+userName+"/stats.skb","rw");//stats.skb
@@ -254,6 +259,7 @@ public class PlayerManager implements Gestionable<Player>{
             rUser.writeDouble(playerLogeado.getVolumen());
             rUser.writeUTF(playerLogeado.getIdioma());
             rUser.writeUTF(playerLogeado.getRutaAvatar());
+            rUser.writeBoolean(playerLogeado.isUsarFlechas());
             rUser.close();
             
             //guardar stats.skb
@@ -564,12 +570,12 @@ public class PlayerManager implements Gestionable<Player>{
             stats[4]= String.format("%.2f",tiempoHoras);
             stats[5]= String.format("%.1f", tiempoPromedio);
             stats[6]= userNameAmigo;
-        } catch (IOException e){
-            for(int i = 0;i<6; i++)
+        }catch(IOException e){
+            for(int i=0; i<6; i++)
                 stats[i] = "0";
             stats[6]= userNameAmigo;
-    }
-    return stats;
+        }
+        return stats;
 }
         
     public boolean cambiarNombreCompleto(String nuevoNombre) {
@@ -586,13 +592,19 @@ public class PlayerManager implements Gestionable<Player>{
             rf.writeDouble(playerLogeado.getVolumen());
             rf.writeUTF(playerLogeado.getIdioma());
             rf.writeUTF(playerLogeado.getRutaAvatar());
+            rf.writeBoolean(playerLogeado.isUsarFlechas());
         }catch (IOException e){
             System.err.println("Error: "+ e.getMessage());
             return false;
         }
         return true;
     }
-    
+   public void cambiarControl(boolean usarFlechas){
+       if(playerLogeado==null) 
+           return;
+       playerLogeado.setUsarFlechas(usarFlechas);
+       guardar();
+   }
     public boolean cambiarPassword(String vieja, String nueva){
         if(playerLogeado==null) 
             return false;

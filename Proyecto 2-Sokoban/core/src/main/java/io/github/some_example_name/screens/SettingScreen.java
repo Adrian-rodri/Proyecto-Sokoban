@@ -83,26 +83,26 @@ public class SettingScreen extends BaseScreen {
         idiomaRow.add(btnEnglish).width(100).height(28);
         idiomaRow.add().expandX();
         
-        boolean usarFlechas = true;
+        boolean usarFlechas= game.playerManager.getPlayerLogeado().isUsarFlechas();
 
         Label lblControlTitulo = new Label(traducir("Controles", "Controls"), skin, "medium-white");
 
         btnWasd= new TextButton("WASD", skin, "small");
         btnFlechas= new TextButton(traducir("Flechas", "Arrows"), skin, "small");
-        ///actualizarBotonControl(btnWasd, btnFlechas, usarFlechas);
+        actualizarBotonControl(btnWasd, btnFlechas, usarFlechas);
 
         btnWasd.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-                //game.playerManager.cambiarControl(false);
-                //actualizarBotonControl(btnWasd, btnFlechas, false);
+                game.playerManager.cambiarControl(false);
+                actualizarBotonControl(btnWasd, btnFlechas, false);
             }
         });
         btnFlechas.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-                //game.playerManager.cambiarControl(true);
-                //actualizarBotonControl(btnWasd, btnFlechas, true);
+                game.playerManager.cambiarControl(true);
+                actualizarBotonControl(btnWasd, btnFlechas, true);
             }
         });
 
@@ -160,6 +160,17 @@ public class SettingScreen extends BaseScreen {
         } else {
             es.getLabel().setColor(gris);
             en.getLabel().setColor(blanco);
+        }
+    }
+    private void actualizarBotonControl(TextButton wasd, TextButton flechas, boolean usaFlechas){
+        Color gris= new Color(0.5f, 0.5f, 0.5f, 1f);
+        Color blanco= Color.WHITE;
+        if(usaFlechas){
+            wasd.getLabel().setColor(gris);
+            flechas.getLabel().setColor(blanco);
+        }else{
+            wasd.getLabel().setColor(blanco);
+            flechas.getLabel().setColor(gris);
         }
     }
 }

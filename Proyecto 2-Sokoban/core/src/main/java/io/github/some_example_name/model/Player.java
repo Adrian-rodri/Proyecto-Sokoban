@@ -31,6 +31,7 @@ public class Player {
     private long fechaRegistro, ultimaSesion;
     private double volumen;
     private String idioma;
+    private boolean usarFlechas= false;
     //amigos.skb
     private ArrayList<String> amigos; //se escribe uno por uno en el archivo
     // historial.skb
@@ -77,7 +78,7 @@ public class Player {
             String rutaAvatar, long fechaRegistro, long ultimaSesion, double volumen,
             String idioma, ArrayList<String> amigos, int partidasJugadas, int nivelesCompletados,
             int mejorPuntaje, int puntajeGeneral, double tiempoJugadoHoras, double tiempoPromedioPorNivel,
-            int nivelesDesbloqueados, String avatarFile,ArrayList<EntradaHistorial> historial) {
+            int nivelesDesbloqueados, String avatarFile,ArrayList<EntradaHistorial> historial,boolean usarFlechas) {
         this.x = 0;
         this.y = 0;
         this.userName = userName;
@@ -89,6 +90,7 @@ public class Player {
         this.ultimaSesion = ultimaSesion;
         this.volumen = volumen;
         this.idioma = idioma;
+        this.usarFlechas=usarFlechas;
         this.amigos = amigos;
         this.partidasJugadas = partidasJugadas;
         this.nivelesCompletados = nivelesCompletados;
@@ -126,26 +128,31 @@ public class Player {
                 return -1;
             }
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+        int teclaArriba= usarFlechas ?Input.Keys.UP :Input.Keys.W;
+        int teclaAbajo= usarFlechas?Input.Keys.DOWN:Input.Keys.S;
+        int teclaIzq= usarFlechas?Input.Keys.LEFT:Input.Keys.A;
+        int teclaDer= usarFlechas ?Input.Keys.RIGHT: Input.Keys.D;
+        
+        if(Gdx.input.isKeyJustPressed(teclaArriba)){
             dirY += 1;
             //y+=Constantes.TILE_SIZE;
             spriteCol = 1;
             spriteFila = 3;
 
         }
-        else if (Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+        else if(Gdx.input.isKeyJustPressed(teclaAbajo)){
             dirY -= 1;
             //y-=Constantes.TILE_SIZE;
             spriteCol = 1;
             spriteFila = 0;
         }
-        else if (Gdx.input.isKeyJustPressed(Input.Keys.A) || Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+        else if(Gdx.input.isKeyJustPressed(teclaIzq)){
             dirX -= 1;
             //x-=Constantes.TILE_SIZE;
             spriteCol = 1;
             spriteFila = 1;
         }
-        else if (Gdx.input.isKeyJustPressed(Input.Keys.D) || Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+        else if(Gdx.input.isKeyJustPressed(teclaDer)){
             dirX += 1;
             //x+=Constantes.TILE_SIZE;
             spriteCol = 1;
@@ -452,6 +459,13 @@ public class Player {
 
     public void setUltimaSesion(long t) {
         this.ultimaSesion = t;
+    }
+    public boolean isUsarFlechas() {
+        return usarFlechas;
+    }
+
+    public void setUsarFlechas(boolean usarFlechas) {
+        this.usarFlechas = usarFlechas;
     }
 
 }
